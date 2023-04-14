@@ -1,4 +1,4 @@
-package space.sadfox.wstableviewer.ui.filter;
+package space.sadfox.tableviewer.ui.filter;
 
 import java.io.IOException;
 import java.util.List;
@@ -24,14 +24,14 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.TransferMode;
+import space.sadfox.dataccess.dataccess.Comparison;
+import space.sadfox.dataccess.dataccess.TableData;
+import space.sadfox.dataccess.filter.Filter;
+import space.sadfox.dataccess.filter.NextComp;
+import space.sadfox.dataccess.filter.TableDataFilter;
+import space.sadfox.dataccess.filter.TableDataFilterDao;
 import space.sadfox.owlook.ui.base.Controller;
-import space.sadfox.wstableviewer.TableViewer;
-import space.sadfox.xmldataccess.dataccess.Comparison;
-import space.sadfox.xmldataccess.dataccess.TableData;
-import space.sadfox.xmldataccess.filter.Filter;
-import space.sadfox.xmldataccess.filter.NextComp;
-import space.sadfox.xmldataccess.filter.TableDataFilter;
-import space.sadfox.xmldataccess.filter.TableDataFilterDao;
+import space.sadfox.tableviewer.TableViewer;
 
 public class EditFilterController extends Controller {
 

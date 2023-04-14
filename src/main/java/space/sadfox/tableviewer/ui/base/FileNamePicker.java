@@ -1,4 +1,4 @@
-package space.sadfox.wstableviewer.ui.base;
+package space.sadfox.tableviewer.ui.base;
 
 import java.io.IOException;
 import java.net.URL;
@@ -14,7 +14,7 @@ import javafx.scene.control.TextField;
 import space.sadfox.owlook.jaxb.EntityLoader;
 import space.sadfox.owlook.jaxb.JAXBEntity;
 import space.sadfox.owlook.ui.base.Controller;
-import space.sadfox.wstableviewer.TableViewer;
+import space.sadfox.tableviewer.TableViewer;
 
 public class FileNamePicker extends Controller {
 	

@@ -1,12 +1,13 @@
 import space.sadfox.owlook.moduleapi.Module;
-import space.sadfox.wstableviewer.TableViewerProvider;
+import space.sadfox.owlook.moduleapi.Workspace;
+import space.sadfox.tableviewer.TableViewerProvider;
 
-module space.sadfox.wstableviewer {
+module space.sadfox.tableviewer {
 	
-	exports space.sadfox.wstableviewer;
+	exports space.sadfox.tableviewer;
 	
 	requires transitive space.sadfox.owlook;
-	requires space.sadfox.xmldataccess;
+	requires space.sadfox.dataccess;
 	requires javafx.base;
 	requires javafx.controls;
 	requires javafx.graphics;
@@ -14,10 +15,11 @@ module space.sadfox.wstableviewer {
 	
 	
 	provides Module with TableViewerProvider;
+	provides Workspace with TableViewerProvider;
 	
-	opens space.sadfox.wstableviewer to jakarta.xml.bind;
-	opens space.sadfox.wstableviewer.ui.filter to javafx.fxml;
-	opens space.sadfox.wstableviewer.ui.base to javafx.fxml;
-	opens space.sadfox.wstableviewer.ui.view to javafx.fxml;
+	opens space.sadfox.tableviewer to jakarta.xml.bind, javafx.fxml;
+	opens space.sadfox.tableviewer.ui.filter to javafx.fxml;
+	opens space.sadfox.tableviewer.ui.base to javafx.fxml;
+	opens space.sadfox.tableviewer.ui.view to javafx.fxml;
 	
 }

@@ -1,4 +1,4 @@
-package space.sadfox.wstableviewer;
+package space.sadfox.tableviewer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -6,16 +6,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import jakarta.xml.bind.JAXBException;
+import space.sadfox.dataccess.command.CommandEntityList;
+import space.sadfox.dataccess.command.CommandEntityListDao;
+import space.sadfox.dataccess.dataccess.TableData;
+import space.sadfox.dataccess.dataccess.TableDataDao;
+import space.sadfox.dataccess.filter.TableDataFilter;
+import space.sadfox.dataccess.filter.TableDataFilterDao;
+import space.sadfox.dataccess.view.TableDataView;
+import space.sadfox.dataccess.view.TableDataViewDao;
 import space.sadfox.owlook.jaxb.EntityLoader;
 import space.sadfox.owlook.utils.ErrorLogger;
-import space.sadfox.xmldataccess.command.CommandEntityList;
-import space.sadfox.xmldataccess.command.CommandEntityListDao;
-import space.sadfox.xmldataccess.dataccess.TableData;
-import space.sadfox.xmldataccess.dataccess.TableDataDao;
-import space.sadfox.xmldataccess.filter.TableDataFilter;
-import space.sadfox.xmldataccess.filter.TableDataFilterDao;
-import space.sadfox.xmldataccess.view.TableDataView;
-import space.sadfox.xmldataccess.view.TableDataViewDao;
 
 public class TableViewerDao {
 

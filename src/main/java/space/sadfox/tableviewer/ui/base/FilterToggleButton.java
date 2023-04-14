@@ -1,12 +1,12 @@
-package space.sadfox.wstableviewer.ui.base;
+package space.sadfox.tableviewer.ui.base;
 
 import java.util.List;
 
 import javafx.event.ActionEvent;
 import javafx.scene.control.ToggleButton;
-import space.sadfox.wstableviewer.TableViewer;
-import space.sadfox.wstableviewer.ui.base.ButtonList.Moveble;
-import space.sadfox.xmldataccess.filter.TableDataFilter;
+import space.sadfox.dataccess.filter.TableDataFilter;
+import space.sadfox.tableviewer.TableViewer;
+import space.sadfox.tableviewer.ui.base.ButtonList.Moveble;
 
 public class FilterToggleButton extends ToggleButton implements Moveble {
 	

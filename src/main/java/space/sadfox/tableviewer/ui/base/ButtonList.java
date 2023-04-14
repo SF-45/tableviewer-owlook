@@ -1,4 +1,4 @@
-package space.sadfox.wstableviewer.ui.base;
+package space.sadfox.tableviewer.ui.base;
 
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.value.ChangeListener;

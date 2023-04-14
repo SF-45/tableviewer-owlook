@@ -1,22 +1,22 @@
-package space.sadfox.wstableviewer.ui.base;
+package space.sadfox.tableviewer.ui.base;
 
 import java.util.List;
 
 import javafx.event.ActionEvent;
 import javafx.scene.control.ToggleButton;
-import space.sadfox.wstableviewer.TableViewer;
-import space.sadfox.wstableviewer.ui.base.ButtonList.Moveble;
-import space.sadfox.xmldataccess.view.TableDataView;
+import space.sadfox.dataccess.view.TableDataView;
+import space.sadfox.tableviewer.TableViewer;
+import space.sadfox.tableviewer.ui.base.ButtonList.Moveble;
 
 public class ViewToggleButton extends ToggleButton implements Moveble {
 	
-	private TableDataView tableDataView;
+	private TableDataView view;
 	private TableViewer tableViewer;
 	
 	
 
 	public ViewToggleButton(TableDataView view, TableViewer tableViewer) {
-		this.tableDataView = view;
+		this.view = view;
 		this.tableViewer = tableViewer;
 		this.textProperty().bind(view.titleProperty());
 		this.addEventHandler(ActionEvent.ACTION, event -> {
@@ -27,14 +27,15 @@ public class ViewToggleButton extends ToggleButton implements Moveble {
 	}
 	
 	public TableDataView getView() {
-		return tableDataView;
+		return view;
 	}
 
 	@Override
 	public void moveTo(int ind) {
 		List<String> viewsNameList = tableViewer.getTableDataViews();
-		String viewFileName = tableDataView.getFileName();
+		String viewFileName = view.getFileName();
 		if (!viewsNameList.contains(viewFileName)) return;
+		System.out.println("From moveTo " + ind);
 		viewsNameList.remove(viewFileName);
 		viewsNameList.add(ind, viewFileName);
 	}

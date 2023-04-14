@@ -1,4 +1,4 @@
-package space.sadfox.wstableviewer.ui.base;
+package space.sadfox.tableviewer.ui.base;
 
 import javafx.geometry.Insets;
 import javafx.scene.Node;

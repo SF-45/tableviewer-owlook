@@ -1,4 +1,4 @@
-package space.sadfox.wstableviewer;
+package space.sadfox.tableviewer;
 
 import java.util.Arrays;
 import java.util.List;

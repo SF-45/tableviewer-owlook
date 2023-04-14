@@ -1,4 +1,4 @@
-package space.sadfox.wstableviewer.ui.filter;
+package space.sadfox.tableviewer.ui.filter;
 
 import java.io.IOException;
 
@@ -10,24 +10,23 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Modality;
+import space.sadfox.dataccess.filter.TableDataFilter;
+import space.sadfox.dataccess.filter.TableDataFilterDao;
 import space.sadfox.owlook.jaxb.EntityLoader;
 import space.sadfox.owlook.utils.ErrorLogger;
-import space.sadfox.owlook.utils.StageFactory;
-import space.sadfox.wstableviewer.TableViewerUI;
-import space.sadfox.wstableviewer.ui.base.FileNamePicker;
-import space.sadfox.wstableviewer.ui.base.FilterToggleButton;
-import space.sadfox.wstableviewer.ui.base.OpenEntityDialog;
-import space.sadfox.wstableviewer.ui.base.ToolTabBase;
-import space.sadfox.xmldataccess.filter.TableDataFilter;
-import space.sadfox.xmldataccess.filter.TableDataFilterDao;
+import space.sadfox.tableviewer.ui.TableViewerTab;
+import space.sadfox.tableviewer.ui.base.FileNamePicker;
+import space.sadfox.tableviewer.ui.base.FilterToggleButton;
+import space.sadfox.tableviewer.ui.base.OpenEntityDialog;
+import space.sadfox.tableviewer.ui.base.ToolTabBase;
 
 public class FiltersTab extends ToolTabBase {
 	
 	private ToggleGroup toggleGroup;
 
 
-	public FiltersTab(TableViewerUI tableViewerUI) {
-		super(tableViewerUI, "Filters");
+	public FiltersTab(TableViewerTab tableViewerTab) {
+		super(tableViewerTab, "Filters");
 		toggleGroup = new ToggleGroup();
 		getTableViewer().getChangeHistory().addChangeListener(() -> getTableViewer().save());
 		getTableViewerDao().getFilters().forEach(this::addFilter);
@@ -103,7 +102,7 @@ public class FiltersTab extends ToolTabBase {
 		button.setToggleGroup(toggleGroup);
 		button.setOnAction(event -> {
 			try {
-				getTableViewerUI().getTableDataViewTable()
+				getTableViewerTab().getTableDataViewTable()
 						.setItems(FXCollections.observableArrayList(filterDao.getDataEntities()));
 			} catch (JAXBException e) {
 				ErrorLogger.registerException(e);

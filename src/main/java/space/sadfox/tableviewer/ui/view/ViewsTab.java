@@ -1,4 +1,4 @@
-package space.sadfox.wstableviewer.ui.view;
+package space.sadfox.tableviewer.ui.view;
 
 import java.io.IOException;
 
@@ -9,23 +9,22 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Modality;
+import space.sadfox.dataccess.view.TableDataView;
 import space.sadfox.owlook.jaxb.EntityLoader;
 import space.sadfox.owlook.utils.ErrorLogger;
-import space.sadfox.wstableviewer.TableViewerUI;
-import space.sadfox.wstableviewer.ui.base.FileNamePicker;
-import space.sadfox.wstableviewer.ui.base.OpenEntityDialog;
-import space.sadfox.wstableviewer.ui.base.ToolTabBase;
-import space.sadfox.wstableviewer.ui.base.ViewToggleButton;
-import space.sadfox.xmldataccess.filter.TableDataFilter;
-import space.sadfox.xmldataccess.view.TableDataView;
+import space.sadfox.tableviewer.ui.TableViewerTab;
+import space.sadfox.tableviewer.ui.base.FileNamePicker;
+import space.sadfox.tableviewer.ui.base.OpenEntityDialog;
+import space.sadfox.tableviewer.ui.base.ToolTabBase;
+import space.sadfox.tableviewer.ui.base.ViewToggleButton;
 
 public class ViewsTab extends ToolTabBase {
 	
 	private ToggleGroup toggleGroup;
 
 
-	public ViewsTab(TableViewerUI tableViewerUI) {
-		super(tableViewerUI, "Views");
+	public ViewsTab(TableViewerTab tableViewerTab) {
+		super(tableViewerTab, "Views");
 		
 		toggleGroup = new ToggleGroup();
 		
@@ -35,7 +34,7 @@ public class ViewsTab extends ToolTabBase {
 			while (change.next()) {
 				if (change.wasAdded()) {
 					change.getAddedSubList().forEach(viewFileName -> {
-						int ind = getTableViewer().getTableDataFilters().indexOf(viewFileName);
+						int ind = getTableViewer().getTableDataViews().indexOf(viewFileName);
 						addView(ind, getTableViewerDao().getView(viewFileName));
 					});
 				}
@@ -103,7 +102,7 @@ public class ViewsTab extends ToolTabBase {
 		ViewToggleButton button = new ViewToggleButton(view, getTableViewer());
 		button.setToggleGroup(toggleGroup);
 		button.setOnAction(event -> {
-			getTableViewerUI().getTableDataViewTable().setTableDataView(view);
+			getTableViewerTab().getTableDataViewTable().setTableDataView(view);
 		});
 		if (getButtonList().getChildren().size() == 0) {
 			button.fire();

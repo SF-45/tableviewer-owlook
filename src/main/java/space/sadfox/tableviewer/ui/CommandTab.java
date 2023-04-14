@@ -1,18 +1,17 @@
-package space.sadfox.wstableviewer.ui;
+package space.sadfox.tableviewer.ui;
 
 import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
-import space.sadfox.wstableviewer.TableViewerUI;
-import space.sadfox.wstableviewer.ui.base.ButtonList;
-import space.sadfox.wstableviewer.ui.base.CommandButton;
-import space.sadfox.xmldataccess.command.CommandEntity;
-import space.sadfox.xmldataccess.command.CommandEntityList;
-import space.sadfox.xmldataccess.command.CommandEntityListDao;
-import space.sadfox.xmldataccess.command.CommandTypes;
-import space.sadfox.xmldataccess.dataccess.DataEntity;
+import space.sadfox.dataccess.command.CommandEntity;
+import space.sadfox.dataccess.command.CommandEntityList;
+import space.sadfox.dataccess.command.CommandEntityListDao;
+import space.sadfox.dataccess.command.CommandTypes;
+import space.sadfox.dataccess.dataccess.DataEntity;
+import space.sadfox.tableviewer.ui.base.ButtonList;
+import space.sadfox.tableviewer.ui.base.CommandButton;
 
 public class CommandTab extends Tab {
 	
@@ -22,12 +21,12 @@ public class CommandTab extends Tab {
 	private ContextMenu contextMenu;
 	
 	private ButtonList root;
-	private TableViewerUI tableViewerUI;
+	private TableViewerTab tableViewerTab;
 	
-	public CommandTab(CommandEntityList target, TableViewerUI tableViewerUI) {
+	public CommandTab(CommandEntityList target, TableViewerTab tableViewerTab) {
 		this.targetCommandList = target;
 		this.targetCommandListDao = new CommandEntityListDao(target);
-		this.tableViewerUI = tableViewerUI;
+		this.tableViewerTab = tableViewerTab;
 		this.setText(target.getTitle());
 		root = new ButtonList();
 		this.setContent(root);
@@ -77,7 +76,7 @@ public class CommandTab extends Tab {
 	private void addCommand(int ind, CommandEntity commandEntity) {
 		CommandButton comButton = new CommandButton(commandEntity, targetCommandList);
 		comButton.setOnAction(event -> {
-			var selection = tableViewerUI.getTableDataViewTable().getSelectionModel();
+			var selection = tableViewerTab.getTableDataViewTable().getSelectionModel();
 			if (selection.isEmpty()) return;
 			
 			comButton.getCommand().execCommand(selection.getSelectedItems().toArray(new DataEntity[0]));

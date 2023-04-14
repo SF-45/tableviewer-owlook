@@ -1,4 +1,4 @@
-package space.sadfox.wstableviewer.ui.view;
+package space.sadfox.tableviewer.ui.view;
 
 import java.io.IOException;
 import java.util.List;
@@ -24,12 +24,12 @@ import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyEvent;
+import space.sadfox.dataccess.dataccess.TableData;
+import space.sadfox.dataccess.view.FieldView;
+import space.sadfox.dataccess.view.TableDataView;
+import space.sadfox.dataccess.view.TableDataViewDao;
 import space.sadfox.owlook.ui.base.Controller;
-import space.sadfox.wstableviewer.TableViewer;
-import space.sadfox.xmldataccess.dataccess.TableData;
-import space.sadfox.xmldataccess.view.FieldView;
-import space.sadfox.xmldataccess.view.TableDataView;
-import space.sadfox.xmldataccess.view.TableDataViewDao;
+import space.sadfox.tableviewer.TableViewer;
 
 public class EditViewController extends Controller {
 	

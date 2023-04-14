@@ -1,10 +1,10 @@
-package space.sadfox.wstableviewer.ui.base;
+package space.sadfox.tableviewer.ui.base;
 
 import javafx.scene.control.Button;
-import space.sadfox.xmldataccess.command.Command;
-import space.sadfox.xmldataccess.command.CommandEntity;
-import space.sadfox.xmldataccess.command.CommandEntityList;
-import space.sadfox.xmldataccess.command.CommandEntityListDao;
+import space.sadfox.dataccess.command.Command;
+import space.sadfox.dataccess.command.CommandEntity;
+import space.sadfox.dataccess.command.CommandEntityList;
+import space.sadfox.dataccess.command.CommandEntityListDao;
 
 public class CommandButton extends Button implements ButtonList.Moveble {
 	
