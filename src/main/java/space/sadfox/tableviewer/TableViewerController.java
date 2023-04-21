@@ -44,17 +44,17 @@ public class TableViewerController extends Controller {
 		super(TableViewer.class.getResource("fxml/main-scene.fxml"));
 		EntityLoader loader = new EntityLoader();
 		for (TableViewer tableViewer : loader.loadAllEntities(TableViewer.class)) {
-			TableViewerTab tableViewerTab = new TableViewerTab(tableViewer);
-			
-			tableViewerTab.setOnSelectionChanged(tabEvent -> {
-				if (tableViewerTab.isSelected()) {
-					leftToolPane.setCenter(tableViewerTab.getLeftToolsNode());
-					rightToolPane.setCenter(tableViewerTab.getRightToolsNode());
-				}
-			});
 			
 			MenuItem tableMenuItem = new MenuItem(tableViewer.getTitle());
 			tableMenuItem.setOnAction(event -> {
+				TableViewerTab tableViewerTab = new TableViewerTab(tableViewer);
+				
+				tableViewerTab.setOnSelectionChanged(tabEvent -> {
+					if (tableViewerTab.isSelected()) {
+						leftToolPane.setCenter(tableViewerTab.getLeftToolsNode());
+						rightToolPane.setCenter(tableViewerTab.getRightToolsNode());
+					}
+				});
 				tableTabPane.getTabs().add(tableViewerTab);
 				tableTabPane.getSelectionModel().select(tableViewerTab);
 			});

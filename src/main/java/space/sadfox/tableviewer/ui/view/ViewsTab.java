@@ -27,8 +27,6 @@ public class ViewsTab extends ToolTabBase {
 		super(tableViewerTab, "Views");
 		
 		toggleGroup = new ToggleGroup();
-		
-		getTableViewer().getChangeHistory().addChangeListener(() -> getTableViewer().save());
 		getTableViewerDao().getViews().forEach(this::addView);
 		getTableViewer().tableDataViewsProperty().addListener((ListChangeListener<String>) change -> {
 			while (change.next()) {

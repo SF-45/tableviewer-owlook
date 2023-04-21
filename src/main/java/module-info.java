@@ -5,13 +5,14 @@ import space.sadfox.tableviewer.TableViewerProvider;
 module space.sadfox.tableviewer {
 	
 	exports space.sadfox.tableviewer;
+	exports space.sadfox.tableviewer.ui.base to org.glassfish.jaxb.core;
 	
 	requires transitive space.sadfox.owlook;
-	requires space.sadfox.dataccess;
-	requires javafx.base;
-	requires javafx.controls;
-	requires javafx.graphics;
-	requires javafx.fxml;
+	requires transitive space.sadfox.dataccess;
+//	requires javafx.base;
+//	requires javafx.controls;
+//	requires javafx.graphics;
+//	requires javafx.fxml;
 	
 	
 	provides Module with TableViewerProvider;
@@ -21,5 +22,6 @@ module space.sadfox.tableviewer {
 	opens space.sadfox.tableviewer.ui.filter to javafx.fxml;
 	opens space.sadfox.tableviewer.ui.base to javafx.fxml;
 	opens space.sadfox.tableviewer.ui.view to javafx.fxml;
+	opens space.sadfox.tableviewer.ui.action to javafx.fxml;
 	
 }

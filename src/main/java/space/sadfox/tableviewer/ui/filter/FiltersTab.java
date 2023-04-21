@@ -28,7 +28,6 @@ public class FiltersTab extends ToolTabBase {
 	public FiltersTab(TableViewerTab tableViewerTab) {
 		super(tableViewerTab, "Filters");
 		toggleGroup = new ToggleGroup();
-		getTableViewer().getChangeHistory().addChangeListener(() -> getTableViewer().save());
 		getTableViewerDao().getFilters().forEach(this::addFilter);
 		getTableViewer().tableDataFiltersProperty().addListener((ListChangeListener<String>) change -> {
 			while (change.next()) {

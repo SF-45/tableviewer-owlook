@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane fx:id="root" prefHeight="666.0" prefWidth="341.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1">
+   <top>
+      <AnchorPane prefHeight="111.0" prefWidth="341.0" style="-fx-border-color: black;" BorderPane.alignment="CENTER">
+         <children>
+            <TextField fx:id="serachTextBox" layoutX="14.0" layoutY="14.0" prefHeight="26.0" prefWidth="316.0" promptText="Search" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0" />
+            <Label layoutX="14.0" layoutY="49.0" text="Group By" />
+            <RadioButton fx:id="radioByTag" layoutX="79.0" layoutY="49.0" mnemonicParsing="false" selected="true" text="Tag" />
+            <RadioButton fx:id="radioByProvider" layoutX="129.0" layoutY="49.0" mnemonicParsing="false" text="Provider" />
+            <RadioButton fx:id="radioByNone" layoutX="207.0" layoutY="49.0" mnemonicParsing="false" text="None" />
+            <MenuButton fx:id="menuNewAction" layoutX="208.0" layoutY="76.0" mnemonicParsing="false" text="New Action" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="75.0" />
+         </children>
+      </AnchorPane>
+   </top>
+</BorderPane>

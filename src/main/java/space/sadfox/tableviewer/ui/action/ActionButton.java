@@ -1,0 +1,69 @@
+package space.sadfox.tableviewer.ui.action;
+
+import java.io.IOException;
+
+import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import space.sadfox.dataccess.action.Action;
+import space.sadfox.dataccess.action.ActionEntity;
+import space.sadfox.owlook.jaxb.EntityLoader;
+import space.sadfox.owlook.utils.ErrorLogger;
+import space.sadfox.tableviewer.ActionDecorator;
+import space.sadfox.tableviewer.TableViewer;
+import space.sadfox.tableviewer.TableViewerDao;
+import space.sadfox.tableviewer.ui.TableViewerTab;
+
+public class ActionButton extends Button {
+	
+	private ActionEntity actionEntity;
+	private ActionDecorator actionDecorator;
+
+	public ActionButton(ActionDecorator actionDecorator, TableViewerTab parent) {
+		this.actionDecorator = actionDecorator;
+		actionEntity = TableViewerDao.getActionEntity(actionDecorator);
+		this.textProperty().bind(actionEntity.titleProperty());
+		
+		ContextMenu contextMenu = new ContextMenu();
+		this.setContextMenu(contextMenu);
+		
+		MenuItem edit = new MenuItem("Edit Action");
+		edit.setOnAction(event -> {
+			try {
+				new EditActionController(actionDecorator).show();
+			} catch (IOException e) {
+				ErrorLogger.registerException(e);
+			}
+		});
+		contextMenu.getItems().add(edit);
+		
+		MenuItem close = new MenuItem("Close Action");
+		close.setOnAction(event -> {
+			parent.getTableViewer().getActionDecorators().remove(actionDecorator);
+		});
+		contextMenu.getItems().add(close);
+		
+		MenuItem delete = new MenuItem("Delete Filter");
+		delete.setOnAction(event -> {
+			EntityLoader loader = new EntityLoader();
+			if (loader.deleteEntity(actionEntity)) {
+				parent.getTableViewer().getActionDecorators().remove(actionDecorator);
+			}
+		});
+		contextMenu.getItems().add(delete);
+	}
+
+	public ActionDecorator getActionDecorator() {
+		return actionDecorator;
+	}
+	
+	public ActionEntity getActionEntity() {
+		return actionEntity;
+	}
+	
+	public Action getAction() {
+		return TableViewerDao.getActionEntityDao(actionDecorator).createAction();
+	}
+
+
+}

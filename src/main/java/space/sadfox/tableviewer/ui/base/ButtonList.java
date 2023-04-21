@@ -1,7 +1,13 @@
 package space.sadfox.tableviewer.ui.base;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -20,9 +26,13 @@ public class ButtonList extends VBox {
 	private ContextMenu contextMenu;
 	private ReadOnlyBooleanProperty hideProperty;
 	private ChangeListener<Boolean> changeListener;
+	
+	private Comparator<Node> comparator;
 
 	private int draggedInd = 0;
 	private Node draggedNode;
+	
+	
 
 	public ButtonList() {
 		getChildren().addListener((ListChangeListener<? super Node>) change -> {
@@ -64,6 +74,32 @@ public class ButtonList extends VBox {
 
 	public ContextMenu getContextMenu() {
 		return contextMenu;
+	}
+	
+	public void addAndSort(Node e) {
+		getChildren().add(e);
+		sort();
+	}
+	
+	public void addAllAndSort(Collection<? extends Node> c) {
+		getChildren().addAll(c);
+		sort();
+		
+	}
+	public void addAllAndSort(Node ... nodes) {
+		getChildren().addAll(nodes);
+		sort();
+	}
+
+	
+	public void setSorted(Comparator<Node> comparator) {
+		this.comparator = comparator;
+	}
+	
+	public void sort() {
+		if (comparator != null) {
+			FXCollections.sort(this.getChildren(), comparator);
+		}
 	}
 
 	private void registerMove(Node node) {

@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import jakarta.xml.bind.JAXBException;
-import space.sadfox.dataccess.command.CommandEntityList;
-import space.sadfox.dataccess.command.CommandEntityListDao;
+import space.sadfox.dataccess.action.ActionEntity;
+import space.sadfox.dataccess.action.ActionEntityDao;
 import space.sadfox.dataccess.dataccess.TableData;
 import space.sadfox.dataccess.dataccess.TableDataDao;
 import space.sadfox.dataccess.filter.TableDataFilter;
@@ -21,14 +21,17 @@ public class TableViewerDao {
 
 	private TableViewer tableViewer;
 	private TableData tableData;
-	private EntityLoader loader;
-
-	public TableViewerDao(TableViewer tableViewer) {
-		this.tableViewer = tableViewer;
+	private static EntityLoader loader;
+	
+	static {
 		loader = new EntityLoader();
 	}
 
-	public TableDataView getView(String fileName) {
+	public TableViewerDao(TableViewer tableViewer) {
+		this.tableViewer = tableViewer;
+	}
+
+	public static TableDataView getView(String fileName) {
 		try {
 			return loader.loadEntity(fileName, TableDataView.class);
 		} catch (IOException | JAXBException e) {
@@ -39,10 +42,18 @@ public class TableViewerDao {
 
 	public List<TableDataView> getViews() {
 		List<TableDataView> tableDataViews = new ArrayList<>();
-		for (String fileName : tableViewer.getTableDataViews()) {
-			tableDataViews.add(getView(fileName));
-
+		
+		for (int i = 0; i < tableViewer.getTableDataViews().size(); i++) {
+			String fileName = tableViewer.getTableDataViews().get(i);
+			TableDataView viev = getView(fileName);
+			if (viev == null) {
+				tableViewer.getTableDataViews().remove(fileName);
+				i--;
+				continue;
+			}
+			tableDataViews.add(viev);
 		}
+		
 		return tableDataViews;
 	}
 
@@ -50,7 +61,7 @@ public class TableViewerDao {
 		return getViews().stream().map(f -> new TableDataViewDao(f)).collect(Collectors.toList());
 	}
 
-	public TableDataFilter getFilter(String fileName) {
+	public static TableDataFilter getFilter(String fileName) {
 		try {
 			return loader.loadEntity(fileName, TableDataFilter.class);
 		} catch (IOException | JAXBException e) {
@@ -98,31 +109,44 @@ public class TableViewerDao {
 		return new TableDataDao(getTableData());
 	}
 
-	public CommandEntityList createCommandEntityList(String name) {
+	public static ActionEntity getActionEntity(ActionDecorator actionDecorator) {
 		try {
-			CommandEntityList commandEntityList = loader.createEntity(name, CommandEntityList.class);
-			tableViewer.getCommands().add(name);
-			return commandEntityList;
-		} catch (JAXBException | IOException e) {
+			return loader.loadEntity(actionDecorator.getAction(), ActionEntity.class);
+		} catch (IOException | JAXBException e) {
 			ErrorLogger.registerException(e);
 		}
 		return null;
 	}
-
-	public List<CommandEntityList> getCommandEtityLists() {
-		List<CommandEntityList> commandEntityLists = new ArrayList<>();
-		for (String fileName : tableViewer.getCommands()) {
-			try {
-				commandEntityLists.add(loader.loadEntity(fileName, CommandEntityList.class));
-			} catch (IOException | JAXBException e) {
-				ErrorLogger.registerException(e);
-			}
-		}
-		return commandEntityLists;
+	
+	public static ActionEntityDao getActionEntityDao(ActionEntity actionEntity) {
+		return new ActionEntityDao(actionEntity);
 	}
-
-	public List<CommandEntityListDao> getCommandEtityListDao() {
-		return getCommandEtityLists().stream().map(c -> new CommandEntityListDao(c)).collect(Collectors.toList());
+	
+	public static ActionEntityDao getActionEntityDao(ActionDecorator actionDecorator) {
+		return new ActionEntityDao(getActionEntity(actionDecorator));
+	}
+	
+	public List<ActionEntity> getActionEntities () {
+		List<ActionEntity> actionEntities = new ArrayList<>();
+		
+		for (int i = 0; i < tableViewer.getActionDecorators().size(); i++) {
+			ActionDecorator actionDecorator = tableViewer.getActionDecorators().get(i);
+			ActionEntity actionEntity = getActionEntity(actionDecorator);
+			if (actionEntity == null) {
+				tableViewer.getActionDecorators().remove(i);
+				i--;
+				continue;
+			}
+			actionEntities.add(actionEntity);
+		}
+		
+		return actionEntities;
+	}
+	
+	public List<ActionEntityDao> getActionEntityDaos () {
+		return getActionEntities().stream()
+				.map(TableViewerDao::getActionEntityDao)
+				.collect(Collectors.toList());
 	}
 
 }

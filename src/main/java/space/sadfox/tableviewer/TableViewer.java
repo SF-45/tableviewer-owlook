@@ -14,6 +14,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import space.sadfox.owlook.jaxb.JAXBEntity;
@@ -27,7 +28,8 @@ public class TableViewer extends JAXBEntity  {
 	private ObjectProperty<String> tableDataConnection = new SimpleObjectProperty<>();
 	private ObservableList<String> tableDataFilters = FXCollections.observableArrayList();
 	private ObservableList<String> tableDataViews = FXCollections.observableArrayList();
-	private ObservableList<String> commands = FXCollections.observableArrayList();
+	private ObservableList<ActionDecorator> actions = FXCollections.observableArrayList();
+	
 	
 	@XmlAttribute(name = "title")
 	public String getTitle() {
@@ -75,20 +77,20 @@ public class TableViewer extends JAXBEntity  {
 		return tableDataViews;
 	}
 	
-	@XmlElementWrapper(name = "CommandLists")
-	@XmlElement(name = "CommandList")
-	public List<String> getCommands() {
-		return commands;
+	@XmlElementWrapper(name = "actions")
+	@XmlElement(name = "action")
+	public List<ActionDecorator> getActionDecorators() {
+		return actions;
 	}
 	
-	public ObservableList<String> commandsProperty() {
-		return commands;
+	public ObservableList<ActionDecorator> actionDecoratorsProperty() {
+		return actions;
 	}
 
 
 	@Override
 	public List<Object> getProperties() {
-		return Arrays.asList(title, tableDataConnection, tableDataFilters, tableDataViews);
+		return Arrays.asList(title, tableDataConnection, tableDataFilters, tableDataViews, actions);
 	}
 
 	@Override

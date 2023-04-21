@@ -1,5 +1,7 @@
 package space.sadfox.tableviewer.ui;
 
+import java.io.IOException;
+
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
@@ -7,8 +9,10 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import space.sadfox.dataccess.dataccess.TableDataDao;
 import space.sadfox.dataccess.view.TableViewForTableData;
+import space.sadfox.owlook.utils.ErrorLogger;
 import space.sadfox.tableviewer.TableViewer;
 import space.sadfox.tableviewer.TableViewerDao;
+import space.sadfox.tableviewer.ui.action.ActionController;
 import space.sadfox.tableviewer.ui.filter.FiltersTab;
 import space.sadfox.tableviewer.ui.view.ViewsTab;
 
@@ -17,7 +21,7 @@ public class TableViewerTab extends Tab {
 	private TableViewer tableViewer;
 	private TableViewerDao tableViewerDao;
 
-	private CommandNode leftToolPane;
+	private ActionController leftToolPane;
 	private TabPane rightToolTabPane;
 	private TableViewForTableData tableDataViewTable;
 
@@ -28,7 +32,11 @@ public class TableViewerTab extends Tab {
 		rightToolTabPane = new TabPane();
 		rightToolTabPane.getTabs().add(new ViewsTab(this));
 		rightToolTabPane.getTabs().add(new FiltersTab(this));
-		leftToolPane = new CommandNode(this);
+		try {
+			leftToolPane = new ActionController(this);
+		} catch (IOException e) {
+			ErrorLogger.registerException(e);
+		}
 		this.setContent(tableDataViewTable);
 		initializ();
 	}
@@ -65,7 +73,7 @@ public class TableViewerTab extends Tab {
 	}
 
 	public Node getLeftToolsNode() {
-		return leftToolPane;
+		return leftToolPane.getParent();
 	}
 	
 	

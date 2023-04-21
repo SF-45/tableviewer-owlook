@@ -29,6 +29,7 @@ import space.sadfox.dataccess.view.FieldView;
 import space.sadfox.dataccess.view.TableDataView;
 import space.sadfox.dataccess.view.TableDataViewDao;
 import space.sadfox.owlook.ui.base.Controller;
+import space.sadfox.tableviewer.ResourceTarget;
 import space.sadfox.tableviewer.TableViewer;
 
 public class EditViewController extends Controller {
@@ -53,7 +54,7 @@ public class EditViewController extends Controller {
 	private TableDataViewDao viewDao;
 	
 	public EditViewController(TableDataView view, TableData tableData) throws IOException {
-		super(TableViewer.class.getResource("fxml/edit-view.fxml"));
+		super(ResourceTarget.class.getResource("fxml/edit-view.fxml"));
 		
 		this.tableData = tableData;
 		this.view = view;
