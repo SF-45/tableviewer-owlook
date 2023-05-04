@@ -3,6 +3,7 @@ package space.sadfox.tableviewer.ui.action;
 import java.io.IOException;
 import java.net.URL;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -13,6 +14,8 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.util.StringConverter;
 import space.sadfox.dataccess.action.Action;
 import space.sadfox.dataccess.action.ActionEntity;
@@ -20,6 +23,7 @@ import space.sadfox.owlook.ui.base.Controller;
 import space.sadfox.tableviewer.ActionDecorator;
 import space.sadfox.tableviewer.ResourceTarget;
 import space.sadfox.tableviewer.TableViewerDao;
+import space.sadfox.tableviewer.ui.TableViewerTab;
 
 public class EditActionController extends Controller {
 	
@@ -38,13 +42,17 @@ public class EditActionController extends Controller {
 	
 	
 
-	public EditActionController(ActionDecorator actionDecorator) throws IOException {
+	public EditActionController(ActionDecorator actionDecorator, TableViewerTab parent) throws IOException {
 		super(ResourceTarget.class.getResource("fxml/edit-action.fxml"));
+
 		this.actionDecorator = actionDecorator;
 		actionEntity = TableViewerDao.getActionEntity(actionDecorator);
-		action = TableViewerDao.getActionEntityDao(actionEntity).createAction();
+		action = parent.getTableViewerDao().getActionEntityDao(actionEntity).createAction();
 		
-		title.textProperty().bind(actionEntity.titleProperty());
+		getStage().titleProperty().bind(Bindings.concat("Edit Action [", actionEntity.titleProperty(), "]"));
+		
+		title.setText(actionEntity.getTitle());
+		actionEntity.titleProperty().bindBidirectional(title.textProperty());
 		root.setCenter(action.getConfigController().getParent());
 		
 		

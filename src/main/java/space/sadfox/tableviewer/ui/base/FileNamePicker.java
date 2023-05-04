@@ -1,12 +1,9 @@
 package space.sadfox.tableviewer.ui.base;
 
 import java.io.IOException;
-import java.net.URL;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -22,7 +19,7 @@ public class FileNamePicker extends Controller {
     private Button cancel;
 
     @FXML
-    private Button create;
+    private Button confirm;
 
     @FXML
     private TextField filename;
@@ -32,11 +29,13 @@ public class FileNamePicker extends Controller {
     
     private BooleanProperty nameValid = new SimpleBooleanProperty(false);
     
-    private boolean isCreate = false;
+    private boolean isConfirm = false;
     
     private Class<? extends JAXBEntity> target;
     
     private EntityLoader loader;
+    
+    private String oldFileName;
 
 	public FileNamePicker(Class<? extends JAXBEntity> target) throws IOException {
 		super(TableViewer.class.getResource("fxml/filename-picker.fxml"));
@@ -44,7 +43,7 @@ public class FileNamePicker extends Controller {
 		this.target = target;
 		loader = new EntityLoader();
 		
-		create.disableProperty().bind(nameValid.not());
+		confirm.disableProperty().bind(nameValid.not());
 		warningLabel.visibleProperty().bind(nameValid.not());
 		filename.textProperty().addListener((property, oldValue, newValue) -> {
 			String err = validateFileName(newValue);
@@ -58,11 +57,18 @@ public class FileNamePicker extends Controller {
 		cancel.setOnAction(event -> {
 			getStage().close();
 		});
-		create.setOnAction(event -> {
-			isCreate = true;
+		confirm.setOnAction(event -> {
+			isConfirm = true;
 			getStage().close();
 		});
 		
+		
+	}
+	
+	public FileNamePicker(Class<? extends JAXBEntity> target, String oldFileName) throws IOException {
+		this(target);
+		this.oldFileName = oldFileName;
+		filename.setText(oldFileName);
 		
 	}
 
@@ -70,15 +76,16 @@ public class FileNamePicker extends Controller {
 	private String validateFileName(String fileName) {
 		if (fileName.equals("")) {
 			 return "File name is empty";
-		}
-		if (loader.entityExist(fileName, target)) {
+		} else if (fileName.equals(oldFileName)) {
+			return " ";
+		} else if (loader.entityExist(fileName, target)) {
 			return "File name alredy exist \"" + fileName + "\"";
 		}
 		return "";
 	}
 	
-	public boolean isCreate () {
-		return isCreate;
+	public boolean isConfirm () {
+		return isConfirm;
 	}
 	
 	public String getFileName() {

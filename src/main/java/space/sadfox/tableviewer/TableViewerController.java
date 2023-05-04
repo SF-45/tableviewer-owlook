@@ -4,9 +4,13 @@ import java.io.IOException;
 
 import javafx.beans.InvalidationListener;
 import javafx.fxml.FXML;
+import javafx.geometry.Orientation;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.Separator;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
@@ -39,9 +43,17 @@ public class TableViewerController extends Controller {
     
     @FXML
     private Menu tablesMenu;
+    
+    @FXML
+    private MenuBar menuBar;
 
 	public TableViewerController() throws IOException {
 		super(TableViewer.class.getResource("fxml/main-scene.fxml"));
+		
+		getStage().setTitle("OwlookTV");
+		
+		
+		
 		EntityLoader loader = new EntityLoader();
 		for (TableViewer tableViewer : loader.loadAllEntities(TableViewer.class)) {
 			
@@ -53,6 +65,8 @@ public class TableViewerController extends Controller {
 					if (tableViewerTab.isSelected()) {
 						leftToolPane.setCenter(tableViewerTab.getLeftToolsNode());
 						rightToolPane.setCenter(tableViewerTab.getRightToolsNode());
+						removeTVMenu();
+						menuBar.getMenus().add(tableViewerTab.getMenu());
 					}
 				});
 				tableTabPane.getTabs().add(tableViewerTab);
@@ -66,8 +80,13 @@ public class TableViewerController extends Controller {
 			if (tableTabPane.getTabs().size() == 0) {
 				leftToolPane.setCenter(null);
 				rightToolPane.setCenter(null);
+				removeTVMenu();
 			}
 		});
+	}
+	
+	private void removeTVMenu() {
+		menuBar.getMenus().remove(4, menuBar.getMenus().size());
 	}
 
 }

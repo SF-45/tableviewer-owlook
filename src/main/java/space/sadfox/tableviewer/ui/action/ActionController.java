@@ -12,6 +12,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioButton;
@@ -19,7 +20,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
-import space.sadfox.dataccess.action.ActionApi;
+import space.sadfox.dataccess.action.ActionProvider;
 import space.sadfox.dataccess.action.ActionEntity;
 import space.sadfox.dataccess.action.ActionEntityDao;
 import space.sadfox.dataccess.filter.TableDataFilter;
@@ -30,6 +31,7 @@ import space.sadfox.tableviewer.TableViewerProvider;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 import space.sadfox.tableviewer.ui.base.ButtonList;
 import space.sadfox.tableviewer.ui.base.FileNamePicker;
+import space.sadfox.tableviewer.ui.base.OpenEntityDialog;
 
 /* TODO:
  * Провести рефакторинг имён переменных
@@ -39,6 +41,9 @@ public class ActionController extends Controller {
 
 	@FXML
 	private MenuButton menuNewAction;
+	
+	@FXML
+	private Button openAction;
 
 	@FXML
 	private RadioButton radioByNone;
@@ -94,7 +99,7 @@ public class ActionController extends Controller {
 			}
 		});
 
-		for (ActionApi actionProvider : ActionEntityDao.getActionProviders()) {
+		for (ActionProvider actionProvider : ActionEntityDao.getActionProviders()) {
 			MenuItem menuItem = new MenuItem(actionProvider.getModuleExtensionName());
 			menuItem.setOnAction(event -> {
 				createAction(actionProvider);
@@ -102,7 +107,21 @@ public class ActionController extends Controller {
 			menuNewAction.getItems().add(menuItem);
 		}
 		
-		
+		openAction.setOnAction(event -> {
+			try {
+				OpenEntityDialog<ActionEntity> openDialog = new OpenEntityDialog<>(ActionEntity.class, tableViewerTab.getTableViewerDao().getActionEntities());
+				openDialog.setModality(Modality.APPLICATION_MODAL);
+				openDialog.showAndWait();
+				if (openDialog.isOpened()) {
+					ActionDecorator actionDecorator = new ActionDecorator();
+					actionDecorator.setAction(openDialog.getOpenned().getFileName());
+					tableViewerTab.getTableViewer().getActionDecorators().add(actionDecorator);
+					editAction(actionDecorator);
+				}
+			} catch (IOException e) {
+				ErrorLogger.registerException(e);
+			}
+		});
 
 		initializ();
 
@@ -138,12 +157,12 @@ public class ActionController extends Controller {
 
 	}
 
-	private void createAction(ActionApi actionProvider) {
+	private void createAction(ActionProvider actionProvider) {
 		try {
 			FileNamePicker picker = new FileNamePicker(ActionEntity.class);
 			picker.setModality(Modality.APPLICATION_MODAL);
 			picker.showAndWait();
-			if (!picker.isCreate())
+			if (!picker.isConfirm())
 				return;
 
 			ActionEntity actionEntity = ActionEntityDao.createActionEntity(picker.getFileName(), actionProvider);
@@ -160,7 +179,7 @@ public class ActionController extends Controller {
 
 	private void editAction(ActionDecorator actionDecorator) {
 		try {
-			new EditActionController(actionDecorator).show();
+			new EditActionController(actionDecorator, tableViewerTab).show();
 		} catch (IOException e) {
 			ErrorLogger.registerException(e);
 		}

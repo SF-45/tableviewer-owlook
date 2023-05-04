@@ -25,6 +25,11 @@
 			<version>${xmldataccess.currentVersion}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>space.sadfox</groupId>
+			<artifactId>execactions</artifactId>
+			<version>0.0.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>

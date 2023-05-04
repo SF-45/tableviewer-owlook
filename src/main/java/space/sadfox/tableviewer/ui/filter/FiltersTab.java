@@ -11,6 +11,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Modality;
 import space.sadfox.dataccess.filter.TableDataFilter;
+import space.sadfox.dataccess.filter.TableDataFilterController;
 import space.sadfox.dataccess.filter.TableDataFilterDao;
 import space.sadfox.owlook.jaxb.EntityLoader;
 import space.sadfox.owlook.utils.ErrorLogger;
@@ -57,7 +58,7 @@ public class FiltersTab extends ToolTabBase {
 				FileNamePicker picker = new FileNamePicker(TableDataFilter.class);
 				picker.setModality(Modality.APPLICATION_MODAL);
 				picker.showAndWait();
-				if (!picker.isCreate()) return;
+				if (!picker.isConfirm()) return;
 				
 				EntityLoader loader = new EntityLoader();
 				
@@ -160,11 +161,18 @@ public class FiltersTab extends ToolTabBase {
 	
 	private void editFilter(TableDataFilter filter) {
 		try {
-			var controller = new EditFilterController(filter, getTableViewerDao().getTableData());
-			controller.getStage().titleProperty().bind(filter.titleProperty());
+			var controller = new TableDataFilterController(filter, getTableViewerDao().getTableData());
 			controller.show();
 		} catch (IOException e) {
 			ErrorLogger.registerException(e);
+		}
+	}
+	
+	public void reloadData() {
+		var toggle = toggleGroup.getSelectedToggle();
+		if (toggle instanceof FilterToggleButton) {
+			FilterToggleButton button = (FilterToggleButton) toggle;
+			button.fire();
 		}
 	}
 	

@@ -2,7 +2,6 @@ package space.sadfox.tableviewer;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
@@ -12,11 +11,9 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableSet;
+import space.sadfox.owlook.jaxb.adapters.StringPropertyAdapter;
 import space.sadfox.owlook.moduleapi.ChangeHistoryKeeping;
-import space.sadfox.tableviewer.ui.base.StringPropertyAdapter;
 
 @XmlAccessorType(XmlAccessType.NONE)
 public class ActionDecorator implements ChangeHistoryKeeping {

@@ -10,6 +10,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Modality;
 import space.sadfox.dataccess.view.TableDataView;
+import space.sadfox.dataccess.view.TableDataViewController;
 import space.sadfox.owlook.jaxb.EntityLoader;
 import space.sadfox.owlook.utils.ErrorLogger;
 import space.sadfox.tableviewer.ui.TableViewerTab;
@@ -56,7 +57,7 @@ public class ViewsTab extends ToolTabBase {
 				FileNamePicker picker = new FileNamePicker(TableDataView.class);
 				picker.setModality(Modality.APPLICATION_MODAL);
 				picker.showAndWait();
-				if (!picker.isCreate()) return;
+				if (!picker.isConfirm()) return;
 				
 				EntityLoader loader = new EntityLoader();
 				
@@ -153,8 +154,7 @@ public class ViewsTab extends ToolTabBase {
 	
 	private void editView(TableDataView view) {
 		try {
-			var controller = new EditViewController(view, getTableViewerDao().getTableData());
-			controller.getStage().titleProperty().bind(view.titleProperty());
+			var controller = new TableDataViewController(view, getTableViewerDao().getTableData());
 			controller.show();
 		} catch (IOException e) {
 			ErrorLogger.registerException(e);

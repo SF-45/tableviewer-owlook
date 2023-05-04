@@ -20,7 +20,6 @@ import space.sadfox.owlook.utils.ErrorLogger;
 public class TableViewerDao {
 
 	private TableViewer tableViewer;
-	private TableData tableData;
 	private static EntityLoader loader;
 	
 	static {
@@ -95,14 +94,13 @@ public class TableViewerDao {
 	}
 
 	public TableData getTableData() {
-		if (tableData == null) {
-			try {
-				tableData = loader.loadEntity(tableViewer.getTableDataConnection(), TableData.class);
-			} catch (IOException | JAXBException e) {
-				ErrorLogger.registerException(e);
-			}
+		try {
+			return loader.loadEntity(tableViewer.getTableDataConnection(), TableData.class);
+		} catch (IOException | JAXBException e) {
+			ErrorLogger.registerException(e);
 		}
-		return tableData;
+		
+		return null;
 	}
 
 	public TableDataDao getTableDataDao() {
@@ -118,12 +116,12 @@ public class TableViewerDao {
 		return null;
 	}
 	
-	public static ActionEntityDao getActionEntityDao(ActionEntity actionEntity) {
-		return new ActionEntityDao(actionEntity);
+	public ActionEntityDao getActionEntityDao(ActionEntity actionEntity) {
+		return new ActionEntityDao(actionEntity, getTableData());
 	}
 	
-	public static ActionEntityDao getActionEntityDao(ActionDecorator actionDecorator) {
-		return new ActionEntityDao(getActionEntity(actionDecorator));
+	public ActionEntityDao getActionEntityDao(ActionDecorator actionDecorator) {
+		return new ActionEntityDao(getActionEntity(actionDecorator), getTableData());
 	}
 	
 	public List<ActionEntity> getActionEntities () {
@@ -145,7 +143,7 @@ public class TableViewerDao {
 	
 	public List<ActionEntityDao> getActionEntityDaos () {
 		return getActionEntities().stream()
-				.map(TableViewerDao::getActionEntityDao)
+				.map(this::getActionEntityDao)
 				.collect(Collectors.toList());
 	}
 
