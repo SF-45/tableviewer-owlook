@@ -12,10 +12,9 @@ import javafx.stage.Modality;
 import space.sadfox.dataccess.view.TableDataView;
 import space.sadfox.dataccess.view.TableDataViewController;
 import space.sadfox.owlook.jaxb.EntityLoader;
+import space.sadfox.owlook.ui.tools.OpenEntityDialog;
 import space.sadfox.owlook.utils.ErrorLogger;
 import space.sadfox.tableviewer.ui.TableViewerTab;
-import space.sadfox.tableviewer.ui.base.FileNamePicker;
-import space.sadfox.tableviewer.ui.base.OpenEntityDialog;
 import space.sadfox.tableviewer.ui.base.ToolTabBase;
 import space.sadfox.tableviewer.ui.base.ViewToggleButton;
 
@@ -54,17 +53,10 @@ public class ViewsTab extends ToolTabBase {
 		MenuItem createView = new MenuItem("Create View");
 		createView.setOnAction(event -> {
 			try {
-				FileNamePicker picker = new FileNamePicker(TableDataView.class);
-				picker.setModality(Modality.APPLICATION_MODAL);
-				picker.showAndWait();
-				if (!picker.isConfirm()) return;
-				
 				EntityLoader loader = new EntityLoader();
-				
 				try {
-					TableDataView newView = loader.createEntity(picker.getFileName(), TableDataView.class);
-					
-					newView.setTitle(picker.getFileName());
+					TableDataView newView = loader.createEntity(TableDataView.class);
+					newView.setTitle("New View");
 					getTableViewer().getTableDataViews().add(newView.getFileName());
 					editView(newView);
 				} catch (JAXBException e) {

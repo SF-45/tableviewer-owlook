@@ -14,11 +14,11 @@ import space.sadfox.dataccess.filter.TableDataFilter;
 import space.sadfox.dataccess.filter.TableDataFilterController;
 import space.sadfox.dataccess.filter.TableDataFilterDao;
 import space.sadfox.owlook.jaxb.EntityLoader;
+import space.sadfox.owlook.ui.tools.OpenEntityDialog;
 import space.sadfox.owlook.utils.ErrorLogger;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 import space.sadfox.tableviewer.ui.base.FileNamePicker;
 import space.sadfox.tableviewer.ui.base.FilterToggleButton;
-import space.sadfox.tableviewer.ui.base.OpenEntityDialog;
 import space.sadfox.tableviewer.ui.base.ToolTabBase;
 
 public class FiltersTab extends ToolTabBase {
@@ -55,17 +55,12 @@ public class FiltersTab extends ToolTabBase {
 		MenuItem createFilter = new MenuItem("Create Filter");
 		createFilter.setOnAction(event -> {
 			try {
-				FileNamePicker picker = new FileNamePicker(TableDataFilter.class);
-				picker.setModality(Modality.APPLICATION_MODAL);
-				picker.showAndWait();
-				if (!picker.isConfirm()) return;
 				
 				EntityLoader loader = new EntityLoader();
 				
 				try {
-					TableDataFilter newFilter = loader.createEntity(picker.getFileName(), TableDataFilter.class);
-					
-					newFilter.setTitle(picker.getFileName());
+					TableDataFilter newFilter = loader.createEntity(TableDataFilter.class);
+					newFilter.setTitle("New Filter");
 					getTableViewer().getTableDataFilters().add(newFilter.getFileName());
 					editFilter(newFilter);
 				} catch (JAXBException e) {
@@ -98,12 +93,11 @@ public class FiltersTab extends ToolTabBase {
 	private void addFilter(int ind, TableDataFilter filter) {
 		if (filter == null) return;
 		FilterToggleButton button = new FilterToggleButton(filter, getTableViewer());
-		TableDataFilterDao filterDao = getTableViewerDao().getFilterDao(filter);
 		button.setToggleGroup(toggleGroup);
 		button.setOnAction(event -> {
 			try {
 				getTableViewerTab().getTableDataViewTable()
-						.setItems(FXCollections.observableArrayList(filterDao.getDataEntities()));
+						.setItems(FXCollections.observableArrayList(getTableViewerDao().getFilterDao(filter).getDataEntities()));
 			} catch (JAXBException e) {
 				ErrorLogger.registerException(e);
 			}

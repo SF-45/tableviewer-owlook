@@ -31,6 +31,8 @@ public class TableViewerDao {
 	}
 
 	public static TableDataView getView(String fileName) {
+		
+		//TODO: Вообще удалить этот метод
 		try {
 			return loader.loadEntity(fileName, TableDataView.class);
 		} catch (IOException | JAXBException e) {
@@ -42,6 +44,7 @@ public class TableViewerDao {
 	public List<TableDataView> getViews() {
 		List<TableDataView> tableDataViews = new ArrayList<>();
 		
+		//TODO: Переделать, так как удаление происходит при инициализации
 		for (int i = 0; i < tableViewer.getTableDataViews().size(); i++) {
 			String fileName = tableViewer.getTableDataViews().get(i);
 			TableDataView viev = getView(fileName);
@@ -72,6 +75,7 @@ public class TableViewerDao {
 	public List<TableDataFilter> getFilters() {
 		List<TableDataFilter> filters = new ArrayList<>();
 		
+		//TODO: Переделать, так как удаление происходит при инициализации
 		for (int i = 0; i < tableViewer.getTableDataFilters().size(); i++) {
 			String fileName = tableViewer.getTableDataFilters().get(i);
 			TableDataFilter filter = getFilter(fileName);
@@ -101,6 +105,10 @@ public class TableViewerDao {
 		}
 		
 		return null;
+	}
+	
+	public void setTableData(TableData tableData) {
+		tableViewer.setTableDataConnection(tableData.getFileName());
 	}
 
 	public TableDataDao getTableDataDao() {
@@ -145,6 +153,26 @@ public class TableViewerDao {
 		return getActionEntities().stream()
 				.map(this::getActionEntityDao)
 				.collect(Collectors.toList());
+	}
+
+	public static TableViewer createTableViewer() {
+		try {
+			TableViewer newTableViewer = loader.createEntity(TableViewer.class);
+			newTableViewer.setTitle("New Table Viewer");
+			return newTableViewer;
+		} catch (JAXBException | IOException e) {
+			ErrorLogger.registerException(e);
+		}
+		return null;
+	}
+	
+	public static List<TableViewer> getTableViewers() {
+		try {
+			return loader.loadAllEntities(TableViewer.class);
+		} catch (IOException e) {
+			ErrorLogger.registerException(e);
+		}
+		return new ArrayList();
 	}
 
 }

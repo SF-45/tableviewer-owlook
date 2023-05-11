@@ -6,6 +6,7 @@ import javafx.beans.InvalidationListener;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -14,68 +15,50 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import space.sadfox.dataccess.dataccess.TableData;
+import space.sadfox.owlook.jaxb.EntityChangeListener;
 import space.sadfox.owlook.jaxb.EntityLoader;
 import space.sadfox.owlook.ui.base.Controller;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 
 public class TableViewerController extends Controller {
-	
-    @FXML
-    private BorderPane leftToolPane;
 
-    @FXML
-    private MenuItem openIndex;
+	@FXML
+	private BorderPane leftToolPane;
 
-    @FXML
-    private BorderPane rightToolPane;
+	@FXML
+	private MenuItem openIndex;
 
-    @FXML
-    private Button searchButton;
+	@FXML
+	private BorderPane rightToolPane;
 
-    @FXML
-    private TextField searchField;
+	@FXML
+	private Button searchButton;
 
-    @FXML
-    private MenuItem settings;
+	@FXML
+	private TextField searchField;
 
-    @FXML
-    private TabPane tableTabPane;
-    
-    @FXML
-    private Menu tablesMenu;
-    
-    @FXML
-    private MenuBar menuBar;
+	@FXML
+	private MenuItem settings;
+
+	@FXML
+	private TabPane tableTabPane;
+
+	@FXML
+	private Menu tablesMenu;
+
+	@FXML
+	private MenuBar menuBar;
 
 	public TableViewerController() throws IOException {
 		super(TableViewer.class.getResource("fxml/main-scene.fxml"));
-		
+
 		getStage().setTitle("OwlookTV");
-		
-		
-		
-		EntityLoader loader = new EntityLoader();
-		for (TableViewer tableViewer : loader.loadAllEntities(TableViewer.class)) {
-			
-			MenuItem tableMenuItem = new MenuItem(tableViewer.getTitle());
-			tableMenuItem.setOnAction(event -> {
-				TableViewerTab tableViewerTab = new TableViewerTab(tableViewer);
-				
-				tableViewerTab.setOnSelectionChanged(tabEvent -> {
-					if (tableViewerTab.isSelected()) {
-						leftToolPane.setCenter(tableViewerTab.getLeftToolsNode());
-						rightToolPane.setCenter(tableViewerTab.getRightToolsNode());
-						removeTVMenu();
-						menuBar.getMenus().add(tableViewerTab.getMenu());
-					}
-				});
-				tableTabPane.getTabs().add(tableViewerTab);
-				tableTabPane.getSelectionModel().select(tableViewerTab);
-			});
-			tablesMenu.getItems().add(tableMenuItem);
-			
-			
-		}
+
+		MenuItem createTableViewer = new MenuItem("Create new");
+		createTableViewer.setOnAction(event -> TableViewerDao.createTableViewer());
+		tablesMenu.getItems().addAll(new SeparatorMenuItem(), createTableViewer);
+
 		tableTabPane.getTabs().addListener((InvalidationListener) listner -> {
 			if (tableTabPane.getTabs().size() == 0) {
 				leftToolPane.setCenter(null);
@@ -83,8 +66,49 @@ public class TableViewerController extends Controller {
 				removeTVMenu();
 			}
 		});
+		
+		new EntityLoader().addCreateChangeListener(entity -> {
+			if (entity.getClass().equals(TableViewer.class)) {
+				createTableViewerMenuItem((TableViewer) entity);
+			}
+		});
+		
+		TableViewerDao.getTableViewers().forEach(this::createTableViewerMenuItem);
 	}
-	
+
+	private void createTableViewerMenuItem(TableViewer tableViewer) {
+		MenuItem tableMenuItem = new MenuItem(tableViewer.getTitle());
+		tableMenuItem.textProperty().bindBidirectional(tableViewer.titleProperty());
+		tableMenuItem.setOnAction(event -> {
+			TableViewerTab tableViewerTab = new TableViewerTab(tableViewer);
+			
+			tableViewer.addEntityChangeListener(change -> {
+				if (change.wasRemoved()) {
+					tableTabPane.getTabs().remove(tableViewerTab);
+				}
+			});
+
+			tableViewerTab.setOnSelectionChanged(tabEvent -> {
+				if (tableViewerTab.isSelected()) {
+					leftToolPane.setCenter(tableViewerTab.getLeftToolsNode());
+					rightToolPane.setCenter(tableViewerTab.getRightToolsNode());
+					removeTVMenu();
+					menuBar.getMenus().add(tableViewerTab.getMenu());
+				}
+			});
+			tableTabPane.getTabs().add(tableViewerTab);
+			tableTabPane.getSelectionModel().select(tableViewerTab);
+		});
+		
+		tableViewer.addEntityChangeListener(change -> {
+			if (change.wasRemoved() && tablesMenu.getItems().contains(tableMenuItem)) {
+				tablesMenu.getItems().remove(tableMenuItem);
+			}
+		});
+		int pos = tablesMenu.getItems().size() - 2;
+		tablesMenu.getItems().add(pos, tableMenuItem);
+	}
+
 	private void removeTVMenu() {
 		menuBar.getMenus().remove(4, menuBar.getMenus().size());
 	}

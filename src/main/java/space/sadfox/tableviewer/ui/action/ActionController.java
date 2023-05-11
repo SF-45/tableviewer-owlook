@@ -1,17 +1,13 @@
 package space.sadfox.tableviewer.ui.action;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import javafx.beans.InvalidationListener;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
@@ -20,18 +16,16 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
-import space.sadfox.dataccess.action.ActionProvider;
 import space.sadfox.dataccess.action.ActionEntity;
 import space.sadfox.dataccess.action.ActionEntityDao;
-import space.sadfox.dataccess.filter.TableDataFilter;
+import space.sadfox.dataccess.action.ActionProvider;
 import space.sadfox.owlook.ui.base.Controller;
+import space.sadfox.owlook.ui.tools.OpenEntityDialog;
 import space.sadfox.owlook.utils.ErrorLogger;
 import space.sadfox.tableviewer.ActionDecorator;
 import space.sadfox.tableviewer.TableViewerProvider;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 import space.sadfox.tableviewer.ui.base.ButtonList;
-import space.sadfox.tableviewer.ui.base.FileNamePicker;
-import space.sadfox.tableviewer.ui.base.OpenEntityDialog;
 
 /* TODO:
  * Провести рефакторинг имён переменных
@@ -41,7 +35,7 @@ public class ActionController extends Controller {
 
 	@FXML
 	private MenuButton menuNewAction;
-	
+
 	@FXML
 	private Button openAction;
 
@@ -106,10 +100,11 @@ public class ActionController extends Controller {
 			});
 			menuNewAction.getItems().add(menuItem);
 		}
-		
+
 		openAction.setOnAction(event -> {
 			try {
-				OpenEntityDialog<ActionEntity> openDialog = new OpenEntityDialog<>(ActionEntity.class, tableViewerTab.getTableViewerDao().getActionEntities());
+				OpenEntityDialog<ActionEntity> openDialog = new OpenEntityDialog<>(ActionEntity.class,
+						tableViewerTab.getTableViewerDao().getActionEntities());
 				openDialog.setModality(Modality.APPLICATION_MODAL);
 				openDialog.showAndWait();
 				if (openDialog.isOpened()) {
@@ -149,32 +144,21 @@ public class ActionController extends Controller {
 		if (serachTextBox.getText().equals("")) {
 			buttonList.addAllAndSort(actionButtons);
 		} else {
-			var filtredButtons = actionButtons.stream()
-					.filter(but -> but.getActionEntity().getTitle().toLowerCase().contains(serachTextBox.getText().toLowerCase()))
-					.collect(Collectors.toList());
+			var filtredButtons = actionButtons.stream().filter(but -> but.getActionEntity().getTitle().toLowerCase()
+					.contains(serachTextBox.getText().toLowerCase())).collect(Collectors.toList());
 			buttonList.addAllAndSort(filtredButtons);
 		}
 
 	}
 
 	private void createAction(ActionProvider actionProvider) {
-		try {
-			FileNamePicker picker = new FileNamePicker(ActionEntity.class);
-			picker.setModality(Modality.APPLICATION_MODAL);
-			picker.showAndWait();
-			if (!picker.isConfirm())
-				return;
+		ActionEntity actionEntity = ActionEntityDao.createActionEntity(actionProvider);
+		actionEntity.setTitle("New Action");
+		ActionDecorator actionDecorator = new ActionDecorator();
+		actionDecorator.setAction(actionEntity.getFileName());
+		tableViewerTab.getTableViewer().getActionDecorators().add(actionDecorator);
+		editAction(actionDecorator);
 
-			ActionEntity actionEntity = ActionEntityDao.createActionEntity(picker.getFileName(), actionProvider);
-			actionEntity.setTitle(picker.getFileName());
-			ActionDecorator actionDecorator = new ActionDecorator();
-			actionDecorator.setAction(actionEntity.getFileName());
-			tableViewerTab.getTableViewer().getActionDecorators().add(actionDecorator);
-			editAction(actionDecorator);
-
-		} catch (IOException e) {
-			ErrorLogger.registerException(e);
-		}
 	}
 
 	private void editAction(ActionDecorator actionDecorator) {

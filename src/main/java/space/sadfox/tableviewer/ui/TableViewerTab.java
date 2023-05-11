@@ -14,6 +14,7 @@ import space.sadfox.dataccess.view.TableViewForTableData;
 import space.sadfox.owlook.utils.ErrorLogger;
 import space.sadfox.tableviewer.TableViewer;
 import space.sadfox.tableviewer.TableViewerDao;
+import space.sadfox.tableviewer.TableViewerEditController;
 import space.sadfox.tableviewer.ui.action.ActionController;
 import space.sadfox.tableviewer.ui.filter.FiltersTab;
 import space.sadfox.tableviewer.ui.view.ViewsTab;
@@ -45,7 +46,7 @@ public class TableViewerTab extends Tab {
 		} catch (IOException e) {
 			ErrorLogger.registerException(e);
 		}
-		this.setContent(tableDataViewTable);
+		this.setContent(getTableDataViewTable());
 		initializ();
 	}
 
@@ -107,6 +108,16 @@ public class TableViewerTab extends Tab {
 				filtersTab.reloadData();
 			});
 			tableDataMenu.getItems().add(reloadData);
+			
+			MenuItem editTableViewer = new MenuItem("Properties");
+			editTableViewer.setOnAction(event -> {
+				try {
+					new TableViewerEditController(getTableViewer()).show();
+				} catch (IOException e) {
+					ErrorLogger.registerException(e);
+				}
+			});
+			menu.getItems().add(editTableViewer);
 		}
 		return menu;
 	}
