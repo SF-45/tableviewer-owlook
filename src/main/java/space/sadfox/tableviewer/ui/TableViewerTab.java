@@ -2,6 +2,7 @@ package space.sadfox.tableviewer.ui;
 
 import java.io.IOException;
 
+import jakarta.xml.bind.JAXBException;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.Menu;
@@ -12,6 +13,7 @@ import javafx.scene.control.TabPane.TabClosingPolicy;
 import space.sadfox.dataccess.dataccess.TableDataController;
 import space.sadfox.dataccess.view.TableViewForTableData;
 import space.sadfox.owlook.utils.ErrorLogger;
+import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.tableviewer.TableViewer;
 import space.sadfox.tableviewer.TableViewerDao;
 import space.sadfox.tableviewer.TableViewerEditController;
@@ -54,6 +56,7 @@ public class TableViewerTab extends Tab {
 		rightToolTabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 		rightToolTabPane.setSide(Side.TOP);
 		this.setText(getTableViewer().getTitle());
+		this.textProperty().bindBidirectional(getTableViewer().titleProperty());
 		
 		
 	}
@@ -88,6 +91,7 @@ public class TableViewerTab extends Tab {
 	public Menu getMenu() {
 		if (menu == null) {
 			menu = new Menu(getTableViewer().getTitle());
+			menu.textProperty().bindBidirectional(getTableViewer().titleProperty());
 			
 			Menu tableDataMenu = new Menu("Data");
 			menu.getItems().add(tableDataMenu);
@@ -98,13 +102,15 @@ public class TableViewerTab extends Tab {
 					new TableDataController(getTableViewerDao().getTableData()).show();
 				} catch (IOException e) {
 					ErrorLogger.registerException(e);
-				}
+				} catch (Nullable e) {}
 			});
 			tableDataMenu.getItems().add(editTableData);
 			
 			MenuItem reloadData = new MenuItem("Reload");
 			reloadData.setOnAction(event -> {
-				getTableViewerDao().getTableDataDao().loadData();
+				try {
+					getTableViewerDao().getTableDataDao().loadData();
+				} catch (Nullable e) {}
 				filtersTab.reloadData();
 			});
 			tableDataMenu.getItems().add(reloadData);

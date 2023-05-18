@@ -33,7 +33,6 @@ public class FileNamePicker extends Controller {
     
     private Class<? extends JAXBEntity> target;
     
-    private EntityLoader loader;
     
     private String oldFileName;
 
@@ -41,7 +40,6 @@ public class FileNamePicker extends Controller {
 		super(TableViewer.class.getResource("fxml/filename-picker.fxml"));
 		
 		this.target = target;
-		loader = new EntityLoader();
 		
 		confirm.disableProperty().bind(nameValid.not());
 		warningLabel.visibleProperty().bind(nameValid.not());
@@ -78,7 +76,7 @@ public class FileNamePicker extends Controller {
 			 return "File name is empty";
 		} else if (fileName.equals(oldFileName)) {
 			return " ";
-		} else if (loader.entityExist(fileName, target)) {
+		} else if (EntityLoader.INSTANCE.entityExist(fileName, target)) {
 			return "File name alredy exist \"" + fileName + "\"";
 		}
 		return "";

@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import space.sadfox.owlook.jaxb.JAXBEntity;
 import space.sadfox.owlook.moduleapi.Module;
 import space.sadfox.owlook.moduleapi.Workspace;
 import space.sadfox.owlook.ui.base.Controller;
 import space.sadfox.owlook.utils.ErrorLogger;
+import space.sadfox.owlook.utils.Nullable;
 
 public class TableViewerProvider implements Module, Workspace {
 	
@@ -60,6 +62,12 @@ public class TableViewerProvider implements Module, Workspace {
 	public List<Workspace> getWorkspaces() {
 		return Arrays.asList(this);
 	}
+
+	@Override
+	public List<Class<? extends JAXBEntity>> getJaxbEntities() throws Nullable {
+		return Arrays.asList(TableViewer.class);
+	}
+
 	
 	
 

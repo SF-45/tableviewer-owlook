@@ -3,6 +3,7 @@ package space.sadfox.tableviewer.ui.action;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
+import jakarta.xml.bind.JAXBException;
 import javafx.beans.InvalidationListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -22,6 +23,7 @@ import space.sadfox.dataccess.action.ActionProvider;
 import space.sadfox.owlook.ui.base.Controller;
 import space.sadfox.owlook.ui.tools.OpenEntityDialog;
 import space.sadfox.owlook.utils.ErrorLogger;
+import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.tableviewer.ActionDecorator;
 import space.sadfox.tableviewer.TableViewerProvider;
 import space.sadfox.tableviewer.ui.TableViewerTab;
@@ -152,21 +154,25 @@ public class ActionController extends Controller {
 	}
 
 	private void createAction(ActionProvider actionProvider) {
-		ActionEntity actionEntity = ActionEntityDao.createActionEntity(actionProvider);
-		actionEntity.setTitle("New Action");
-		ActionDecorator actionDecorator = new ActionDecorator();
-		actionDecorator.setAction(actionEntity.getFileName());
-		tableViewerTab.getTableViewer().getActionDecorators().add(actionDecorator);
-		editAction(actionDecorator);
+			try {
+				ActionEntity actionEntity = ActionEntityDao.createActionEntity(actionProvider);
+				actionEntity.setTitle("New Action");
+				ActionDecorator actionDecorator = new ActionDecorator();
+				actionDecorator.setAction(actionEntity.getFileName());
+				tableViewerTab.getTableViewer().getActionDecorators().add(actionDecorator);
+				editAction(actionDecorator);
+			} catch (JAXBException | IOException e) {
+				ErrorLogger.registerException(e);
+			}
 
 	}
 
 	private void editAction(ActionDecorator actionDecorator) {
 		try {
 			new EditActionController(actionDecorator, tableViewerTab).show();
-		} catch (IOException e) {
+		} catch (IOException  e) {
 			ErrorLogger.registerException(e);
-		}
+		} catch (Nullable e) {}
 	}
 
 	private void initializ() {

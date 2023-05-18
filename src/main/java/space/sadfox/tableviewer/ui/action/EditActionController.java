@@ -3,6 +3,7 @@ package space.sadfox.tableviewer.ui.action;
 import java.io.IOException;
 import java.net.URL;
 
+import jakarta.xml.bind.JAXBException;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -20,6 +21,7 @@ import javafx.util.StringConverter;
 import space.sadfox.dataccess.action.Action;
 import space.sadfox.dataccess.action.ActionEntity;
 import space.sadfox.owlook.ui.base.Controller;
+import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.tableviewer.ActionDecorator;
 import space.sadfox.tableviewer.ResourceTarget;
 import space.sadfox.tableviewer.TableViewerDao;
@@ -42,7 +44,7 @@ public class EditActionController extends Controller {
 	
 	
 
-	public EditActionController(ActionDecorator actionDecorator, TableViewerTab parent) throws IOException {
+	public EditActionController(ActionDecorator actionDecorator, TableViewerTab parent) throws IOException, Nullable {
 		super(ResourceTarget.class.getResource("fxml/edit-action.fxml"));
 
 		this.actionDecorator = actionDecorator;

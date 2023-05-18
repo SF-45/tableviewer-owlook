@@ -1,9 +1,14 @@
 package space.sadfox.tableviewer.ui.action;
 
+import java.io.IOException;
+
+import jakarta.xml.bind.JAXBException;
 import javafx.scene.Node;
 import javafx.scene.control.TableView.TableViewSelectionModel;
 import javafx.scene.control.TitledPane;
 import space.sadfox.dataccess.dataccess.DataEntity;
+import space.sadfox.owlook.utils.ErrorLogger;
+import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.tableviewer.ActionDecorator;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 import space.sadfox.tableviewer.ui.base.ButtonList;
@@ -34,7 +39,9 @@ public class ActionTitledPane extends TitledPane {
 		TableViewSelectionModel<DataEntity> selection = tableViewerTab.getTableDataViewTable().getSelectionModel();
 		actionButton.setOnAction(event -> {
 			if (selection.isEmpty()) return;
-			actionButton.getAction().run(selection.getSelectedItems().toArray(new DataEntity[0]));
+			try {
+				actionButton.getAction().run(selection.getSelectedItems().toArray(new DataEntity[0]));
+			} catch (Nullable e) {}
 		});
 		buttonList.addAndSort(actionButton);
 		

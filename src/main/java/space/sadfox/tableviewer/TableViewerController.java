@@ -67,7 +67,7 @@ public class TableViewerController extends Controller {
 			}
 		});
 		
-		new EntityLoader().addCreateChangeListener(entity -> {
+		EntityLoader.INSTANCE.addCreateChangeListener(entity -> {
 			if (entity.getClass().equals(TableViewer.class)) {
 				createTableViewerMenuItem((TableViewer) entity);
 			}

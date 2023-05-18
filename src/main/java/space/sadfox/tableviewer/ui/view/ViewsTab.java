@@ -7,33 +7,44 @@ import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.Tab;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Modality;
 import space.sadfox.dataccess.view.TableDataView;
 import space.sadfox.dataccess.view.TableDataViewController;
+import space.sadfox.dataccess.view.TableDataViewDao;
+import space.sadfox.owlook.jaxb.EntityChangeListener;
 import space.sadfox.owlook.jaxb.EntityLoader;
 import space.sadfox.owlook.ui.tools.OpenEntityDialog;
 import space.sadfox.owlook.utils.ErrorLogger;
+import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.tableviewer.ui.TableViewerTab;
-import space.sadfox.tableviewer.ui.base.ToolTabBase;
+import space.sadfox.tableviewer.ui.base.ButtonList;
 import space.sadfox.tableviewer.ui.base.ViewToggleButton;
 
-public class ViewsTab extends ToolTabBase {
-	
-	private ToggleGroup toggleGroup;
+public class ViewsTab extends Tab {
 
+	private ToggleGroup toggleGroup;
+	private TableViewerTab tableViewerTab;
+	private ButtonList buttonList;
 
 	public ViewsTab(TableViewerTab tableViewerTab) {
-		super(tableViewerTab, "Views");
+		super("Views");
 		
+		this.tableViewerTab = tableViewerTab;
+
 		toggleGroup = new ToggleGroup();
-		getTableViewerDao().getViews().forEach(this::addView);
-		getTableViewer().tableDataViewsProperty().addListener((ListChangeListener<String>) change -> {
+		getTableViewerTab().getTableViewerDao().getViews().forEach(this::addView);
+		getTableViewerTab().getTableViewer().tableDataViewsProperty().addListener((ListChangeListener<String>) change -> {
 			while (change.next()) {
 				if (change.wasAdded()) {
 					change.getAddedSubList().forEach(viewFileName -> {
-						int ind = getTableViewer().getTableDataViews().indexOf(viewFileName);
-						addView(ind, getTableViewerDao().getView(viewFileName));
+						int ind = getTableViewerTab().getTableViewer().getTableDataViews().indexOf(viewFileName);
+						try {
+							addView(ind, TableDataViewDao.loadTableDataView(viewFileName));
+						} catch (IOException | JAXBException e) {
+							ErrorLogger.registerException(e);
+						}
 					});
 				}
 				if (change.wasRemoved()) {
@@ -43,54 +54,46 @@ public class ViewsTab extends ToolTabBase {
 				}
 			}
 		});
-		
+
 		ContextMenu contextMenu = new ContextMenu();
 		getButtonList().setContextMenu(contextMenu);
 		this.tabPaneProperty().addListener((property, oldValue, newValue) -> {
 			getButtonList().setContextMenuHideProperty(newValue.focusedProperty());
 		});
-		
+
 		MenuItem createView = new MenuItem("Create View");
 		createView.setOnAction(event -> {
-			try {
-				EntityLoader loader = new EntityLoader();
-				try {
-					TableDataView newView = loader.createEntity(TableDataView.class);
-					newView.setTitle("New View");
-					getTableViewer().getTableDataViews().add(newView.getFileName());
-					editView(newView);
-				} catch (JAXBException e) {
-					ErrorLogger.registerException(e);
-				}
-				
-			} catch (IOException e) {
-				ErrorLogger.registerException(e);
-			}
+			TableDataView newView = TableDataViewDao.createTableDataView();
+			if (newView == null) return;
+			newView.setTitle("New View");
+			getTableViewerTab().getTableViewerDao().addView(newView);
+			editView(newView);
 		});
 		contextMenu.getItems().add(createView);
-		
+
 		MenuItem open = new MenuItem("Open View");
 		open.setOnAction(event -> {
 			try {
-				OpenEntityDialog<TableDataView> openDialog = new OpenEntityDialog<>(TableDataView.class, getTableViewerDao().getViews());
+				OpenEntityDialog<TableDataView> openDialog = new OpenEntityDialog<>(TableDataView.class,
+						getTableViewerTab().getTableViewerDao().getViews());
 				openDialog.setModality(Modality.APPLICATION_MODAL);
 				openDialog.showAndWait();
 				if (openDialog.isOpened()) {
-					getTableViewer().getTableDataViews().add(openDialog.getOpenned().getFileName());
+					getTableViewerTab().getTableViewerDao().addView(openDialog.getOpenned());
 				}
 			} catch (IOException e) {
 				ErrorLogger.registerException(e);
 			}
 		});
 		contextMenu.getItems().add(open);
-		
-		
+
 	}
-	
+
 	private void addView(int ind, TableDataView view) {
-		if (view == null) return;
-		
-		ViewToggleButton button = new ViewToggleButton(view, getTableViewer());
+		if (view == null)
+			return;
+
+		ViewToggleButton button = new ViewToggleButton(view, getTableViewerTab().getTableViewer());
 		button.setToggleGroup(toggleGroup);
 		button.setOnAction(event -> {
 			getTableViewerTab().getTableDataViewTable().setTableDataView(view);
@@ -100,36 +103,49 @@ public class ViewsTab extends ToolTabBase {
 		}
 		ContextMenu contextMenu = new ContextMenu();
 		button.setContextMenu(contextMenu);
-		
+
 		MenuItem edit = new MenuItem("Edit View");
 		edit.setOnAction(event -> {
 			editView(view);
 		});
 		contextMenu.getItems().add(edit);
 		
+		MenuItem duplicate = new MenuItem("Duplicate View");
+		duplicate.setOnAction(event -> {
+			try {
+				TableDataView newView = EntityLoader.INSTANCE.duplicateEntity(view);
+				getTableViewerTab().getTableViewerDao().addView(newView);
+				editView(newView);
+			} catch (JAXBException | IOException e) {
+				ErrorLogger.registerException(e);
+			} 
+		});
+		contextMenu.getItems().add(duplicate);
+
 		MenuItem close = new MenuItem("Close View");
 		close.setOnAction(event -> {
-			getTableViewer().getTableDataViews().remove(view.getFileName());
+			getTableViewerTab().getTableViewerDao().removeView(view);
 		});
 		contextMenu.getItems().add(close);
-		
+
 		MenuItem delete = new MenuItem("Delete View");
 		delete.setOnAction(event -> {
-			EntityLoader loader = new EntityLoader();
-			if (loader.deleteEntity(view)) {
-				getTableViewer().getTableDataViews().remove(view.getFileName());
+			if (TableDataViewDao.deleteTableDataView(view)) {
+				getTableViewerTab().getTableViewerDao().removeView(view);
 			}
 		});
 		contextMenu.getItems().add(delete);
 		
-		if (ind < 0) getButtonList().getChildren().add(button);
-		else getButtonList().getChildren().add(ind, button);
+		if (ind < 0)
+			getButtonList().getChildren().add(button);
+		else
+			getButtonList().getChildren().add(ind, button);
 	}
-	
+
 	private void addView(TableDataView view) {
 		addView(-1, view);
 	}
-	
+
 	private void deleteView(String viewFileName) {
 		var btnList = getButtonList().getChildren();
 		for (int i = 0; i < btnList.size(); i++) {
@@ -143,16 +159,32 @@ public class ViewsTab extends ToolTabBase {
 			}
 		}
 	}
-	
+
 	private void editView(TableDataView view) {
 		try {
-			var controller = new TableDataViewController(view, getTableViewerDao().getTableData());
-			controller.show();
+			view.getConfigController(getTableViewerTab().getTableViewerDao().getTableData()).show();
 		} catch (IOException e) {
 			ErrorLogger.registerException(e);
+		} catch (Nullable e) {
+			try {
+				view.getConfigController().show();
+			} catch (IOException e1) {
+				ErrorLogger.registerException(e1);
+			} catch (Nullable e1) {	}
 		}
 	}
-	
+
+	public TableViewerTab getTableViewerTab() {
+		return tableViewerTab;
+	}
+
+	private ButtonList getButtonList() {
+		if (buttonList == null) {
+			buttonList = new ButtonList();
+			this.setContent(buttonList);
+		}
+		return buttonList;
+	}
 	
 	
 
