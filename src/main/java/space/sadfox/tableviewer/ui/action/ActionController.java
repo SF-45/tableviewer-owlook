@@ -13,6 +13,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
@@ -105,15 +106,25 @@ public class ActionController extends Controller {
 
 		openAction.setOnAction(event -> {
 			try {
-				OpenEntityDialog<ActionEntity> openDialog = new OpenEntityDialog<>(ActionEntity.class,
+				OpenEntityDialog<ActionEntity> openDialog = new OpenEntityDialog<>(
+						ActionEntity.class,
+						SelectionMode.MULTIPLE,
 						tableViewerTab.getTableViewerDao().getActionEntities());
 				openDialog.setModality(Modality.APPLICATION_MODAL);
 				openDialog.showAndWait();
 				if (openDialog.isOpened()) {
-					ActionDecorator actionDecorator = new ActionDecorator();
-					actionDecorator.setAction(openDialog.getOpenned().getFileName());
-					tableViewerTab.getTableViewer().getActionDecorators().add(actionDecorator);
-					editAction(actionDecorator);
+					if (openDialog.getOpenned().size() == 1) {
+						ActionDecorator actionDecorator = new ActionDecorator();
+						actionDecorator.setAction(openDialog.getOpenned().get(0).getFileName());
+						tableViewerTab.getTableViewer().getActionDecorators().add(actionDecorator);
+						editAction(actionDecorator);
+					} else {
+						for (ActionEntity actionEntity : openDialog.getOpenned()) {
+							ActionDecorator actionDecorator = new ActionDecorator();
+							actionDecorator.setAction(actionEntity.getFileName());
+							tableViewerTab.getTableViewer().getActionDecorators().add(actionDecorator);
+						}
+					}
 				}
 			} catch (IOException e) {
 				ErrorLogger.registerException(e);

@@ -5,6 +5,7 @@ import java.io.IOException;
 import jakarta.xml.bind.JAXBException;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import space.sadfox.dataccess.dataccess.TableData;
@@ -74,10 +75,10 @@ public class TableViewerEditController extends Controller {
 
 		selectTableDataButton.setOnAction(event -> {
 			try {
-				OpenEntityDialog<TableData> openEntityDialog = new OpenEntityDialog<>(TableData.class, null);
+				OpenEntityDialog<TableData> openEntityDialog = new OpenEntityDialog<>(TableData.class, SelectionMode.SINGLE);
 				openEntityDialog.showAndWait();
 				if (openEntityDialog.isOpened()) {
-					getTableViewerDao().setTableData(openEntityDialog.getOpenned());
+					getTableViewerDao().setTableData(openEntityDialog.getOpenned().get(0));
 				}
 			} catch (IOException e) {
 				ErrorLogger.registerException(e);

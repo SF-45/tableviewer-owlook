@@ -3,6 +3,8 @@ package space.sadfox.tableviewer.ui;
 import java.io.IOException;
 
 import jakarta.xml.bind.JAXBException;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.Menu;
@@ -11,6 +13,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import space.sadfox.dataccess.dataccess.TableDataController;
+import space.sadfox.dataccess.filter.TableDataFilter;
 import space.sadfox.dataccess.view.TableViewForTableData;
 import space.sadfox.owlook.utils.ErrorLogger;
 import space.sadfox.owlook.utils.Nullable;
@@ -22,24 +25,23 @@ import space.sadfox.tableviewer.ui.filter.FiltersTab;
 import space.sadfox.tableviewer.ui.view.ViewsTab;
 
 public class TableViewerTab extends Tab {
-	
+
 	private TableViewer tableViewer;
 	private TableViewerDao tableViewerDao;
 
 	private ActionController leftToolPane;
 	private TabPane rightToolTabPane;
 	private Menu menu;
-	
-	private FiltersTab filtersTab;
-	
-	private TableViewForTableData tableDataViewTable;
 
+	private FiltersTab filtersTab;
+
+	private TableViewForTableData tableDataViewTable;
 
 	public TableViewerTab(TableViewer tableViewer) {
 		this.tableViewer = tableViewer;
-		
+
 		filtersTab = new FiltersTab(this);
-		
+
 		rightToolTabPane = new TabPane();
 		rightToolTabPane.getTabs().add(new ViewsTab(this));
 		rightToolTabPane.getTabs().add(filtersTab);
@@ -55,12 +57,26 @@ public class TableViewerTab extends Tab {
 	private void initializ() {
 		rightToolTabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 		rightToolTabPane.setSide(Side.TOP);
-		this.setText(getTableViewer().getTitle());
-		this.textProperty().bindBidirectional(getTableViewer().titleProperty());
-		
-		
+
+		if (filtersTab.getSelectedTableDataFilter() != null) {
+			TableDataFilter selectFilter = filtersTab.getSelectedTableDataFilter();
+			this.textProperty()
+					.bind(Bindings.concat(tableViewer.titleProperty(), "[", selectFilter.titleProperty(), "]"));
+		} else {
+			this.textProperty().bind(tableViewer.titleProperty());
+		}
+		filtersTab.selectedTableDataFilterProperty().addListener((property, oldValue, newValue) -> {
+			this.textProperty().unbind();
+			if (newValue != null) {
+				this.textProperty()
+						.bind(Bindings.concat(tableViewer.titleProperty(), "[", newValue.titleProperty(), "]"));
+			} else {
+
+				this.textProperty().bind(tableViewer.titleProperty());
+			}
+		});
 	}
-	
+
 	public TableViewForTableData getTableDataViewTable() {
 		if (tableDataViewTable == null) {
 			tableDataViewTable = new TableViewForTableData();
@@ -71,12 +87,12 @@ public class TableViewerTab extends Tab {
 	public TableViewer getTableViewer() {
 		return tableViewer;
 	}
-	
+
 	public TableViewerDao getTableViewerDao() {
 		if (tableViewerDao == null) {
 			tableViewerDao = new TableViewerDao(getTableViewer());
 		}
-		
+
 		return tableViewerDao;
 	}
 
@@ -87,34 +103,36 @@ public class TableViewerTab extends Tab {
 	public Node getLeftToolsNode() {
 		return leftToolPane.getParent();
 	}
-	
+
 	public Menu getMenu() {
 		if (menu == null) {
 			menu = new Menu(getTableViewer().getTitle());
 			menu.textProperty().bindBidirectional(getTableViewer().titleProperty());
-			
+
 			Menu tableDataMenu = new Menu("Data");
 			menu.getItems().add(tableDataMenu);
-			
+
 			MenuItem editTableData = new MenuItem("Edit Table Data");
 			editTableData.setOnAction(event -> {
 				try {
 					new TableDataController(getTableViewerDao().getTableData()).show();
 				} catch (IOException e) {
 					ErrorLogger.registerException(e);
-				} catch (Nullable e) {}
+				} catch (Nullable e) {
+				}
 			});
 			tableDataMenu.getItems().add(editTableData);
-			
+
 			MenuItem reloadData = new MenuItem("Reload");
 			reloadData.setOnAction(event -> {
 				try {
 					getTableViewerDao().getTableDataDao().loadData();
-				} catch (Nullable e) {}
+				} catch (Nullable e) {
+				}
 				filtersTab.reloadData();
 			});
 			tableDataMenu.getItems().add(reloadData);
-			
+
 			MenuItem editTableViewer = new MenuItem("Properties");
 			editTableViewer.setOnAction(event -> {
 				try {
@@ -127,7 +145,5 @@ public class TableViewerTab extends Tab {
 		}
 		return menu;
 	}
-	
-	
 
 }

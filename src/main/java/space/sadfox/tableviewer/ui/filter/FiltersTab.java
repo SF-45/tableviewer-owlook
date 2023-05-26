@@ -3,11 +3,15 @@ package space.sadfox.tableviewer.ui.filter;
 import java.io.IOException;
 
 import jakarta.xml.bind.JAXBException;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Modality;
@@ -15,6 +19,8 @@ import space.sadfox.dataccess.filter.TableDataFilter;
 import space.sadfox.dataccess.filter.TableDataFilterController;
 import space.sadfox.dataccess.filter.TableDataFilterDao;
 import space.sadfox.owlook.jaxb.EntityLoader;
+import space.sadfox.owlook.jaxb.JAXBEntity;
+import space.sadfox.owlook.ui.tools.EntityManager;
 import space.sadfox.owlook.ui.tools.OpenEntityDialog;
 import space.sadfox.owlook.utils.ErrorLogger;
 import space.sadfox.owlook.utils.Nullable;
@@ -27,6 +33,8 @@ public class FiltersTab extends Tab {
 	private ToggleGroup toggleGroup;
 	private TableViewerTab tableViewerTab;
 	private ButtonList buttonList;
+	
+	private ObjectProperty<TableDataFilter> selectedTableDataFilter;
 
 	public FiltersTab(TableViewerTab tableViewerTab) {
 		super("Filters");
@@ -78,12 +86,16 @@ public class FiltersTab extends Tab {
 		MenuItem open = new MenuItem("Open Filter");
 		open.setOnAction(event -> {
 			try {
-				OpenEntityDialog<TableDataFilter> openDialog = new OpenEntityDialog<>(TableDataFilter.class,
-						getTableViewerTab().getTableViewerDao().getFilters());
+				OpenEntityDialog<TableDataFilter> openDialog = new OpenEntityDialog<>(
+						TableDataFilter.class,
+						SelectionMode.MULTIPLE,
+						getTableViewerTab().getTableViewerDao().getFilters()
+						);
+				
 				openDialog.setModality(Modality.APPLICATION_MODAL);
 				openDialog.showAndWait();
 				if (openDialog.isOpened()) {
-					getTableViewerTab().getTableViewerDao().addFilter(openDialog.getOpenned());
+					openDialog.getOpenned().forEach(f -> getTableViewerTab().getTableViewerDao().addFilter(f));
 				}
 			} catch (IOException e) {
 				ErrorLogger.registerException(e);
@@ -100,6 +112,8 @@ public class FiltersTab extends Tab {
 			button.fire();
 		}
 	}
+	
+	
 
 	public TableViewerTab getTableViewerTab() {
 		return tableViewerTab;
@@ -112,9 +126,11 @@ public class FiltersTab extends Tab {
 			try {
 				getTableViewerTab().getTableDataViewTable().setItems(
 						FXCollections.observableArrayList(getTableViewerTab().getTableViewerDao().getFilterDao(filter).getDataEntities()));
+				
 			} catch (JAXBException e) {
 				ErrorLogger.registerException(e);
 			} catch (Nullable e) {}
+			setSelectedTableDataFilter(filter);
 		});
 		if (getButtonList().getChildren().size() == 0) {
 			button.fire();
@@ -185,6 +201,25 @@ public class FiltersTab extends Tab {
 			this.setContent(buttonList);
 		}
 		return buttonList;
+	}
+	
+	public TableDataFilter getSelectedTableDataFilter() {
+		return selectedTableDataFilterProperty().get();
+	}
+	
+	private void setSelectedTableDataFilter(TableDataFilter tableDataFilter) {
+		writableSelectedTableDataFilterProperty().set(tableDataFilter);
+	}
+	
+	private ObjectProperty<TableDataFilter> writableSelectedTableDataFilterProperty() {
+		if (selectedTableDataFilter == null) {
+			selectedTableDataFilter = new SimpleObjectProperty<>();
+		}
+		return selectedTableDataFilter;
+	}
+	
+	public ReadOnlyObjectProperty<TableDataFilter> selectedTableDataFilterProperty() {
+		return writableSelectedTableDataFilterProperty();
 	}
 	
 	private void editFilter(TableDataFilter tableDataFilter) {

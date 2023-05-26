@@ -68,6 +68,12 @@ public class TableViewerProvider implements Module, Workspace {
 		return Arrays.asList(TableViewer.class);
 	}
 
+	@Override
+	public void initModule() {
+		// TODO Auto-generated method stub
+		
+	}
+
 	
 	
 

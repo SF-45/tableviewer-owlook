@@ -1,24 +1,17 @@
 package space.sadfox.tableviewer.ui.action;
 
 import java.io.IOException;
-import java.net.URL;
 
-import jakarta.xml.bind.JAXBException;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextField;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
 import javafx.util.StringConverter;
-import space.sadfox.dataccess.action.Action;
 import space.sadfox.dataccess.action.ActionEntity;
 import space.sadfox.owlook.ui.base.Controller;
 import space.sadfox.owlook.utils.Nullable;
@@ -34,31 +27,30 @@ public class EditActionController extends Controller {
 
     @FXML
     private ListView<StringProperty> tags;
-
-    @FXML
-    private TextField title;
 	
 	private ActionDecorator actionDecorator;
 	private ActionEntity actionEntity;
-	private Action action;
-	
-	
 
 	public EditActionController(ActionDecorator actionDecorator, TableViewerTab parent) throws IOException, Nullable {
 		super(ResourceTarget.class.getResource("fxml/edit-action.fxml"));
 
 		this.actionDecorator = actionDecorator;
-		actionEntity = TableViewerDao.getActionEntity(actionDecorator);
-		action = parent.getTableViewerDao().getActionEntityDao(actionEntity).createAction();
+		init();
 		
-		getStage().titleProperty().bind(Bindings.concat("Edit Action [", actionEntity.titleProperty(), "]"));
-		
-		title.setText(actionEntity.getTitle());
-		actionEntity.titleProperty().bindBidirectional(title.textProperty());
-		root.setCenter(action.getConfigController().getParent());
+		tags.setItems(getActionDecorator().tagsProperty());
 		
 		
-		tags.setItems(actionDecorator.tagsProperty());
+		
+	}
+	
+	private void init() throws IOException, Nullable {
+		getStage().titleProperty().bind(Bindings.concat("Edit Action [", getActionEntity().titleProperty(), "]"));
+		root.setCenter(getActionEntity().getConfigController().getParent());
+		
+		initTagsListView();
+	}
+	
+	private void initTagsListView() {
 		tags.setEditable(true);
 		tags.setCellFactory(call -> {
 			TextFieldListCell<StringProperty> cell = new TextFieldListCell<>();
@@ -87,16 +79,29 @@ public class EditActionController extends Controller {
 		MenuItem newTag = new MenuItem("Create Tag");
 		newTag.setOnAction(event -> {
 			StringProperty tag = new SimpleStringProperty("New Tag");
-			actionDecorator.getTags().add(tag);
+			getActionDecorator().getTags().add(tag);
 			
 		});
 		tagsContextMenu.getItems().add(newTag);
 		
 		MenuItem deleteTag = new MenuItem("Delete Tag");
 		deleteTag.setOnAction(event -> {
-			actionDecorator.getTags().removeAll(tags.getSelectionModel().getSelectedItems());
+			getActionDecorator().getTags().removeAll(tags.getSelectionModel().getSelectedItems());
 		});
 		tagsContextMenu.getItems().add(deleteTag);
+		
+		
+	}
+	
+	private ActionDecorator getActionDecorator() {
+		return actionDecorator;
+	}
+	
+	private ActionEntity getActionEntity() {
+		if (actionEntity == null) {
+			actionEntity = TableViewerDao.getActionEntity(getActionDecorator());
+		}
+		return actionEntity;
 	}
 	
 	

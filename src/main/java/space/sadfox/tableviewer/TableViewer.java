@@ -11,8 +11,6 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -35,18 +33,18 @@ import space.sadfox.owlook.utils.Nullable;
 public class TableViewer extends JAXBEntity {
 
 	private StringProperty title = new SimpleStringProperty("");
-	private ObjectProperty<String> tableDataConnection = new SimpleObjectProperty<>("");
-	private ObservableList<String> tableDataFilters = FXCollections.observableArrayList();
-	private ObservableList<String> tableDataViews = FXCollections.observableArrayList();
-	private ObservableList<ActionDecorator> actions = FXCollections.observableArrayList();
+	private StringProperty tableDataConnection = new SimpleStringProperty();
+	private ObservableList<String> tableDataFilters = FXCollections.observableArrayList();;
+	private ObservableList<String> tableDataViews = FXCollections.observableArrayList();;
+	private ObservableList<ActionDecorator> actionDecorators = FXCollections.observableArrayList();;
 
 	@XmlAttribute(name = "title")
 	public String getTitle() {
-		return title.get();
+		return titleProperty().get();
 	}
 
 	public void setTitle(String name) {
-		this.title.set(name);
+		titleProperty().set(name);
 	}
 
 	public StringProperty titleProperty() {
@@ -55,21 +53,21 @@ public class TableViewer extends JAXBEntity {
 
 	@XmlElement(name = "TableDataConnection")
 	public String getTableDataConnection() {
-		return tableDataConnection.get();
+		return tableDataConnectionProperty().get();
 	}
 
 	public void setTableDataConnection(String tableDataConnection) {
-		this.tableDataConnection.set(tableDataConnection);
+		tableDataConnectionProperty().set(tableDataConnection);
 	}
 
-	public ObjectProperty<String> tableDataConnectionProperty() {
+	public StringProperty tableDataConnectionProperty() {
 		return tableDataConnection;
 	}
 
 	@XmlElementWrapper(name = "TableDataFilters")
 	@XmlElement(name = "Filter")
 	public List<String> getTableDataFilters() {
-		return tableDataFilters;
+		return tableDataFiltersProperty();
 	}
 
 	public ObservableList<String> tableDataFiltersProperty() {
@@ -79,7 +77,7 @@ public class TableViewer extends JAXBEntity {
 	@XmlElementWrapper(name = "TableDataViews")
 	@XmlElement(name = "View")
 	public List<String> getTableDataViews() {
-		return tableDataViews;
+		return tableDataViewsProperty();
 	}
 
 	public ObservableList<String> tableDataViewsProperty() {
@@ -89,16 +87,16 @@ public class TableViewer extends JAXBEntity {
 	@XmlElementWrapper(name = "actions")
 	@XmlElement(name = "action")
 	public List<ActionDecorator> getActionDecorators() {
-		return actions;
+		return actionDecoratorsProperty();
 	}
 
 	public ObservableList<ActionDecorator> actionDecoratorsProperty() {
-		return actions;
+		return actionDecorators;
 	}
 
 	@Override
 	public List<Object> getProperties() {
-		return Arrays.asList(title, tableDataConnection, tableDataFilters, tableDataViews, actions);
+		return Arrays.asList(title, tableDataConnection, tableDataFilters, tableDataViews, actionDecorators);
 	}
 
 	@Override
@@ -115,7 +113,7 @@ public class TableViewer extends JAXBEntity {
 				getTableDataViews().remove(entity.getFileName());
 			} else if (entity.getClass().equals(ActionEntity.class)) {
 				getActionDecorators()
-				.removeIf(actionDecrator -> actionDecrator.getAction().equals(entity.getFileName()));
+						.removeIf(actionDecrator -> actionDecrator.getAction().equals(entity.getFileName()));
 			}
 		});
 
@@ -197,7 +195,7 @@ public class TableViewer extends JAXBEntity {
 		builder.append("\n");
 
 		builder.append("Views:\n");
-		getTableDataFilters().forEach(s -> {
+		getTableDataViews().forEach(s -> {
 			builder.append("\t" + s + "\n");
 		});
 

@@ -7,6 +7,7 @@ import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Tab;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Modality;
@@ -74,12 +75,14 @@ public class ViewsTab extends Tab {
 		MenuItem open = new MenuItem("Open View");
 		open.setOnAction(event -> {
 			try {
-				OpenEntityDialog<TableDataView> openDialog = new OpenEntityDialog<>(TableDataView.class,
+				OpenEntityDialog<TableDataView> openDialog = new OpenEntityDialog<>(
+						TableDataView.class,
+						SelectionMode.MULTIPLE,
 						getTableViewerTab().getTableViewerDao().getViews());
 				openDialog.setModality(Modality.APPLICATION_MODAL);
 				openDialog.showAndWait();
 				if (openDialog.isOpened()) {
-					getTableViewerTab().getTableViewerDao().addView(openDialog.getOpenned());
+					openDialog.getOpenned().forEach(v -> getTableViewerTab().getTableViewerDao().addView(v));
 				}
 			} catch (IOException e) {
 				ErrorLogger.registerException(e);
