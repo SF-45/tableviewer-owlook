@@ -12,9 +12,11 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
+import space.sadfox.dataccess.dataccess.TableData;
 import space.sadfox.dataccess.dataccess.TableDataController;
 import space.sadfox.dataccess.filter.TableDataFilter;
 import space.sadfox.dataccess.view.TableViewForTableData;
+import space.sadfox.owlook.jaxb.EntityChangeListener;
 import space.sadfox.owlook.utils.ErrorLogger;
 import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.tableviewer.TableViewer;
@@ -57,6 +59,28 @@ public class TableViewerTab extends Tab {
 	private void initializ() {
 		rightToolTabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 		rightToolTabPane.setSide(Side.TOP);
+		
+		EntityChangeListener<TableData.Change> tableDataChangeListener = change -> {
+			if (change.wasDataUpdate()) {
+				reloadCurrentData();
+			}
+		};
+		
+		getTableViewer().addEntityChangeListener((EntityChangeListener<TableViewer.Change>)change -> {
+			if (change.wasTableDataChange()) {
+				try {
+					change.getOldTableData().removeEntityChangeListener(tableDataChangeListener);
+				} catch (Nullable e) {}
+				change.getNewTableData().addEntityChangeListener(tableDataChangeListener);
+				reloadCurrentData();
+			}
+		});
+		
+		try {
+			getTableViewerDao().getTableData();
+		} catch (Nullable e) {
+
+		}
 
 		if (filtersTab.getSelectedTableDataFilter() != null) {
 			TableDataFilter selectFilter = filtersTab.getSelectedTableDataFilter();
@@ -129,7 +153,6 @@ public class TableViewerTab extends Tab {
 					getTableViewerDao().getTableDataDao().loadData();
 				} catch (Nullable e) {
 				}
-				filtersTab.reloadData();
 			});
 			tableDataMenu.getItems().add(reloadData);
 
@@ -144,6 +167,10 @@ public class TableViewerTab extends Tab {
 			menu.getItems().add(editTableViewer);
 		}
 		return menu;
+	}
+	
+	public void reloadCurrentData() {
+		filtersTab.reloadData();
 	}
 
 }

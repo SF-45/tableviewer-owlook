@@ -104,6 +104,35 @@ public class TableViewerDao {
 
 	public void setTableData(TableData tableData) {
 		tableViewer.setTableDataConnection(tableData.getFileName());
+		
+		getTableViewer().notifyEntityChangeListeners(new TableViewer.Change() {
+
+			@Override
+			public boolean wasTableDataChange() {
+				return true;
+			}
+
+			@Override
+			public TableData getOldTableData() throws Nullable {
+
+					return getTableData();
+				
+			}
+
+			@Override
+			public TableData getNewTableData() {
+				return tableData;
+			}
+
+			@Override
+			public boolean wasModify() {
+				return true;
+			}
+
+			@Override
+			public boolean wasRemoved() {
+				return false;
+			}});
 	}
 
 	public TableDataDao getTableDataDao() throws Nullable {
