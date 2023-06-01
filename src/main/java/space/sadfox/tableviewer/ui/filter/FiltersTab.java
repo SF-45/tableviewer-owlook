@@ -232,7 +232,7 @@ public class FiltersTab extends Tab {
 				tableDataFilter.getConfigController().show();
 			} catch (IOException e1) {
 				ErrorLogger.registerException(e1);
-			} catch (Nullable e1) {}
+			}
 		}
 	}
 

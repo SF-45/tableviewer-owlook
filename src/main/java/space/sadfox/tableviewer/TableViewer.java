@@ -178,7 +178,7 @@ public class TableViewer extends JAXBEntity {
 	}
 
 	@Override
-	public Controller getConfigController() throws IOException, Nullable {
+	public Controller getConfigController() throws IOException {
 		return new TableViewerEditController(this);
 	}
 

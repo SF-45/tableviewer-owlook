@@ -183,7 +183,7 @@ public class ActionController extends Controller {
 			new EditActionController(actionDecorator, tableViewerTab).show();
 		} catch (IOException  e) {
 			ErrorLogger.registerException(e);
-		} catch (Nullable e) {}
+		}
 	}
 
 	private void initializ() {

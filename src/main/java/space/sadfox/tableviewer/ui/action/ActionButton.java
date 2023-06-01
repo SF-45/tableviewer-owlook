@@ -49,7 +49,7 @@ public class ActionButton extends Button {
 				new EditActionController(actionDecorator, parent).show();
 			} catch (IOException e) {
 				ErrorLogger.registerException(e);
-			} catch (Nullable e) {}
+			}
 		});
 		contextMenu.getItems().add(edit);
 		
@@ -62,7 +62,7 @@ public class ActionButton extends Button {
 				new EditActionController(newActionDecorator, parent).show();
 			} catch (JAXBException | IOException e) {
 				ErrorLogger.registerException(e);
-			} catch (Nullable e) {}
+			}
 		});
 		contextMenu.getItems().add(duplicate);
 		

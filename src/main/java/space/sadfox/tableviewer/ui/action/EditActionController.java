@@ -13,6 +13,8 @@ import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.layout.BorderPane;
 import javafx.util.StringConverter;
 import space.sadfox.dataccess.action.ActionEntity;
+import space.sadfox.dataccess.dataccess.TableData;
+import space.sadfox.owlook.jaxb.ControllerNotDefined;
 import space.sadfox.owlook.ui.base.Controller;
 import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.tableviewer.ActionDecorator;
@@ -30,11 +32,14 @@ public class EditActionController extends Controller {
 	
 	private ActionDecorator actionDecorator;
 	private ActionEntity actionEntity;
+	
+	private TableViewerTab tableViewerTab;
 
-	public EditActionController(ActionDecorator actionDecorator, TableViewerTab parent) throws IOException, Nullable {
+	public EditActionController(ActionDecorator actionDecorator, TableViewerTab parent) throws IOException {
 		super(ResourceTarget.class.getResource("fxml/edit-action.fxml"));
 
 		this.actionDecorator = actionDecorator;
+		this.tableViewerTab = parent;
 		init();
 		
 		tags.setItems(getActionDecorator().tagsProperty());
@@ -43,9 +48,15 @@ public class EditActionController extends Controller {
 		
 	}
 	
-	private void init() throws IOException, Nullable {
+	private void init() throws IOException {
 		getStage().titleProperty().bind(Bindings.concat("Edit Action [", getActionEntity().titleProperty(), "]"));
-		root.setCenter(getActionEntity().getConfigController().getParent());
+		
+		try {
+			root.setCenter(getActionEntity().getConfigController(getParentTableData()).getParent());
+		} catch (Nullable e) {
+			root.setCenter(getActionEntity().getConfigController().getParent());
+		}
+		
 		
 		initTagsListView();
 	}
@@ -103,6 +114,17 @@ public class EditActionController extends Controller {
 		}
 		return actionEntity;
 	}
+
+	private TableViewerTab getTableViewerTab() {
+		
+		return tableViewerTab;
+	}
+	
+	private TableData getParentTableData() throws Nullable {
+		return getTableViewerTab().getTableViewerDao().getTableData();
+	}
+	
+	
 	
 	
 
