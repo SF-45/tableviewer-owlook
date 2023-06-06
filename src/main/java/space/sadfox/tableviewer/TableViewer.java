@@ -17,29 +17,19 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import space.sadfox.dataccess.action.ActionEntity;
 import space.sadfox.dataccess.action.ActionEntityDao;
-import space.sadfox.dataccess.dataccess.TableData;
 import space.sadfox.dataccess.dataccess.TableDataDao;
 import space.sadfox.dataccess.filter.TableDataFilter;
 import space.sadfox.dataccess.view.TableDataView;
 import space.sadfox.owlook.components.logger.LogLevel;
-import space.sadfox.owlook.jaxb.EntityChangeListener;
-import space.sadfox.owlook.jaxb.EntityChangeListener.Change;
 import space.sadfox.owlook.jaxb.EntityLoader;
 import space.sadfox.owlook.jaxb.JAXBEntity;
 import space.sadfox.owlook.ui.base.Controller;
 import space.sadfox.owlook.utils.ErrorLogger;
 import space.sadfox.owlook.utils.LoggerMessage;
-import space.sadfox.owlook.utils.Nullable;
 
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement
 public class TableViewer extends JAXBEntity {
-	
-	public static abstract class Change extends EntityChangeListener.Change  {
-		public abstract boolean wasTableDataChange();
-		public abstract TableData getOldTableData() throws Nullable;
-		public abstract TableData getNewTableData();
-	}
 
 	private StringProperty title = new SimpleStringProperty("");
 	private StringProperty tableDataConnection = new SimpleStringProperty();
@@ -134,12 +124,6 @@ public class TableViewer extends JAXBEntity {
 		validateViews();
 		validateActions();
 		validateData();
-	}
-	
-	
-
-	void notifyEntityChangeListeners(TableViewer.Change change) {
-		super.notifyEntityChangeListeners(change);
 	}
 
 	private void validateViews() {

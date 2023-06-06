@@ -23,14 +23,12 @@ import space.sadfox.tableviewer.ui.TableViewerTab;
 import space.sadfox.tableviewer.ui.base.ButtonList;
 import space.sadfox.tableviewer.ui.base.ViewToggleButton;
 
-public class ViewsTab extends Tab {
+public class ViewsTab extends ButtonList {
 
 	private ToggleGroup toggleGroup;
 	private TableViewerTab tableViewerTab;
-	private ButtonList buttonList;
 
 	public ViewsTab(TableViewerTab tableViewerTab) {
-		super("Views");
 		
 		this.tableViewerTab = tableViewerTab;
 
@@ -57,10 +55,7 @@ public class ViewsTab extends Tab {
 		});
 
 		ContextMenu contextMenu = new ContextMenu();
-		getButtonList().setContextMenu(contextMenu);
-		this.tabPaneProperty().addListener((property, oldValue, newValue) -> {
-			getButtonList().setContextMenuHideProperty(newValue.focusedProperty());
-		});
+		setContextMenu(contextMenu);
 
 		MenuItem createView = new MenuItem("Create View");
 		createView.setOnAction(event -> {
@@ -101,7 +96,7 @@ public class ViewsTab extends Tab {
 		button.setOnAction(event -> {
 			getTableViewerTab().getTableDataViewTable().setTableDataView(view);
 		});
-		if (getButtonList().getChildren().size() == 0) {
+		if (getChildren().size() == 0) {
 			button.fire();
 		}
 		ContextMenu contextMenu = new ContextMenu();
@@ -140,9 +135,9 @@ public class ViewsTab extends Tab {
 		contextMenu.getItems().add(delete);
 		
 		if (ind < 0)
-			getButtonList().getChildren().add(button);
+			getChildren().add(button);
 		else
-			getButtonList().getChildren().add(ind, button);
+			getChildren().add(ind, button);
 	}
 
 	private void addView(TableDataView view) {
@@ -150,7 +145,7 @@ public class ViewsTab extends Tab {
 	}
 
 	private void deleteView(String viewFileName) {
-		var btnList = getButtonList().getChildren();
+		var btnList = getChildren();
 		for (int i = 0; i < btnList.size(); i++) {
 			Node node = btnList.get(i);
 			if (node instanceof ViewToggleButton) {
@@ -179,14 +174,6 @@ public class ViewsTab extends Tab {
 
 	public TableViewerTab getTableViewerTab() {
 		return tableViewerTab;
-	}
-
-	private ButtonList getButtonList() {
-		if (buttonList == null) {
-			buttonList = new ButtonList();
-			this.setContent(buttonList);
-		}
-		return buttonList;
 	}
 	
 	

@@ -4,16 +4,13 @@ import java.io.IOException;
 
 import jakarta.xml.bind.JAXBException;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TabPane.TabClosingPolicy;
 import space.sadfox.dataccess.dataccess.TableData;
 import space.sadfox.dataccess.dataccess.TableDataController;
+import space.sadfox.dataccess.dataccess.TableDataDao;
 import space.sadfox.dataccess.filter.TableDataFilter;
 import space.sadfox.dataccess.view.TableViewForTableData;
 import space.sadfox.owlook.jaxb.EntityChangeListener;
@@ -31,24 +28,22 @@ public class TableViewerTab extends Tab {
 	private TableViewer tableViewer;
 	private TableViewerDao tableViewerDao;
 
-	private ActionController leftToolPane;
-	private TabPane rightToolTabPane;
-	private Menu menu;
+	private ActionController actionsNode;
+	private ViewsTab viewsNode;
+	private FiltersTab filtersNode;
 
-	private FiltersTab filtersTab;
+	private Menu menu;
 
 	private TableViewForTableData tableDataViewTable;
 
 	public TableViewerTab(TableViewer tableViewer) {
 		this.tableViewer = tableViewer;
 
-		filtersTab = new FiltersTab(this);
+		filtersNode = new FiltersTab(this);
+		viewsNode = new ViewsTab(this);
 
-		rightToolTabPane = new TabPane();
-		rightToolTabPane.getTabs().add(new ViewsTab(this));
-		rightToolTabPane.getTabs().add(filtersTab);
 		try {
-			leftToolPane = new ActionController(this);
+			actionsNode = new ActionController(this);
 		} catch (IOException e) {
 			ErrorLogger.registerException(e);
 		}
@@ -57,39 +52,45 @@ public class TableViewerTab extends Tab {
 	}
 
 	private void initializ() {
-		rightToolTabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
-		rightToolTabPane.setSide(Side.TOP);
-		
-		EntityChangeListener<TableData.Change> tableDataChangeListener = change -> {
-			if (change.wasDataUpdate()) {
-				reloadCurrentData();
+
+		EntityChangeListener tableDataChangeListener = change -> {
+			if (change instanceof TableData.Change) {
+				TableData.Change tdchange = (TableData.Change) change;
+				if (tdchange.wasDataUpdate()) {
+					reloadCurrentData();
+				}
 			}
 		};
 		
-		getTableViewer().addEntityChangeListener((EntityChangeListener<TableViewer.Change>)change -> {
-			if (change.wasTableDataChange()) {
-				try {
-					change.getOldTableData().removeEntityChangeListener(tableDataChangeListener);
-				} catch (Nullable e) {}
-				change.getNewTableData().addEntityChangeListener(tableDataChangeListener);
-				reloadCurrentData();
-			}
-		});
-		
 		try {
-			getTableViewerDao().getTableData();
+			getTableViewerDao().getTableData().addEntityChangeListener(tableDataChangeListener);
 		} catch (Nullable e) {
-
 		}
 
-		if (filtersTab.getSelectedTableDataFilter() != null) {
-			TableDataFilter selectFilter = filtersTab.getSelectedTableDataFilter();
+		getTableViewer().tableDataConnectionProperty().addListener((property, oldValue, newValue) -> {
+			if (oldValue != null && TableDataDao.existTableData(oldValue)) {
+				try {
+					TableDataDao.loadTableData(oldValue).removeEntityChangeListener(tableDataChangeListener);
+				} catch (IOException | JAXBException e) {}
+			}
+			if (newValue != null && TableDataDao.existTableData(newValue)) {
+				try {
+					TableDataDao.loadTableData(newValue).addEntityChangeListener(tableDataChangeListener);
+				} catch (IOException | JAXBException e) {}
+			}
+			reloadCurrentData();
+		});
+
+		
+
+		if (filtersNode.getSelectedTableDataFilter() != null) {
+			TableDataFilter selectFilter = filtersNode.getSelectedTableDataFilter();
 			this.textProperty()
 					.bind(Bindings.concat(tableViewer.titleProperty(), "[", selectFilter.titleProperty(), "]"));
 		} else {
 			this.textProperty().bind(tableViewer.titleProperty());
 		}
-		filtersTab.selectedTableDataFilterProperty().addListener((property, oldValue, newValue) -> {
+		filtersNode.selectedTableDataFilterProperty().addListener((property, oldValue, newValue) -> {
 			this.textProperty().unbind();
 			if (newValue != null) {
 				this.textProperty()
@@ -120,12 +121,16 @@ public class TableViewerTab extends Tab {
 		return tableViewerDao;
 	}
 
-	public Node getRightToolsNode() {
-		return rightToolTabPane;
+	public Node getViewsNode() {
+		return viewsNode;
 	}
 
-	public Node getLeftToolsNode() {
-		return leftToolPane.getParent();
+	public Node getFiltersNode() {
+		return filtersNode;
+	}
+
+	public Node getActionsNode() {
+		return actionsNode.getParent();
 	}
 
 	public Menu getMenu() {
@@ -168,9 +173,9 @@ public class TableViewerTab extends Tab {
 		}
 		return menu;
 	}
-	
+
 	public void reloadCurrentData() {
-		filtersTab.reloadData();
+		filtersNode.reloadData();
 	}
 
 }

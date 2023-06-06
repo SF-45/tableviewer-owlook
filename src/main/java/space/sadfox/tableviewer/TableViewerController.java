@@ -4,13 +4,16 @@ import java.io.IOException;
 
 import javafx.beans.InvalidationListener;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.Tab;
@@ -18,6 +21,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Region;
 import space.sadfox.dataccess.dataccess.TableData;
 import space.sadfox.owlook.jaxb.EntityChangeListener;
 import space.sadfox.owlook.jaxb.EntityLoader;
@@ -27,35 +31,40 @@ import space.sadfox.tableviewer.ui.TableViewerTab;
 
 public class TableViewerController extends Controller {
 
-	@FXML
-	private BorderPane leftToolPane;
-
-	@FXML
-	private MenuItem openIndex;
-
-	@FXML
-	private BorderPane rightToolPane;
-
-	@FXML
-	private Button searchButton;
-
-	@FXML
-	private TextField searchField;
-
-	@FXML
-	private MenuItem settings;
-
-	@FXML
-	private TabPane tableTabPane;
-
-	@FXML
-	private Menu tablesMenu;
-
-	@FXML
-	private MenuBar menuBar;
 	
-	@FXML
+
+    @FXML
+    private BorderPane actionsRoot;
+
+    @FXML
+    private MenuBar menuBar;
+
+    @FXML
+    private MenuItem openIndex;
+
+    @FXML
+    private Button searchButton;
+
+    @FXML
+    private TextField searchField;
+
+    @FXML
     private Label searchHistory;
+
+    @FXML
+    private MenuItem settings;
+
+    @FXML
+    private TabPane tableTabPane;
+
+    @FXML
+    private Menu tablesMenu;
+
+    @FXML
+    private ScrollPane viewsRoot;
+    
+    @FXML
+    private ScrollPane filtersRoot;
 
 	public TableViewerController() throws IOException {
 		super(TableViewer.class.getResource("fxml/main-scene.fxml"));
@@ -68,8 +77,9 @@ public class TableViewerController extends Controller {
 
 		tableTabPane.getTabs().addListener((InvalidationListener) listner -> {
 			if (tableTabPane.getTabs().size() == 0) {
-				leftToolPane.setCenter(null);
-				rightToolPane.setCenter(null);
+				actionsRoot.setCenter(null);
+				viewsRoot.setContent(null);
+				filtersRoot.setContent(null);
 				removeTVMenu();
 			}
 		});
@@ -109,6 +119,28 @@ public class TableViewerController extends Controller {
 			} catch (Nullable e) {}
 		});
 		
+		viewsRoot.contentProperty().addListener((property, oldValue, newValue) -> {
+			if (oldValue != null || oldValue instanceof Parent) {
+				((Region) oldValue).prefWidthProperty().unbind();
+				((Region) oldValue).prefHeightProperty().unbind();
+			}
+			if (newValue != null || newValue instanceof Parent) {
+				((Region) newValue).prefWidthProperty().bind(viewsRoot.widthProperty().subtract(5));
+				((Region) newValue).prefHeightProperty().bind(viewsRoot.heightProperty().subtract(5));
+			}
+		});
+		
+		filtersRoot.contentProperty().addListener((property, oldValue, newValue) -> {
+			if (oldValue != null || oldValue instanceof Parent) {
+				((Region) oldValue).prefWidthProperty().unbind();
+				((Region) oldValue).prefHeightProperty().unbind();
+			}
+			if (newValue != null || newValue instanceof Parent) {
+				((Region) newValue).prefWidthProperty().bind(filtersRoot.widthProperty().subtract(5));
+				((Region) newValue).prefHeightProperty().bind(filtersRoot.heightProperty().subtract(5));
+			}
+		});
+		
 		
 		
 		
@@ -136,8 +168,10 @@ public class TableViewerController extends Controller {
 
 			tableViewerTab.setOnSelectionChanged(tabEvent -> {
 				if (tableViewerTab.isSelected()) {
-					leftToolPane.setCenter(tableViewerTab.getLeftToolsNode());
-					rightToolPane.setCenter(tableViewerTab.getRightToolsNode());
+					actionsRoot.setCenter(tableViewerTab.getActionsNode());
+					viewsRoot.setContent(tableViewerTab.getViewsNode());
+					filtersRoot.setContent(tableViewerTab.getFiltersNode());
+					
 					removeTVMenu();
 					menuBar.getMenus().add(tableViewerTab.getMenu());
 					searchHistory.textProperty().bind(tableViewerTab.getTableDataViewTable().searchTextHistoryProperty());

@@ -12,15 +12,11 @@ import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionMode;
-import javafx.scene.control.Tab;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Modality;
 import space.sadfox.dataccess.filter.TableDataFilter;
-import space.sadfox.dataccess.filter.TableDataFilterController;
 import space.sadfox.dataccess.filter.TableDataFilterDao;
 import space.sadfox.owlook.jaxb.EntityLoader;
-import space.sadfox.owlook.jaxb.JAXBEntity;
-import space.sadfox.owlook.ui.tools.EntityManager;
 import space.sadfox.owlook.ui.tools.OpenEntityDialog;
 import space.sadfox.owlook.utils.ErrorLogger;
 import space.sadfox.owlook.utils.Nullable;
@@ -28,17 +24,14 @@ import space.sadfox.tableviewer.ui.TableViewerTab;
 import space.sadfox.tableviewer.ui.base.ButtonList;
 import space.sadfox.tableviewer.ui.base.FilterToggleButton;
 
-public class FiltersTab extends Tab {
+public class FiltersTab extends ButtonList {
 
 	private ToggleGroup toggleGroup;
 	private TableViewerTab tableViewerTab;
-	private ButtonList buttonList;
 	
 	private ObjectProperty<TableDataFilter> selectedTableDataFilter;
 
 	public FiltersTab(TableViewerTab tableViewerTab) {
-		super("Filters");
-		
 		
 		this.tableViewerTab = tableViewerTab;
 		toggleGroup = new ToggleGroup();
@@ -68,10 +61,7 @@ public class FiltersTab extends Tab {
 		});
 
 		ContextMenu contextMenu = new ContextMenu();
-		getButtonList().setContextMenu(contextMenu);
-		this.tabPaneProperty().addListener((property, oldValue, newValue) -> {
-			getButtonList().setContextMenuHideProperty(newValue.focusedProperty());
-		});
+		setContextMenu(contextMenu);
 
 		MenuItem createFilter = new MenuItem("Create Filter");
 		createFilter.setOnAction(event -> {
@@ -132,7 +122,7 @@ public class FiltersTab extends Tab {
 			} catch (Nullable e) {}
 			setSelectedTableDataFilter(filter);
 		});
-		if (getButtonList().getChildren().size() == 0) {
+		if (getChildren().size() == 0) {
 			button.fire();
 		}
 
@@ -172,9 +162,9 @@ public class FiltersTab extends Tab {
 		contextMenu.getItems().add(delete);
 
 		if (ind < 0)
-			getButtonList().getChildren().add(button);
+			getChildren().add(button);
 		else
-			getButtonList().getChildren().add(ind, button);
+			getChildren().add(ind, button);
 	}
 
 	private void addFilter(TableDataFilter filter) {
@@ -182,7 +172,7 @@ public class FiltersTab extends Tab {
 	}
 
 	private void deleteFilter(String filterFileName) {
-		var btnList = getButtonList().getChildren();
+		var btnList = getChildren();
 		for (int i = 0; i < btnList.size(); i++) {
 			Node node = btnList.get(i);
 			if (node instanceof FilterToggleButton) {
@@ -193,14 +183,6 @@ public class FiltersTab extends Tab {
 				}
 			}
 		}
-	}
-
-	private ButtonList getButtonList() {
-		if (buttonList == null) {
-			buttonList = new ButtonList();
-			this.setContent(buttonList);
-		}
-		return buttonList;
 	}
 	
 	public TableDataFilter getSelectedTableDataFilter() {
