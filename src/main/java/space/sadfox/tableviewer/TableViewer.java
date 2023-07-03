@@ -11,32 +11,35 @@ import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import space.sadfox.dataccess.action.ActionEntity;
-import space.sadfox.dataccess.action.ActionEntityDao;
-import space.sadfox.dataccess.dataccess.TableDataDao;
+import space.sadfox.dataccess.dataccess.TableData;
+import space.sadfox.dataccess.dataccess.TableDataAdapter;
 import space.sadfox.dataccess.filter.TableDataFilter;
+import space.sadfox.dataccess.filter.TableDataFilterAdapter;
 import space.sadfox.dataccess.view.TableDataView;
-import space.sadfox.owlook.components.logger.LogLevel;
+import space.sadfox.dataccess.view.TableDataViewAdapter;
 import space.sadfox.owlook.jaxb.EntityLoader;
 import space.sadfox.owlook.jaxb.JAXBEntity;
 import space.sadfox.owlook.ui.base.Controller;
-import space.sadfox.owlook.utils.ErrorLogger;
-import space.sadfox.owlook.utils.LoggerMessage;
+import space.sadfox.owlook.utils.Nullable;
 
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement
 public class TableViewer extends JAXBEntity {
 
-	private StringProperty title = new SimpleStringProperty("");
-	private StringProperty tableDataConnection = new SimpleStringProperty();
-	private ObservableList<String> tableDataFilters = FXCollections.observableArrayList();;
-	private ObservableList<String> tableDataViews = FXCollections.observableArrayList();;
-	private ObservableList<ActionDecorator> actionDecorators = FXCollections.observableArrayList();;
-
+	private volatile StringProperty title = new SimpleStringProperty("");
+	private volatile ObjectProperty<TableData> tableData = new SimpleObjectProperty<>();
+	private final ObservableList<TableDataFilter> tableDataFilters = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
+	private final ObservableList<TableDataView> tableDataViews = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
+	private final ObservableList<ActionDecorator> actionDecorators = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
+	
 	@XmlAttribute(name = "title")
 	public String getTitle() {
 		return titleProperty().get();
@@ -50,36 +53,46 @@ public class TableViewer extends JAXBEntity {
 		return title;
 	}
 
-	@XmlElement(name = "TableDataConnection")
-	public String getTableDataConnection() {
-		return tableDataConnectionProperty().get();
+	@XmlElement(name = "TableData")
+	@XmlJavaTypeAdapter(TableDataAdapter.class)
+	private TableData getTableDataInner() {
+		return tableDataProperty().get();
+	}
+	
+	public TableData getTableData() throws Nullable {
+		if (tableDataProperty().get() == null) {
+			throw new Nullable();
+		}
+		return tableDataProperty().get();
 	}
 
-	public void setTableDataConnection(String tableDataConnection) {
-		tableDataConnectionProperty().set(tableDataConnection);
+	public void setTableData(TableData tableData) {
+		tableDataProperty().set(tableData);
 	}
 
-	public StringProperty tableDataConnectionProperty() {
-		return tableDataConnection;
+	public ObjectProperty<TableData> tableDataProperty() {
+		return tableData;
 	}
 
 	@XmlElementWrapper(name = "TableDataFilters")
 	@XmlElement(name = "Filter")
-	public List<String> getTableDataFilters() {
+	@XmlJavaTypeAdapter(TableDataFilterAdapter.class)
+	public List<TableDataFilter> getTableDataFilters() {
 		return tableDataFiltersProperty();
 	}
 
-	public ObservableList<String> tableDataFiltersProperty() {
+	public ObservableList<TableDataFilter> tableDataFiltersProperty() {
 		return tableDataFilters;
 	}
 
 	@XmlElementWrapper(name = "TableDataViews")
 	@XmlElement(name = "View")
-	public List<String> getTableDataViews() {
+	@XmlJavaTypeAdapter(TableDataViewAdapter.class)
+	public List<TableDataView> getTableDataViews() {
 		return tableDataViewsProperty();
 	}
 
-	public ObservableList<String> tableDataViewsProperty() {
+	public ObservableList<TableDataView> tableDataViewsProperty() {
 		return tableDataViews;
 	}
 
@@ -95,7 +108,7 @@ public class TableViewer extends JAXBEntity {
 
 	@Override
 	public List<Object> getProperties() {
-		return Arrays.asList(title, tableDataConnection, tableDataFilters, tableDataViews, actionDecorators);
+		return Arrays.asList(title, tableData, tableDataFilters, tableDataViews, actionDecorators);
 	}
 
 	@Override
@@ -107,74 +120,84 @@ public class TableViewer extends JAXBEntity {
 	public void initialize() {
 		EntityLoader.INSTANCE.addDeleteChangeListener(entity -> {
 			if (entity.getClass().equals(TableDataFilter.class)) {
-				getTableDataFilters().remove(entity.getFileName());
+				getTableDataFilters().remove(entity);
 			} else if (entity.getClass().equals(TableDataView.class)) {
-				getTableDataViews().remove(entity.getFileName());
+				getTableDataViews().remove(entity);
 			} else if (entity.getClass().equals(ActionEntity.class)) {
 				getActionDecorators()
-						.removeIf(actionDecrator -> actionDecrator.getAction().equals(entity.getFileName()));
+						.removeIf(actionDecrator -> actionDecrator.getAction().equals(entity));
 			}
 		});
+		
 
 	}
 
 	@Override
 	public void validate() {
-		validateFilters();
-		validateViews();
-		validateActions();
-		validateData();
-	}
-
-	private void validateViews() {
-		checkExist(getTableDataViews(), TableDataView.class, "TableViewerValidation: " + getFileName(),
-				"View not exist");
-	}
-
-	private void validateFilters() {
-		checkExist(getTableDataFilters(), TableDataFilter.class, "TableViewerValidation: " + getFileName(),
-				"Filter not exist");
-	}
-
-	private void validateActions() {
 		for (int i = 0; i < getActionDecorators().size(); i++) {
-			String fileName = getActionDecorators().get(i).getAction();
-			if (!ActionEntityDao.existActionEntity(fileName)) {
-				LoggerMessage loggerMessage = new LoggerMessage(LogLevel.WARNING);
-				loggerMessage.setName("TableViewerValidation: " + getFileName());
-				loggerMessage.setMessage("Action not exist" + ": " + fileName);
-				ErrorLogger.registerMessage(loggerMessage);
+			if (getActionDecorators().get(i).getAction() == null) {
 				getActionDecorators().remove(i);
 				i--;
 			}
 		}
+		
+		
+//		validateFilters();
+//		validateViews();
+//		validateActions();
+//		validateData();
 	}
 
-	private void validateData() {
-		if (getTableDataConnection() != null) {
-			if (!TableDataDao.existTableData(getTableDataConnection())) {
-				LoggerMessage loggerMessage = new LoggerMessage(LogLevel.WARNING);
-				loggerMessage.setName("TableViewerValidation: " + getFileName());
-				loggerMessage.setMessage("TableData not exist " + getTableDataConnection());
-				ErrorLogger.registerMessage(loggerMessage);
-				setTableDataConnection(null);
-			}
-		}
-	}
-
-	private void checkExist(List<String> files, Class<? extends JAXBEntity> target, String name, String message) {
-		for (int i = 0; i < files.size(); i++) {
-			String fileName = files.get(i);
-			if (!EntityLoader.INSTANCE.entityExist(fileName, target)) {
-				LoggerMessage loggerMessage = new LoggerMessage(LogLevel.WARNING);
-				loggerMessage.setName(name);
-				loggerMessage.setMessage(message + ": " + fileName);
-				ErrorLogger.registerMessage(loggerMessage);
-				files.remove(i);
-				i--;
-			}
-		}
-	}
+//	private void validateViews() {
+//		checkExist(getTableDataViews(), TableDataView.class, "TableViewerValidation: " + getFileName(),
+//				"View not exist");
+//	}
+//
+//	private void validateFilters() {
+//		checkExist(getTableDataFilters(), TableDataFilter.class, "TableViewerValidation: " + getFileName(),
+//				"Filter not exist");
+//	}
+//
+//	private void validateActions() {
+//		for (int i = 0; i < getActionDecorators().size(); i++) {
+//			String fileName = getActionDecorators().get(i).getAction();
+//			if (!ActionEntityDao.existActionEntity(fileName)) {
+//				LoggerMessage loggerMessage = new LoggerMessage(LogLevel.WARNING);
+//				loggerMessage.setName("TableViewerValidation: " + getFileName());
+//				loggerMessage.setMessage("Action not exist" + ": " + fileName);
+//				ErrorLogger.registerMessage(loggerMessage);
+//				getActionDecorators().remove(i);
+//				i--;
+//			}
+//		}
+//	}
+//
+//	private void validateData() {
+//		if (getTableData() == null) {
+//			if (!TableDataDao.existTableData(getTableDataConnection())) {
+//				LoggerMessage loggerMessage = new LoggerMessage(LogLevel.WARNING);
+//				loggerMessage.setName("TableViewerValidation: " + getFileName());
+//				loggerMessage.setMessage("TableData not exist " + getTableDataConnection());
+//				ErrorLogger.registerMessage(loggerMessage);
+//				setTableDataConnection(null);
+//			}
+//		}
+//		//TODO: Перенести в адаптер
+//	}
+//
+//	private void checkExist(List<String> files, Class<? extends JAXBEntity> target, String name, String message) {
+//		for (int i = 0; i < files.size(); i++) {
+//			String fileName = files.get(i);
+//			if (!EntityLoader.INSTANCE.entityExist(fileName, target)) {
+//				LoggerMessage loggerMessage = new LoggerMessage(LogLevel.WARNING);
+//				loggerMessage.setName(name);
+//				loggerMessage.setMessage(message + ": " + fileName);
+//				ErrorLogger.registerMessage(loggerMessage);
+//				files.remove(i);
+//				i--;
+//			}
+//		}
+//	}
 
 	@Override
 	public Controller getConfigController() throws IOException {
@@ -184,25 +207,29 @@ public class TableViewer extends JAXBEntity {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder("TableViewer: " + getTitle() + "\n");
-		builder.append("TableData: " + getTableDataConnection() + "\n\n");
+		try {
+			builder.append("TableData: " + getTableData().getTitle() + "\n\n");
+		} catch (Nullable e) {
+			builder.append("TableData: Indefined\n\n");
+		}
 
 		builder.append("Filters:\n");
 		getTableDataFilters().forEach(s -> {
-			builder.append("\t" + s + "\n");
+			builder.append("\t" + s.getTitle() + "\n");
 		});
 
 		builder.append("\n");
 
 		builder.append("Views:\n");
 		getTableDataViews().forEach(s -> {
-			builder.append("\t" + s + "\n");
+			builder.append("\t" + s.getTitle() + "\n");
 		});
 
 		builder.append("\n");
 
 		builder.append("Actions:\n");
 		getActionDecorators().forEach(action -> {
-			builder.append("\t" + action.getAction());
+			builder.append("\t" + action.getAction().getTitle());
 			builder.append(
 					" [" + action.getTags().stream().map(p -> p.get()).collect(Collectors.joining(", ")) + "]\n");
 
@@ -219,7 +246,9 @@ public class TableViewer extends JAXBEntity {
 		TableViewer tv = (TableViewer) entity;
 
 		setTitle(tv.getTitle());
-		setTableDataConnection(tv.getTableDataConnection());
+		try {
+			setTableData(tv.getTableData());
+		} catch (Nullable e) {}
 		getTableDataFilters().clear();
 		getTableDataFilters().addAll(tv.getTableDataFilters());
 

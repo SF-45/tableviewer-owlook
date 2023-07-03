@@ -14,15 +14,15 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Modality;
+import space.sadfox.dataccess.dataccess.DataEntity;
 import space.sadfox.dataccess.filter.TableDataFilter;
-import space.sadfox.dataccess.filter.TableDataFilterDao;
+import space.sadfox.dataccess.filter.TableDataFilters;
 import space.sadfox.owlook.jaxb.EntityLoader;
 import space.sadfox.owlook.ui.tools.OpenEntityDialog;
 import space.sadfox.owlook.utils.ErrorLogger;
 import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 import space.sadfox.tableviewer.ui.base.ButtonList;
-import space.sadfox.tableviewer.ui.base.FilterToggleButton;
 
 public class FiltersTab extends ButtonList {
 
@@ -36,25 +36,18 @@ public class FiltersTab extends ButtonList {
 		this.tableViewerTab = tableViewerTab;
 		toggleGroup = new ToggleGroup();
 		
-		getTableViewerTab().getTableViewerDao().getFilters().forEach(this::addFilter);
-		getTableViewerTab().getTableViewer().tableDataFiltersProperty().addListener((ListChangeListener<String>) change -> {
+		getTableViewerTab().getTableViewer().getTableDataFilters().forEach(this::addFilter);
+		getTableViewerTab().getTableViewer().tableDataFiltersProperty().addListener((ListChangeListener<TableDataFilter>) change -> {
 			while (change.next()) {
 				if (change.wasAdded()) {
-					change.getAddedSubList().forEach(filterFileName -> {
-						int ind = getTableViewerTab().getTableViewer().getTableDataFilters().indexOf(filterFileName);
-						try {
-							TableDataFilter newTableDataFilter = TableDataFilterDao.loadTableDataFilter(filterFileName);
-							if (newTableDataFilter != null) {
-								addFilter(ind, newTableDataFilter);
-							}
-						} catch (IOException | JAXBException e) {
-							ErrorLogger.registerException(e);
-						}
+					change.getAddedSubList().forEach(filter -> {
+						int ind = getTableViewerTab().getTableViewer().getTableDataFilters().indexOf(filter);
+						addFilter(ind, filter);
 					});
 				}
 				if (change.wasRemoved()) {
-					change.getRemoved().forEach(filterFileName -> {
-						deleteFilter(filterFileName);
+					change.getRemoved().forEach(filter -> {
+						deleteFilter(filter);
 					});
 				}
 			}
@@ -65,10 +58,10 @@ public class FiltersTab extends ButtonList {
 
 		MenuItem createFilter = new MenuItem("Create Filter");
 		createFilter.setOnAction(event -> {
-			TableDataFilter newFilter = TableDataFilterDao.createTableDataFilter();
+			TableDataFilter newFilter = TableDataFilters.createTableDataFilter();
 			if (newFilter == null) return;
 			newFilter.setTitle("New Filter");
-			getTableViewerTab().getTableViewerDao().addFilter(newFilter);
+			getTableViewerTab().getTableViewer().getTableDataFilters().add(newFilter);
 			editFilter(newFilter);
 		});
 		contextMenu.getItems().add(createFilter);
@@ -79,13 +72,13 @@ public class FiltersTab extends ButtonList {
 				OpenEntityDialog<TableDataFilter> openDialog = new OpenEntityDialog<>(
 						TableDataFilter.class,
 						SelectionMode.MULTIPLE,
-						getTableViewerTab().getTableViewerDao().getFilters()
+						getTableViewerTab().getTableViewer().getTableDataFilters()
 						);
 				
 				openDialog.setModality(Modality.APPLICATION_MODAL);
 				openDialog.showAndWait();
 				if (openDialog.isOpened()) {
-					openDialog.getOpenned().forEach(f -> getTableViewerTab().getTableViewerDao().addFilter(f));
+					openDialog.getOpenned().forEach(f -> getTableViewerTab().getTableViewer().getTableDataFilters().add(f));
 				}
 			} catch (IOException e) {
 				ErrorLogger.registerException(e);
@@ -114,9 +107,8 @@ public class FiltersTab extends ButtonList {
 		button.setToggleGroup(toggleGroup);
 		button.setOnAction(event -> {
 			try {
-				getTableViewerTab().getTableDataViewTable().setItems(
-						FXCollections.observableArrayList(getTableViewerTab().getTableViewerDao().getFilterDao(filter).getDataEntities()));
-				
+			DataEntity[] dataEntities = TableDataFilters.getDataEntities(filter, getTableViewerTab().getTableData());
+			getTableViewerTab().getTableDataViewTable().setItems(FXCollections.observableArrayList(dataEntities));
 			} catch (JAXBException e) {
 				ErrorLogger.registerException(e);
 			} catch (Nullable e) {}
@@ -139,7 +131,7 @@ public class FiltersTab extends ButtonList {
 		duplicate.setOnAction(event -> {
 			try {
 				TableDataFilter newFilter = EntityLoader.INSTANCE.duplicateEntity(filter);
-				getTableViewerTab().getTableViewerDao().addFilter(newFilter);
+				getTableViewerTab().getTableViewer().getTableDataFilters().add(filter);
 				editFilter(newFilter);
 			} catch (JAXBException | IOException e) {
 				ErrorLogger.registerException(e);
@@ -149,14 +141,14 @@ public class FiltersTab extends ButtonList {
 
 		MenuItem close = new MenuItem("Close Filter");
 		close.setOnAction(event -> {
-			getTableViewerTab().getTableViewerDao().removeFilter(filter);
+			getTableViewerTab().getTableViewer().getTableDataFilters().remove(filter);
 		});
 		contextMenu.getItems().add(close);
 
 		MenuItem delete = new MenuItem("Delete Filter");
 		delete.setOnAction(event -> {
-			if (TableDataFilterDao.deleteTableDataFiter(filter)) {
-				getTableViewerTab().getTableViewerDao().removeFilter(filter);
+			if (TableDataFilters.deleteTableDataFiter(filter)) {
+				getTableViewerTab().getTableViewer().getTableDataFilters().remove(filter);
 			}
 		});
 		contextMenu.getItems().add(delete);
@@ -171,13 +163,13 @@ public class FiltersTab extends ButtonList {
 		addFilter(-1, filter);
 	}
 
-	private void deleteFilter(String filterFileName) {
+	private void deleteFilter(TableDataFilter filter) {
 		var btnList = getChildren();
 		for (int i = 0; i < btnList.size(); i++) {
 			Node node = btnList.get(i);
 			if (node instanceof FilterToggleButton) {
 				FilterToggleButton filterButton = (FilterToggleButton) node;
-				if (filterButton.getFilter().getFileName().equals(filterFileName)) {
+				if (filterButton.getFilter().equals(filter)) {
 					btnList.remove(i);
 					return;
 				}
@@ -206,7 +198,7 @@ public class FiltersTab extends ButtonList {
 	
 	private void editFilter(TableDataFilter tableDataFilter) {
 		try {
-			tableDataFilter.getConfigController(getTableViewerTab().getTableViewerDao().getTableData()).show();
+			tableDataFilter.getConfigController(getTableViewerTab().getTableViewer().getTableData()).show();
 		} catch (IOException e) {
 			ErrorLogger.registerException(e);
 		} catch (Nullable e) {

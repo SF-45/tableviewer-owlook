@@ -2,15 +2,14 @@ package space.sadfox.tableviewer;
 
 import java.io.IOException;
 
-import jakarta.xml.bind.JAXBException;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import space.sadfox.dataccess.dataccess.TableData;
-import space.sadfox.dataccess.dataccess.TableDataController;
 import space.sadfox.dataccess.dataccess.TableDataDao;
+import space.sadfox.owlook.jaxb.EntityChangeListener;
 import space.sadfox.owlook.ui.base.Controller;
 import space.sadfox.owlook.ui.tools.OpenEntityDialog;
 import space.sadfox.owlook.utils.ErrorLogger;
@@ -34,7 +33,6 @@ public class TableViewerEditController extends Controller {
 	private TextField titleTaxtField;
 
 	private TableViewer tableViewer;
-	private TableViewerDao tableViewerDao;
 
 	public TableViewerEditController(TableViewer tableViewer) throws IOException {
 		super(ResourceTarget.class.getResource("fxml/edit-tableviewer.fxml"));
@@ -48,26 +46,31 @@ public class TableViewerEditController extends Controller {
 		titleTaxtField.setText(getTableViewer().getTitle());
 		titleTaxtField.textProperty().bindBidirectional(getTableViewer().titleProperty());
 
-		getTableViewer().tableDataConnectionProperty().addListener(change -> {
+		EntityChangeListener tbListener = change -> {
+			if (change.wasModify()) {
+				refreshTableData();
+			}
+		};
+		
+		getTableViewer().tableDataProperty().addListener((property, oldValue, newValue) -> {
 			refreshTableData();
-			try {
-				getTableViewerDao().getTableData().addEntityChangeListener(changeEntity -> {
-					if (changeEntity.wasModify()) {
-						refreshTableData();
-					}
-				});
-			} catch (Nullable e) {}
+			if (oldValue != null) {
+				oldValue.removeEntityChangeListener(tbListener);
+			}
+			if (newValue != null) {
+				newValue.addEntityChangeListener(tbListener);
+			}
 		});
 		refreshTableData();
 
 		createTableDataButton.setOnAction(event -> {
 			TableData newTableData = TableDataDao.createTableData();
-			getTableViewerDao().setTableData(newTableData);
+			getTableViewer().setTableData(newTableData);
 		});
 
 		editTableData.setOnAction(event -> {
 			try {
-				new TableDataController(getTableViewerDao().getTableData()).show();
+				getTableViewer().getTableData().getConfigController().show();
 			} catch (IOException e) {
 				ErrorLogger.registerException(e);
 			} catch (Nullable e) {}
@@ -78,7 +81,7 @@ public class TableViewerEditController extends Controller {
 				OpenEntityDialog<TableData> openEntityDialog = new OpenEntityDialog<>(TableData.class, SelectionMode.SINGLE);
 				openEntityDialog.showAndWait();
 				if (openEntityDialog.isOpened()) {
-					getTableViewerDao().setTableData(openEntityDialog.getOpenned().get(0));
+					getTableViewer().setTableData(openEntityDialog.getOpenned().get(0));
 				}
 			} catch (IOException e) {
 				ErrorLogger.registerException(e);
@@ -91,17 +94,12 @@ public class TableViewerEditController extends Controller {
 		return tableViewer;
 	}
 
-	private TableViewerDao getTableViewerDao() {
-		if (tableViewerDao == null) {
-			tableViewerDao = new TableViewerDao(getTableViewer());
-		}
-		return tableViewerDao;
-	}
-
 	private void refreshTableData() {
 		try {
-			previewTextArea.setText(getTableViewerDao().getTableData().toString());
-		} catch (Nullable e) {}
+			previewTextArea.setText(getTableViewer().getTableData().toString());
+		} catch (Nullable e) {
+			previewTextArea.setText("");
+		}
 
 	}
 

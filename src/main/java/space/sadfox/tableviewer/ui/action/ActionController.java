@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.util.stream.Collectors;
 
 import jakarta.xml.bind.JAXBException;
-import javafx.beans.InvalidationListener;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -18,23 +19,88 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
+import space.sadfox.dataccess.action.ActionEntities;
 import space.sadfox.dataccess.action.ActionEntity;
-import space.sadfox.dataccess.action.ActionEntityDao;
 import space.sadfox.dataccess.action.ActionProvider;
 import space.sadfox.owlook.ui.base.Controller;
 import space.sadfox.owlook.ui.tools.OpenEntityDialog;
 import space.sadfox.owlook.utils.ErrorLogger;
-import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.tableviewer.ActionDecorator;
+import space.sadfox.tableviewer.ActionDecoratorsCollector;
 import space.sadfox.tableviewer.TableViewerProvider;
+import space.sadfox.tableviewer.TableViewers;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 import space.sadfox.tableviewer.ui.base.ButtonList;
+import space.sadfox.tableviewer.ui.base.GroupAccordion;
 
-/* TODO:
- * Провести рефакторинг имён переменных
- * 
- * */
 public class ActionController extends Controller {
+
+	private class ActionDecoratorButtonList extends ButtonList {
+
+		final ObservableList<ActionButton> buttons = FXCollections.observableArrayList();
+		String currentFilter = "";
+
+		ActionDecoratorButtonList() {
+			init();
+			getActionDecorators().forEach(this::createActionButton);
+			getActionDecorators().addListener((ListChangeListener<ActionDecorator>) change -> {
+				while (change.next()) {
+					if (change.wasAdded()) {
+						change.getAddedSubList().forEach(this::createActionButton);
+					}
+					if (change.wasRemoved()) {
+						change.getRemoved().forEach(this::removeActionButton);
+					}
+				}
+			});
+			
+		}
+		
+		void init() {
+			setSortComparator((node1, node2) -> {
+				if (node1 instanceof ActionButton && node2 instanceof ActionButton) {
+					String buttonName1 = ((ActionButton) node1).getActionEntity().getTitle();
+					String buttonName2 = ((ActionButton) node2).getActionEntity().getTitle();
+					return buttonName1.compareToIgnoreCase(buttonName2);
+				} else {
+					return -1;
+				}
+			});
+		}
+
+		void createActionButton(ActionDecorator actionDecorator) {
+			buttons.add(new ActionButton(actionDecorator, getTableViewerTab()));
+			filtred();
+		}
+		
+		void removeActionButton(ActionDecorator actionDecorator) {
+			for (int i = 0; i < buttons.size(); i++) {
+				ActionButton actionButton = buttons.get(i);
+				if (actionButton.getActionDecorator().equals(actionDecorator)) {
+					buttons.remove(i);
+					i--;
+				}
+			}
+			filtred();
+		}
+
+		void setFilter(String filter) {
+			currentFilter = filter;
+			filtred();
+		}
+		
+		void filtred() {
+			getChildren().clear();
+			if (currentFilter.equals("")) {
+				addAllAndSort(buttons);
+			} else {
+				var filtredButtons = buttons.stream().filter(but -> but.getActionEntity().getTitle().toLowerCase()
+						.contains(serachTextBox.getText().toLowerCase())).collect(Collectors.toList());
+				addAllAndSort(filtredButtons);
+			}
+		}
+
+	}
 
 	@FXML
 	private MenuButton menuNewAction;
@@ -57,49 +123,61 @@ public class ActionController extends Controller {
 	@FXML
 	private TextField serachTextBox;
 
-	private ObservableList<ActionButton> actionButtons;
 	private TableViewerTab tableViewerTab;
-	private ActionAccordion actionAccordion;
-	private ButtonList buttonList;
-	private ToggleGroup toggleGroup;
+	private ObservableList<ActionDecorator> actionDecorators;
+
+	private final ToggleGroup toggleGroup = new ToggleGroup();
+
+	private GroupAccordion<ActionDecorator, StringProperty> tagAccordion;
+	private GroupAccordion<ActionDecorator, String> providerAccordion;
+	private ActionDecoratorButtonList actionDecoratorButtonList;
+
+	private final ActionDecoratorsCollector actionDecoratorsCollector;
 
 	public ActionController(TableViewerTab tableViewerTab) throws IOException {
 		super(TableViewerProvider.class.getResource("fxml/acion-pane.fxml"));
 		this.tableViewerTab = tableViewerTab;
+		actionDecoratorsCollector = new ActionDecoratorsCollector(tableViewerTab.getTableViewer());
 
-		actionAccordion = new ActionAccordion(tableViewerTab);
-		actionAccordion.showByTag();
-		buttonList = new ButtonList();
-		buttonList.setSorted((node1, node2) -> {
-			if (node1 instanceof ActionButton && node2 instanceof ActionButton) {
-				String buttonName1 = ((ActionButton) node1).getActionEntity().getTitle();
-				String buttonName2 = ((ActionButton) node2).getActionEntity().getTitle();
-				return buttonName1.compareToIgnoreCase(buttonName2);
+		initializ();
+
+	}
+
+	private void initializ() {
+		root.setCenter(tagAccordion);
+		radioByTag.setToggleGroup(toggleGroup);
+		radioByProvider.setToggleGroup(toggleGroup);
+		radioByNone.setToggleGroup(toggleGroup);
+		serachTextBox.textProperty().addListener((property, oldValue, newValue) -> {
+			if (oldValue.equals(newValue))
+				return;
+			toggleGroup.selectToggle(radioByNone);
+			getActionDecoratorButtonList().setFilter(newValue);
+		});
+
+		toggleGroup.selectedToggleProperty().addListener((property, oldValue, newValue) -> {
+			if (newValue == radioByTag) {
+				root.setCenter(getTagAccordion());
+			} else if (newValue == radioByProvider) {
+				root.setCenter(getProviderAccordion());
 			} else {
-				return -1;
+				root.setCenter(getActionDecoratorButtonList());
 			}
 		});
-		toggleGroup = new ToggleGroup();
-		actionButtons = FXCollections.observableArrayList();
-		actionButtons.addListener((InvalidationListener) prop -> filtredAllActions());
-
-		ObservableList<ActionDecorator> actionDecorators = tableViewerTab.getTableViewer().actionDecoratorsProperty();
-		actionDecorators.forEach(this::addAction);
-		actionDecorators.addListener((ListChangeListener<ActionDecorator>) change -> {
-			while (change.next()) {
-				if (change.wasAdded()) {
-					change.getAddedSubList().forEach(this::addAction);
-				}
-				if (change.wasRemoved()) {
-					change.getRemoved().forEach(this::deleteAction);
-				}
-			}
-		});
-
-		for (ActionProvider actionProvider : ActionEntityDao.getActionProviders()) {
+		root.setCenter(getTagAccordion());
+		
+		for (ActionProvider actionProvider : ActionEntities.getActionProviders()) {
 			MenuItem menuItem = new MenuItem(actionProvider.getModuleExtensionName());
 			menuItem.setOnAction(event -> {
-				createAction(actionProvider);
+				ActionDecorator newActionDecorator = new ActionDecorator();
+				try {
+					newActionDecorator.setAction(ActionEntities.createActionEntity(actionProvider));
+					getTableViewerTab().getTableViewer().getActionDecorators().add(newActionDecorator);
+					new EditActionController(newActionDecorator, tableViewerTab).show();
+				} catch (JAXBException | IOException e) {
+					ErrorLogger.registerException(e);
+				} 
+				
 			});
 			menuNewAction.getItems().add(menuItem);
 		}
@@ -109,19 +187,19 @@ public class ActionController extends Controller {
 				OpenEntityDialog<ActionEntity> openDialog = new OpenEntityDialog<>(
 						ActionEntity.class,
 						SelectionMode.MULTIPLE,
-						tableViewerTab.getTableViewerDao().getActionEntities());
+						TableViewers.getActionEntities(getTableViewerTab().getTableViewer()));
 				openDialog.setModality(Modality.APPLICATION_MODAL);
 				openDialog.showAndWait();
 				if (openDialog.isOpened()) {
 					if (openDialog.getOpenned().size() == 1) {
 						ActionDecorator actionDecorator = new ActionDecorator();
-						actionDecorator.setAction(openDialog.getOpenned().get(0).getFileName());
+						actionDecorator.setAction(openDialog.getOpenned().get(0));
 						tableViewerTab.getTableViewer().getActionDecorators().add(actionDecorator);
-						editAction(actionDecorator);
+						new EditActionController(actionDecorator, tableViewerTab).show();
 					} else {
 						for (ActionEntity actionEntity : openDialog.getOpenned()) {
 							ActionDecorator actionDecorator = new ActionDecorator();
-							actionDecorator.setAction(actionEntity.getFileName());
+							actionDecorator.setAction(actionEntity);
 							tableViewerTab.getTableViewer().getActionDecorators().add(actionDecorator);
 						}
 					}
@@ -130,93 +208,66 @@ public class ActionController extends Controller {
 				ErrorLogger.registerException(e);
 			}
 		});
-
-		initializ();
-
 	}
 
-	private void addAction(ActionDecorator actionDecorator) {
-		actionButtons.add(new ActionButton(actionDecorator, tableViewerTab));
-		actionAccordion.addAction(actionDecorator);
+	private TableViewerTab getTableViewerTab() {
+		return tableViewerTab;
 	}
 
-	private void deleteAction(ActionDecorator actionDecorator) {
-		for (int i = 0; i < actionButtons.size(); i++) {
-			ActionButton actionButton = actionButtons.get(i);
-			if (actionButton.getActionDecorator().equals(actionDecorator)) {
-				actionButtons.remove(i);
-				i--;
-			}
+	private ObservableList<ActionDecorator> getActionDecorators() {
+		if (actionDecorators == null) {
+			actionDecorators = getTableViewerTab().getTableViewer().actionDecoratorsProperty();
 		}
-		actionAccordion.deleteAction(actionDecorator);
-		filtredAllActions();
+		return actionDecorators;
 	}
 
-	private void filtredAllActions() {
-		buttonList.getChildren().clear();
-		if (serachTextBox.getText().equals("")) {
-			buttonList.addAllAndSort(actionButtons);
-		} else {
-			var filtredButtons = actionButtons.stream().filter(but -> but.getActionEntity().getTitle().toLowerCase()
-					.contains(serachTextBox.getText().toLowerCase())).collect(Collectors.toList());
-			buttonList.addAllAndSort(filtredButtons);
+	private GroupAccordion<ActionDecorator, StringProperty> getTagAccordion() {
+		if (tagAccordion == null) {
+			tagAccordion = new GroupAccordion<>();
+			tagAccordion.setItems(getActionDecorators());
+			tagAccordion.setMatcher((item, crit) -> item.getTags().contains(crit));
+			tagAccordion.setCriteria(actionDecoratorsCollector.getTags());
+			tagAccordion.setButtonFactory(action -> new ActionButton(action, getTableViewerTab()));
+			tagAccordion.setGroupNameFactory(s -> s);
+			tagAccordion.setSortComparator((node1, node2) -> {
+				if (node1 instanceof ActionButton && node2 instanceof ActionButton) {
+					String buttonName1 = ((ActionButton) node1).getActionEntity().getTitle();
+					String buttonName2 = ((ActionButton) node2).getActionEntity().getTitle();
+					return buttonName1.compareToIgnoreCase(buttonName2);
+				} else {
+					return -1;
+				}
+			});
 		}
-
+		return tagAccordion;
 	}
 
-	private void createAction(ActionProvider actionProvider) {
-			try {
-				ActionEntity actionEntity = ActionEntityDao.createActionEntity(actionProvider);
-				actionEntity.setTitle("New Action");
-				ActionDecorator actionDecorator = new ActionDecorator();
-				actionDecorator.setAction(actionEntity.getFileName());
-				tableViewerTab.getTableViewer().getActionDecorators().add(actionDecorator);
-				editAction(actionDecorator);
-			} catch (JAXBException | IOException e) {
-				ErrorLogger.registerException(e);
-			}
-
-	}
-
-	private void editAction(ActionDecorator actionDecorator) {
-		try {
-			new EditActionController(actionDecorator, tableViewerTab).show();
-		} catch (IOException  e) {
-			ErrorLogger.registerException(e);
+	private GroupAccordion<ActionDecorator, String> getProviderAccordion() {
+		if (providerAccordion == null) {
+			providerAccordion = new GroupAccordion<>();
+			providerAccordion.setItems(getActionDecorators());
+			providerAccordion.setMatcher((item, crit) -> item.getAction().getActionProvider().equals(crit));
+			providerAccordion.setCriteria(actionDecoratorsCollector.getProviders());
+			providerAccordion.setButtonFactory(action -> new ActionButton(action, getTableViewerTab()));
+			providerAccordion.setGroupNameFactory(p -> new SimpleStringProperty(p));
+			providerAccordion.setSortComparator((node1, node2) -> {
+				if (node1 instanceof ActionButton && node2 instanceof ActionButton) {
+					String buttonName1 = ((ActionButton) node1).getActionEntity().getTitle();
+					String buttonName2 = ((ActionButton) node2).getActionEntity().getTitle();
+					return buttonName1.compareToIgnoreCase(buttonName2);
+				} else {
+					return -1;
+				}
+			});
+			
 		}
+		return providerAccordion;
 	}
 
-	private void initializ() {
-		root.setCenter(actionAccordion);
-		radioByTag.setToggleGroup(toggleGroup);
-		radioByProvider.setToggleGroup(toggleGroup);
-		radioByNone.setToggleGroup(toggleGroup);
-		serachTextBox.textProperty().addListener((property, oldValue, newValue) -> {
-			if (oldValue.equals(newValue))
-				return;
-			toggleGroup.selectToggle(radioByNone);
-			filtredAllActions();
-		});
-
-		toggleGroup.selectedToggleProperty().addListener((property, oldValue, newValue) -> {
-			if (newValue == radioByTag) {
-				root.setCenter(actionAccordion);
-				actionAccordion.showByTag();
-			} else if (newValue == radioByProvider) {
-				root.setCenter(actionAccordion);
-				actionAccordion.showByProvider();
-			} else {
-				root.setCenter(buttonList);
-			}
-		});
+	private ActionDecoratorButtonList getActionDecoratorButtonList() {
+		if (actionDecoratorButtonList == null) {
+			actionDecoratorButtonList = new ActionDecoratorButtonList();
+		}
+		return actionDecoratorButtonList;
 	}
-
-//	public ActionController(TableViewerTab tableViewerTab) {
-//		this.tableViewerTab = tableViewerTab;
-//		
-//		tableViewerTab.getTableViewer().getActionDecorators().forEach(al -> {
-//			getTabs().add(new ActionTab(al, tableViewerTab));
-//		});
-//	}
-
 }

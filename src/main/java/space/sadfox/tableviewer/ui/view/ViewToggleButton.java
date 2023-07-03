@@ -1,4 +1,4 @@
-package space.sadfox.tableviewer.ui.base;
+package space.sadfox.tableviewer.ui.view;
 
 import java.util.List;
 
@@ -6,6 +6,7 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.ToggleButton;
 import space.sadfox.dataccess.view.TableDataView;
 import space.sadfox.tableviewer.TableViewer;
+import space.sadfox.tableviewer.ui.base.ButtonList;
 import space.sadfox.tableviewer.ui.base.ButtonList.Moveble;
 
 public class ViewToggleButton extends ToggleButton implements Moveble {
@@ -32,12 +33,9 @@ public class ViewToggleButton extends ToggleButton implements Moveble {
 
 	@Override
 	public void moveTo(int ind) {
-		List<String> viewsNameList = tableViewer.getTableDataViews();
-		String viewFileName = view.getFileName();
-		if (!viewsNameList.contains(viewFileName)) return;
-		System.out.println("From moveTo " + ind);
-		viewsNameList.remove(viewFileName);
-		viewsNameList.add(ind, viewFileName);
+		if (!tableViewer.getTableDataViews().contains(view)) return;
+		tableViewer.getTableDataViews().remove(view);
+		tableViewer.getTableDataViews().add(ind, view);
 	}
 
 }

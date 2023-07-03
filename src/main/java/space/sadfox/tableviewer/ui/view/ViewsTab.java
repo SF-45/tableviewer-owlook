@@ -8,20 +8,16 @@ import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionMode;
-import javafx.scene.control.Tab;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Modality;
 import space.sadfox.dataccess.view.TableDataView;
-import space.sadfox.dataccess.view.TableDataViewController;
-import space.sadfox.dataccess.view.TableDataViewDao;
-import space.sadfox.owlook.jaxb.EntityChangeListener;
+import space.sadfox.dataccess.view.TableDataViews;
 import space.sadfox.owlook.jaxb.EntityLoader;
 import space.sadfox.owlook.ui.tools.OpenEntityDialog;
 import space.sadfox.owlook.utils.ErrorLogger;
 import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 import space.sadfox.tableviewer.ui.base.ButtonList;
-import space.sadfox.tableviewer.ui.base.ViewToggleButton;
 
 public class ViewsTab extends ButtonList {
 
@@ -29,40 +25,39 @@ public class ViewsTab extends ButtonList {
 	private TableViewerTab tableViewerTab;
 
 	public ViewsTab(TableViewerTab tableViewerTab) {
-		
+
 		this.tableViewerTab = tableViewerTab;
 
 		toggleGroup = new ToggleGroup();
-		getTableViewerTab().getTableViewerDao().getViews().forEach(this::addView);
-		getTableViewerTab().getTableViewer().tableDataViewsProperty().addListener((ListChangeListener<String>) change -> {
-			while (change.next()) {
-				if (change.wasAdded()) {
-					change.getAddedSubList().forEach(viewFileName -> {
-						int ind = getTableViewerTab().getTableViewer().getTableDataViews().indexOf(viewFileName);
-						try {
-							addView(ind, TableDataViewDao.loadTableDataView(viewFileName));
-						} catch (IOException | JAXBException e) {
-							ErrorLogger.registerException(e);
+		getTableViewerTab().getTableViewer().getTableDataViews().forEach(this::addView);
+		getTableViewerTab().getTableViewer().tableDataViewsProperty()
+				.addListener((ListChangeListener<TableDataView>) change -> {
+					while (change.next()) {
+						if (change.wasAdded()) {
+							change.getAddedSubList().forEach(view -> {
+								int ind = getTableViewerTab().getTableViewer().getTableDataViews().indexOf(view);
+								addView(ind, view);
+
+							});
 						}
-					});
-				}
-				if (change.wasRemoved()) {
-					change.getRemoved().forEach(viewFileName -> {
-						deleteView(viewFileName);
-					});
-				}
-			}
-		});
+						if (change.wasRemoved()) {
+							change.getRemoved().forEach(view -> {
+								deleteView(view);
+							});
+						}
+					}
+				});
 
 		ContextMenu contextMenu = new ContextMenu();
 		setContextMenu(contextMenu);
 
 		MenuItem createView = new MenuItem("Create View");
 		createView.setOnAction(event -> {
-			TableDataView newView = TableDataViewDao.createTableDataView();
-			if (newView == null) return;
+			TableDataView newView = TableDataViews.createTableDataView();
+			if (newView == null)
+				return;
 			newView.setTitle("New View");
-			getTableViewerTab().getTableViewerDao().addView(newView);
+			getTableViewerTab().getTableViewer().getTableDataViews().add(newView);
 			editView(newView);
 		});
 		contextMenu.getItems().add(createView);
@@ -70,14 +65,14 @@ public class ViewsTab extends ButtonList {
 		MenuItem open = new MenuItem("Open View");
 		open.setOnAction(event -> {
 			try {
-				OpenEntityDialog<TableDataView> openDialog = new OpenEntityDialog<>(
-						TableDataView.class,
-						SelectionMode.MULTIPLE,
-						getTableViewerTab().getTableViewerDao().getViews());
+				OpenEntityDialog<TableDataView> openDialog = new OpenEntityDialog<>(TableDataView.class,
+						SelectionMode.MULTIPLE, getTableViewerTab().getTableViewer().getTableDataViews());
 				openDialog.setModality(Modality.APPLICATION_MODAL);
 				openDialog.showAndWait();
 				if (openDialog.isOpened()) {
-					openDialog.getOpenned().forEach(v -> getTableViewerTab().getTableViewerDao().addView(v));
+					openDialog.getOpenned().forEach(v -> {
+						getTableViewerTab().getTableViewer().getTableDataViews().add(v);
+					});
 				}
 			} catch (IOException e) {
 				ErrorLogger.registerException(e);
@@ -107,33 +102,33 @@ public class ViewsTab extends ButtonList {
 			editView(view);
 		});
 		contextMenu.getItems().add(edit);
-		
+
 		MenuItem duplicate = new MenuItem("Duplicate View");
 		duplicate.setOnAction(event -> {
 			try {
 				TableDataView newView = EntityLoader.INSTANCE.duplicateEntity(view);
-				getTableViewerTab().getTableViewerDao().addView(newView);
+				getTableViewerTab().getTableViewer().getTableDataViews().add(newView);
 				editView(newView);
 			} catch (JAXBException | IOException e) {
 				ErrorLogger.registerException(e);
-			} 
+			}
 		});
 		contextMenu.getItems().add(duplicate);
 
 		MenuItem close = new MenuItem("Close View");
 		close.setOnAction(event -> {
-			getTableViewerTab().getTableViewerDao().removeView(view);
+			getTableViewerTab().getTableViewer().getTableDataViews().remove(view);
 		});
 		contextMenu.getItems().add(close);
 
 		MenuItem delete = new MenuItem("Delete View");
 		delete.setOnAction(event -> {
-			if (TableDataViewDao.deleteTableDataView(view)) {
-				getTableViewerTab().getTableViewerDao().removeView(view);
+			if (TableDataViews.deleteTableDataView(view)) {
+				getTableViewerTab().getTableViewer().getTableDataViews().remove(view);
 			}
 		});
 		contextMenu.getItems().add(delete);
-		
+
 		if (ind < 0)
 			getChildren().add(button);
 		else
@@ -144,13 +139,13 @@ public class ViewsTab extends ButtonList {
 		addView(-1, view);
 	}
 
-	private void deleteView(String viewFileName) {
+	private void deleteView(TableDataView view) {
 		var btnList = getChildren();
 		for (int i = 0; i < btnList.size(); i++) {
 			Node node = btnList.get(i);
 			if (node instanceof ViewToggleButton) {
 				ViewToggleButton viewButton = (ViewToggleButton) node;
-				if (viewButton.getView().getFileName().equals(viewFileName)) {
+				if (viewButton.getView().equals(view)) {
 					btnList.remove(i);
 					return;
 				}
@@ -160,7 +155,7 @@ public class ViewsTab extends ButtonList {
 
 	private void editView(TableDataView view) {
 		try {
-			view.getConfigController(getTableViewerTab().getTableViewerDao().getTableData()).show();
+			view.getConfigController(getTableViewerTab().getTableData()).show();
 		} catch (IOException e) {
 			ErrorLogger.registerException(e);
 		} catch (Nullable e) {
@@ -175,7 +170,5 @@ public class ViewsTab extends ButtonList {
 	public TableViewerTab getTableViewerTab() {
 		return tableViewerTab;
 	}
-	
-	
 
 }

@@ -1,11 +1,10 @@
-package space.sadfox.tableviewer.ui.base;
-
-import java.util.List;
+package space.sadfox.tableviewer.ui.filter;
 
 import javafx.event.ActionEvent;
 import javafx.scene.control.ToggleButton;
 import space.sadfox.dataccess.filter.TableDataFilter;
 import space.sadfox.tableviewer.TableViewer;
+import space.sadfox.tableviewer.ui.base.ButtonList;
 import space.sadfox.tableviewer.ui.base.ButtonList.Moveble;
 
 public class FilterToggleButton extends ToggleButton implements Moveble {
@@ -30,14 +29,9 @@ public class FilterToggleButton extends ToggleButton implements Moveble {
 
 	@Override
 	public void moveTo(int ind) {
-		List<String> filterNameList = tableViewer.getTableDataFilters();
-		String filterFileName = filter.getFileName();
-		if (!filterNameList.contains(filterFileName)) return;
-		System.out.println("From moveTo " + ind);
-		filterNameList.remove(filterFileName);
-		filterNameList.add(ind, filterFileName);
-		
-		
+		if (!tableViewer.getTableDataFilters().contains(filter)) return;
+		tableViewer.getTableDataFilters().remove(filter);
+		tableViewer.getTableDataFilters().add(ind, filter);
 	}
 	
 	

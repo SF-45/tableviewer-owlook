@@ -1,11 +1,11 @@
 package space.sadfox.tableviewer.ui.base;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -27,7 +27,7 @@ public class ButtonList extends VBox {
 	private ReadOnlyBooleanProperty hideProperty;
 	private ChangeListener<Boolean> changeListener;
 	
-	private Comparator<Node> comparator;
+	private ObjectProperty<Comparator<Node>> comparator = new SimpleObjectProperty<>();
 
 	private int draggedInd = 0;
 	private Node draggedNode;
@@ -55,6 +55,10 @@ public class ButtonList extends VBox {
 		this.addEventHandler(MouseEvent.MOUSE_PRESSED, mouseEvent -> {
 			if (contextMenu != null)
 				contextMenu.hide();
+		});
+		
+		comparator.addListener(listener -> {
+			sort();
 		});
 	}
 
@@ -92,13 +96,21 @@ public class ButtonList extends VBox {
 	}
 
 	
-	public void setSorted(Comparator<Node> comparator) {
-		this.comparator = comparator;
+	public Comparator<Node> getSortComparator() {
+		return this.comparator.get();
+	}
+	
+	public void setSortComparator(Comparator<Node> comparator) {
+		this.comparator.set(comparator);
+	}
+	
+	public ObjectProperty<Comparator<Node>> sortComparatorProperty() {
+		return comparator;
 	}
 	
 	public void sort() {
-		if (comparator != null) {
-			FXCollections.sort(this.getChildren(), comparator);
+		if (comparator.get() != null) {
+			FXCollections.sort(this.getChildren(), comparator.get());
 		}
 	}
 

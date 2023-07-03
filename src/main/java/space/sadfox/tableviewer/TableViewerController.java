@@ -72,7 +72,7 @@ public class TableViewerController extends Controller {
 		getStage().setTitle("OwlookTV");
 
 		MenuItem createTableViewer = new MenuItem("Create new");
-		createTableViewer.setOnAction(event -> TableViewerDao.createTableViewer());
+		createTableViewer.setOnAction(event -> TableViewers.createTableViewer());
 		tablesMenu.getItems().addAll(new SeparatorMenuItem(), createTableViewer);
 
 		tableTabPane.getTabs().addListener((InvalidationListener) listner -> {
@@ -90,7 +90,7 @@ public class TableViewerController extends Controller {
 			}
 		});
 		
-		TableViewerDao.getTableViewers().forEach(this::createTableViewerMenuItem);
+		TableViewers.getTableViewers().forEach(this::createTableViewerMenuItem);
 		
 		
 //		searchField.textProperty().addListener((property, oldValue, newValue) -> {

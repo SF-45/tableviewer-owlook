@@ -2,7 +2,6 @@ package space.sadfox.tableviewer.ui;
 
 import java.io.IOException;
 
-import jakarta.xml.bind.JAXBException;
 import javafx.beans.binding.Bindings;
 import javafx.scene.Node;
 import javafx.scene.control.Menu;
@@ -17,16 +16,15 @@ import space.sadfox.owlook.jaxb.EntityChangeListener;
 import space.sadfox.owlook.utils.ErrorLogger;
 import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.tableviewer.TableViewer;
-import space.sadfox.tableviewer.TableViewerDao;
 import space.sadfox.tableviewer.TableViewerEditController;
 import space.sadfox.tableviewer.ui.action.ActionController;
+import space.sadfox.tableviewer.ui.action.ActionController2;
 import space.sadfox.tableviewer.ui.filter.FiltersTab;
 import space.sadfox.tableviewer.ui.view.ViewsTab;
 
 public class TableViewerTab extends Tab {
 
 	private TableViewer tableViewer;
-	private TableViewerDao tableViewerDao;
 
 	private ActionController actionsNode;
 	private ViewsTab viewsNode;
@@ -63,20 +61,16 @@ public class TableViewerTab extends Tab {
 		};
 		
 		try {
-			getTableViewerDao().getTableData().addEntityChangeListener(tableDataChangeListener);
+			getTableViewer().getTableData().addEntityChangeListener(tableDataChangeListener);
 		} catch (Nullable e) {
 		}
-
-		getTableViewer().tableDataConnectionProperty().addListener((property, oldValue, newValue) -> {
-			if (oldValue != null && TableDataDao.existTableData(oldValue)) {
-				try {
-					TableDataDao.loadTableData(oldValue).removeEntityChangeListener(tableDataChangeListener);
-				} catch (IOException | JAXBException e) {}
+		
+		getTableViewer().tableDataProperty().addListener((property, oldValue, newValue) -> {
+			if (oldValue != null) {
+				oldValue.removeEntityChangeListener(tableDataChangeListener);
 			}
-			if (newValue != null && TableDataDao.existTableData(newValue)) {
-				try {
-					TableDataDao.loadTableData(newValue).addEntityChangeListener(tableDataChangeListener);
-				} catch (IOException | JAXBException e) {}
+			if (newValue != null ) {
+				newValue.addEntityChangeListener(tableDataChangeListener);
 			}
 			reloadCurrentData();
 		});
@@ -112,13 +106,9 @@ public class TableViewerTab extends Tab {
 	public TableViewer getTableViewer() {
 		return tableViewer;
 	}
-
-	public TableViewerDao getTableViewerDao() {
-		if (tableViewerDao == null) {
-			tableViewerDao = new TableViewerDao(getTableViewer());
-		}
-
-		return tableViewerDao;
+	
+	public TableData getTableData( ) throws Nullable {
+		return getTableViewer().getTableData();
 	}
 
 	public Node getViewsNode() {
@@ -144,7 +134,7 @@ public class TableViewerTab extends Tab {
 			MenuItem editTableData = new MenuItem("Edit Table Data");
 			editTableData.setOnAction(event -> {
 				try {
-					new TableDataController(getTableViewerDao().getTableData()).show();
+					new TableDataController(getTableViewer().getTableData()).show();
 				} catch (IOException e) {
 					ErrorLogger.registerException(e);
 				} catch (Nullable e) {
@@ -155,7 +145,7 @@ public class TableViewerTab extends Tab {
 			MenuItem reloadData = new MenuItem("Reload");
 			reloadData.setOnAction(event -> {
 				try {
-					getTableViewerDao().getTableDataDao().loadData();
+					new TableDataDao(getTableViewer().getTableData()).loadData();
 				} catch (Nullable e) {
 				}
 			});
