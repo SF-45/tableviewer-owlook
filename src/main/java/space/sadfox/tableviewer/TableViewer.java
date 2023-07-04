@@ -34,8 +34,8 @@ import space.sadfox.owlook.utils.Nullable;
 @XmlRootElement
 public class TableViewer extends JAXBEntity {
 
-	private volatile StringProperty title = new SimpleStringProperty("");
-	private volatile ObjectProperty<TableData> tableData = new SimpleObjectProperty<>();
+	private final StringProperty title = new SimpleStringProperty("");
+	private final ObjectProperty<TableData> tableData = new SimpleObjectProperty<>();
 	private final ObservableList<TableDataFilter> tableDataFilters = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
 	private final ObservableList<TableDataView> tableDataViews = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
 	private final ObservableList<ActionDecorator> actionDecorators = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
@@ -126,6 +126,8 @@ public class TableViewer extends JAXBEntity {
 			} else if (entity.getClass().equals(ActionEntity.class)) {
 				getActionDecorators()
 						.removeIf(actionDecrator -> actionDecrator.getAction().equals(entity));
+			} else if (entity.getClass().equals(TableData.class)) {
+				setTableData(null);
 			}
 		});
 		
@@ -140,64 +142,21 @@ public class TableViewer extends JAXBEntity {
 				i--;
 			}
 		}
+		for (int i = 0; i < getTableDataFilters().size(); i++) {
+			if (getTableDataFilters().get(i) == null) {
+				getTableDataFilters().remove(i);
+				i--;
+			}
+		}
+		for (int i = 0; i < getTableDataViews().size(); i++) {
+			if (getTableDataViews().get(i) == null) {
+				getTableDataViews().remove(i);
+				i--;
+			}
+		} 
 		
-		
-//		validateFilters();
-//		validateViews();
-//		validateActions();
-//		validateData();
 	}
 
-//	private void validateViews() {
-//		checkExist(getTableDataViews(), TableDataView.class, "TableViewerValidation: " + getFileName(),
-//				"View not exist");
-//	}
-//
-//	private void validateFilters() {
-//		checkExist(getTableDataFilters(), TableDataFilter.class, "TableViewerValidation: " + getFileName(),
-//				"Filter not exist");
-//	}
-//
-//	private void validateActions() {
-//		for (int i = 0; i < getActionDecorators().size(); i++) {
-//			String fileName = getActionDecorators().get(i).getAction();
-//			if (!ActionEntityDao.existActionEntity(fileName)) {
-//				LoggerMessage loggerMessage = new LoggerMessage(LogLevel.WARNING);
-//				loggerMessage.setName("TableViewerValidation: " + getFileName());
-//				loggerMessage.setMessage("Action not exist" + ": " + fileName);
-//				ErrorLogger.registerMessage(loggerMessage);
-//				getActionDecorators().remove(i);
-//				i--;
-//			}
-//		}
-//	}
-//
-//	private void validateData() {
-//		if (getTableData() == null) {
-//			if (!TableDataDao.existTableData(getTableDataConnection())) {
-//				LoggerMessage loggerMessage = new LoggerMessage(LogLevel.WARNING);
-//				loggerMessage.setName("TableViewerValidation: " + getFileName());
-//				loggerMessage.setMessage("TableData not exist " + getTableDataConnection());
-//				ErrorLogger.registerMessage(loggerMessage);
-//				setTableDataConnection(null);
-//			}
-//		}
-//		//TODO: Перенести в адаптер
-//	}
-//
-//	private void checkExist(List<String> files, Class<? extends JAXBEntity> target, String name, String message) {
-//		for (int i = 0; i < files.size(); i++) {
-//			String fileName = files.get(i);
-//			if (!EntityLoader.INSTANCE.entityExist(fileName, target)) {
-//				LoggerMessage loggerMessage = new LoggerMessage(LogLevel.WARNING);
-//				loggerMessage.setName(name);
-//				loggerMessage.setMessage(message + ": " + fileName);
-//				ErrorLogger.registerMessage(loggerMessage);
-//				files.remove(i);
-//				i--;
-//			}
-//		}
-//	}
 
 	@Override
 	public Controller getConfigController() throws IOException {
@@ -243,20 +202,26 @@ public class TableViewer extends JAXBEntity {
 			return;
 		}
 
-		TableViewer tv = (TableViewer) entity;
+		TableViewer targetTableView = (TableViewer) entity;
 
-		setTitle(tv.getTitle());
+		setTitle(targetTableView.getTitle());
 		try {
-			setTableData(tv.getTableDataSafe());
+			setTableData(targetTableView.getTableDataSafe());
 		} catch (Nullable e) {}
 		getTableDataFilters().clear();
-		getTableDataFilters().addAll(tv.getTableDataFilters());
+		getTableDataFilters().addAll(targetTableView.getTableDataFilters());
 
 		getTableDataViews().clear();
-		getTableDataViews().addAll(tv.getTableDataViews());
+		getTableDataViews().addAll(targetTableView.getTableDataViews());
 
 		getActionDecorators().clear();
-		getActionDecorators().addAll(tv.getActionDecorators());
+		targetTableView.getActionDecorators().forEach(targetActionDecorator -> {
+			ActionDecorator newActionDecorator = new ActionDecorator();
+			newActionDecorator.setAction(targetActionDecorator.getAction());
+			targetActionDecorator.getTags().forEach(newActionDecorator.getTags()::add);
+			getActionDecorators().add(newActionDecorator);
+		});
+		
 	}
 
 }

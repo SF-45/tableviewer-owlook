@@ -57,6 +57,7 @@ public class TableViewerTab extends Tab {
 				if (tdchange.wasDataUpdate()) {
 					reloadCurrentData();
 				}
+				
 			}
 		};
 		
