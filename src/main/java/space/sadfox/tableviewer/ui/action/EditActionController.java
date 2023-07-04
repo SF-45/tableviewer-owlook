@@ -32,7 +32,7 @@ public class EditActionController extends Controller {
 	private BorderPane root;
 
 	@FXML
-	private TableView<StringProperty> tags;
+	private TableView<String> tags;
 
 	private ActionDecorator actionDecorator;
 	private ActionEntity actionEntity;
@@ -69,7 +69,7 @@ public class EditActionController extends Controller {
 
 		
 		
-		TableColumn<StringProperty, Boolean> selectedTagsColumn = new TableColumn<>();
+		TableColumn<String, Boolean> selectedTagsColumn = new TableColumn<>();
 		selectedTagsColumn.setEditable(true);
 		tags.getColumns().add(selectedTagsColumn);
 		selectedTagsColumn.setCellValueFactory(callback -> {
@@ -89,19 +89,19 @@ public class EditActionController extends Controller {
 		selectedTagsColumn.setCellFactory(callback -> new CheckBoxTableCell<>());
 		
 		
-		TableColumn<StringProperty,	String> nameTagsColumn = new TableColumn<>();
+		TableColumn<String,	String> nameTagsColumn = new TableColumn<>();
 		nameTagsColumn.setEditable(true);
 		tags.getColumns().add(nameTagsColumn);
-		nameTagsColumn.setCellValueFactory(callback -> callback.getValue());
+		nameTagsColumn.setCellValueFactory(callback -> new SimpleStringProperty(callback.getValue()));
 		nameTagsColumn.setCellFactory(TextFieldTableCell.forTableColumn());
 		nameTagsColumn.setOnEditCommit(event -> {
 			String oldValue = event.getOldValue();
 			String newValue = event.getNewValue();
 			if (oldValue.equals(newValue)) return;
 			var tagList = getActionDecoratorsCollector().getTags();
+			if (tagList.contains(newValue)) return;
 			
-			if (tagList.stream().anyMatch(tag -> tag.get().equals(newValue))) return;
-			event.getRowValue().set(newValue);
+			getActionDecoratorsCollector().replaceTag(oldValue, newValue);
 		});
 		
 //		tags.setCellFactory(call -> {
@@ -130,15 +130,19 @@ public class EditActionController extends Controller {
 
 		MenuItem newTag = new MenuItem("Create Tag");
 		newTag.setOnAction(event -> {
-			StringProperty tag = new SimpleStringProperty("New Tag");
-			getActionDecorator().getTags().add(tag);
+			String newTagName = "New Tag";
+			int i = 1;
+			while (getActionDecoratorsCollector().getTags().contains(newTagName)) {
+				newTagName = "New Tag " + i++;
+			}
+			getActionDecorator().getTags().add(newTagName);
 
 		});
 		tagsContextMenu.getItems().add(newTag);
 
 		MenuItem deleteTag = new MenuItem("Delete Tag");
 		deleteTag.setOnAction(event -> {
-			getActionDecorator().getTags().removeAll(tags.getSelectionModel().getSelectedItems());
+			getActionDecoratorsCollector().removeTag(tags.getSelectionModel().getSelectedItem());
 		});
 		tagsContextMenu.getItems().add(deleteTag);
 
@@ -168,7 +172,7 @@ public class EditActionController extends Controller {
 	}
 
 	private TableData getParentTableData() throws Nullable {
-		return getTableViewerTab().getTableViewer().getTableData();
+		return getTableViewerTab().getTableViewer().getTableDataSafe();
 	}
 
 }

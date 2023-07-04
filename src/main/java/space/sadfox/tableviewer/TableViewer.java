@@ -55,11 +55,11 @@ public class TableViewer extends JAXBEntity {
 
 	@XmlElement(name = "TableData")
 	@XmlJavaTypeAdapter(TableDataAdapter.class)
-	private TableData getTableDataInner() {
+	public TableData getTableData() {
 		return tableDataProperty().get();
 	}
 	
-	public TableData getTableData() throws Nullable {
+	public TableData getTableDataSafe() throws Nullable {
 		if (tableDataProperty().get() == null) {
 			throw new Nullable();
 		}
@@ -208,7 +208,7 @@ public class TableViewer extends JAXBEntity {
 	public String toString() {
 		StringBuilder builder = new StringBuilder("TableViewer: " + getTitle() + "\n");
 		try {
-			builder.append("TableData: " + getTableData().getTitle() + "\n\n");
+			builder.append("TableData: " + getTableDataSafe().getTitle() + "\n\n");
 		} catch (Nullable e) {
 			builder.append("TableData: Indefined\n\n");
 		}
@@ -231,7 +231,7 @@ public class TableViewer extends JAXBEntity {
 		getActionDecorators().forEach(action -> {
 			builder.append("\t" + action.getAction().getTitle());
 			builder.append(
-					" [" + action.getTags().stream().map(p -> p.get()).collect(Collectors.joining(", ")) + "]\n");
+					" [" + action.getTags().stream().map(p -> p).collect(Collectors.joining(", ")) + "]\n");
 
 		});
 		return builder.toString();
@@ -247,7 +247,7 @@ public class TableViewer extends JAXBEntity {
 
 		setTitle(tv.getTitle());
 		try {
-			setTableData(tv.getTableData());
+			setTableData(tv.getTableDataSafe());
 		} catch (Nullable e) {}
 		getTableDataFilters().clear();
 		getTableDataFilters().addAll(tv.getTableDataFilters());

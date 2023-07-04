@@ -61,7 +61,7 @@ public class TableViewerTab extends Tab {
 		};
 		
 		try {
-			getTableViewer().getTableData().addEntityChangeListener(tableDataChangeListener);
+			getTableViewer().getTableDataSafe().addEntityChangeListener(tableDataChangeListener);
 		} catch (Nullable e) {
 		}
 		
@@ -108,7 +108,7 @@ public class TableViewerTab extends Tab {
 	}
 	
 	public TableData getTableData( ) throws Nullable {
-		return getTableViewer().getTableData();
+		return getTableViewer().getTableDataSafe();
 	}
 
 	public Node getViewsNode() {
@@ -134,7 +134,7 @@ public class TableViewerTab extends Tab {
 			MenuItem editTableData = new MenuItem("Edit Table Data");
 			editTableData.setOnAction(event -> {
 				try {
-					new TableDataController(getTableViewer().getTableData()).show();
+					new TableDataController(getTableViewer().getTableDataSafe()).show();
 				} catch (IOException e) {
 					ErrorLogger.registerException(e);
 				} catch (Nullable e) {
@@ -145,7 +145,7 @@ public class TableViewerTab extends Tab {
 			MenuItem reloadData = new MenuItem("Reload");
 			reloadData.setOnAction(event -> {
 				try {
-					new TableDataDao(getTableViewer().getTableData()).loadData();
+					new TableDataDao(getTableViewer().getTableDataSafe()).loadData();
 				} catch (Nullable e) {
 				}
 			});

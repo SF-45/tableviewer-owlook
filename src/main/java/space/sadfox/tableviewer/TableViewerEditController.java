@@ -70,7 +70,7 @@ public class TableViewerEditController extends Controller {
 
 		editTableData.setOnAction(event -> {
 			try {
-				getTableViewer().getTableData().getConfigController().show();
+				getTableViewer().getTableDataSafe().getConfigController().show();
 			} catch (IOException e) {
 				ErrorLogger.registerException(e);
 			} catch (Nullable e) {}
@@ -96,7 +96,7 @@ public class TableViewerEditController extends Controller {
 
 	private void refreshTableData() {
 		try {
-			previewTextArea.setText(getTableViewer().getTableData().toString());
+			previewTextArea.setText(getTableViewer().getTableDataSafe().toString());
 		} catch (Nullable e) {
 			previewTextArea.setText("");
 		}

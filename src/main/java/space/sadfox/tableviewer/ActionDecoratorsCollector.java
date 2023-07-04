@@ -1,6 +1,5 @@
 package space.sadfox.tableviewer;
 
-import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -9,15 +8,15 @@ public class ActionDecoratorsCollector {
 
 	private final TableViewer tableViewer;
 
-	private final ObservableList<StringProperty> actionTags = FXCollections
+	private final ObservableList<String> actionTags = FXCollections
 			.synchronizedObservableList(FXCollections.observableArrayList());
 	private final ObservableList<String> actionProviders = FXCollections
 			.synchronizedObservableList(FXCollections.observableArrayList());
 
-	private final ObservableList<StringProperty> roActionTags = FXCollections.unmodifiableObservableList(actionTags);
+	private final ObservableList<String> roActionTags = FXCollections.unmodifiableObservableList(actionTags);
 	private final ObservableList<String> roActionProviders = FXCollections.unmodifiableObservableList(actionProviders);
 
-	private ListChangeListener<StringProperty> tagListChangeListener;
+	private ListChangeListener<String> tagListChangeListener;
 	
 	public ActionDecoratorsCollector(TableViewer tableViewer) {
 		this.tableViewer = tableViewer;
@@ -36,7 +35,7 @@ public class ActionDecoratorsCollector {
 		
 	}
 
-	public ObservableList<StringProperty> getTags() {
+	public ObservableList<String> getTags() {
 		return roActionTags;
 	}
 
@@ -56,25 +55,32 @@ public class ActionDecoratorsCollector {
 		actionDecorator.tagsProperty().removeListener(getTagListChangeListener());
 	}
 	
-	public void replaceTag(StringProperty oldTag, StringProperty newTag) {
+	public void replaceTag(String oldTag, String newTag) {
 		tableViewer.getActionDecorators().forEach(actionDecorator -> {
-			boolean isDel = actionDecorator.getTags().removeIf(pred -> {
-				return pred.equals(oldTag);
-			});
+			boolean isDel = actionDecorator.getTags().remove(oldTag);
 			if (isDel) {
 				actionDecorator.getTags().add(newTag);
 			}
 		});
+		FXCollections.sort(actionTags);
 	}
 	
-	private void checkAndAddTag(StringProperty tag) {
+	public void removeTag(String tag) {
+		tableViewer.getActionDecorators().forEach(actionDecorator -> {
+			actionDecorator.getTags().remove(tag);
+		});
+	}
+	
+	private void checkAndAddTag(String tag) {
 		
-		if (!actionTags.stream().anyMatch(tagfind -> tagfind.get().equals(tag.get()))) {
+		if (!actionTags.contains(tag)) {
 			actionTags.add(tag);
+			FXCollections.sort(actionTags);
+			//actionTags.sort((s1, s2) -> s1.compareTo(s2));
 		}
 	}
 	
-	private void checkAndRemoveTag(StringProperty tag) {
+	private void checkAndRemoveTag(String tag) {
 		int countTag = 0;
 		for (ActionDecorator actionDecorator : tableViewer.getActionDecorators()) {
 			if (actionDecorator.getTags().contains(tag)) {
@@ -104,7 +110,7 @@ public class ActionDecoratorsCollector {
 		}
 	}
 	
-	private ListChangeListener<StringProperty> getTagListChangeListener() {
+	private ListChangeListener<String> getTagListChangeListener() {
 		if (tagListChangeListener == null) {
 			tagListChangeListener = change -> {
 				while (change.next()) {

@@ -128,7 +128,7 @@ public class ActionController extends Controller {
 
 	private final ToggleGroup toggleGroup = new ToggleGroup();
 
-	private GroupAccordion<ActionDecorator, StringProperty> tagAccordion;
+	private GroupAccordion<ActionDecorator, String> tagAccordion;
 	private GroupAccordion<ActionDecorator, String> providerAccordion;
 	private ActionDecoratorButtonList actionDecoratorButtonList;
 
@@ -221,14 +221,16 @@ public class ActionController extends Controller {
 		return actionDecorators;
 	}
 
-	private GroupAccordion<ActionDecorator, StringProperty> getTagAccordion() {
+	private GroupAccordion<ActionDecorator, String> getTagAccordion() {
 		if (tagAccordion == null) {
 			tagAccordion = new GroupAccordion<>();
 			tagAccordion.setItems(getActionDecorators());
 			tagAccordion.setMatcher((item, crit) -> item.getTags().contains(crit));
 			tagAccordion.setCriteria(actionDecoratorsCollector.getTags());
 			tagAccordion.setButtonFactory(action -> new ActionButton(action, getTableViewerTab()));
-			tagAccordion.setGroupNameFactory(s -> s);
+			tagAccordion
+			.setInternalItemСhangeNotifier((item, listener) -> item.tagsProperty().addListener(listener));
+			tagAccordion.setGroupNameFactory(s -> new SimpleStringProperty(s));
 			tagAccordion.setSortComparator((node1, node2) -> {
 				if (node1 instanceof ActionButton && node2 instanceof ActionButton) {
 					String buttonName1 = ((ActionButton) node1).getActionEntity().getTitle();

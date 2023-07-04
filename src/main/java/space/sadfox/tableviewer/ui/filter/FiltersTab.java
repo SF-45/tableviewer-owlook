@@ -198,7 +198,7 @@ public class FiltersTab extends ButtonList {
 	
 	private void editFilter(TableDataFilter tableDataFilter) {
 		try {
-			tableDataFilter.getConfigController(getTableViewerTab().getTableViewer().getTableData()).show();
+			tableDataFilter.getConfigController(getTableViewerTab().getTableViewer().getTableDataSafe()).show();
 		} catch (IOException e) {
 			ErrorLogger.registerException(e);
 		} catch (Nullable e) {
