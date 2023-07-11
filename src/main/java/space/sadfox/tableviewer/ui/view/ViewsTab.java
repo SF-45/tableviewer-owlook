@@ -14,8 +14,8 @@ import space.sadfox.dataccess.view.TableDataView;
 import space.sadfox.dataccess.view.TableDataViews;
 import space.sadfox.owlook.jaxb.EntityLoader;
 import space.sadfox.owlook.ui.tools.OpenEntityDialog;
-import space.sadfox.owlook.utils.ErrorLogger;
 import space.sadfox.owlook.utils.Nullable;
+import space.sadfox.owlook.utils.OwlLogger;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 import space.sadfox.tableviewer.ui.base.ButtonList;
 
@@ -75,7 +75,7 @@ public class ViewsTab extends ButtonList {
 					});
 				}
 			} catch (IOException e) {
-				ErrorLogger.registerException(e);
+				OwlLogger.registerException(1, e);
 			}
 		});
 		contextMenu.getItems().add(open);
@@ -110,7 +110,7 @@ public class ViewsTab extends ButtonList {
 				getTableViewerTab().getTableViewer().getTableDataViews().add(newView);
 				editView(newView);
 			} catch (JAXBException | IOException e) {
-				ErrorLogger.registerException(e);
+				OwlLogger.registerException(1, e);
 			}
 		});
 		contextMenu.getItems().add(duplicate);
@@ -157,12 +157,12 @@ public class ViewsTab extends ButtonList {
 		try {
 			view.getConfigController(getTableViewerTab().getTableData()).show();
 		} catch (IOException e) {
-			ErrorLogger.registerException(e);
+			OwlLogger.registerException(1, e);
 		} catch (Nullable e) {
 			try {
 				view.getConfigController().show();
 			} catch (IOException e1) {
-				ErrorLogger.registerException(e1);
+				OwlLogger.registerException(1, e1);
 			}
 		}
 	}

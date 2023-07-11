@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import jakarta.xml.bind.JAXBException;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -24,7 +23,7 @@ import space.sadfox.dataccess.action.ActionEntity;
 import space.sadfox.dataccess.action.ActionProvider;
 import space.sadfox.owlook.ui.base.Controller;
 import space.sadfox.owlook.ui.tools.OpenEntityDialog;
-import space.sadfox.owlook.utils.ErrorLogger;
+import space.sadfox.owlook.utils.OwlLogger;
 import space.sadfox.tableviewer.ActionDecorator;
 import space.sadfox.tableviewer.ActionDecoratorsCollector;
 import space.sadfox.tableviewer.TableViewerProvider;
@@ -53,9 +52,9 @@ public class ActionController extends Controller {
 					}
 				}
 			});
-			
+
 		}
-		
+
 		void init() {
 			setSortComparator((node1, node2) -> {
 				if (node1 instanceof ActionButton && node2 instanceof ActionButton) {
@@ -72,7 +71,7 @@ public class ActionController extends Controller {
 			buttons.add(new ActionButton(actionDecorator, getTableViewerTab()));
 			filtred();
 		}
-		
+
 		void removeActionButton(ActionDecorator actionDecorator) {
 			for (int i = 0; i < buttons.size(); i++) {
 				ActionButton actionButton = buttons.get(i);
@@ -88,7 +87,7 @@ public class ActionController extends Controller {
 			currentFilter = filter;
 			filtred();
 		}
-		
+
 		void filtred() {
 			getChildren().clear();
 			if (currentFilter.equals("")) {
@@ -151,21 +150,26 @@ public class ActionController extends Controller {
 		serachTextBox.textProperty().addListener((property, oldValue, newValue) -> {
 			if (oldValue.equals(newValue))
 				return;
-			toggleGroup.selectToggle(radioByNone);
+			if (newValue != "") {
+				toggleGroup.selectToggle(radioByNone);
+			}
 			getActionDecoratorButtonList().setFilter(newValue);
 		});
 
 		toggleGroup.selectedToggleProperty().addListener((property, oldValue, newValue) -> {
+			
 			if (newValue == radioByTag) {
+				serachTextBox.clear();
 				root.setCenter(getTagAccordion());
 			} else if (newValue == radioByProvider) {
+				serachTextBox.clear();
 				root.setCenter(getProviderAccordion());
 			} else {
 				root.setCenter(getActionDecoratorButtonList());
 			}
 		});
 		root.setCenter(getTagAccordion());
-		
+
 		for (ActionProvider actionProvider : ActionEntities.getActionProviders()) {
 			MenuItem menuItem = new MenuItem(actionProvider.getModuleExtensionName());
 			menuItem.setOnAction(event -> {
@@ -175,19 +179,17 @@ public class ActionController extends Controller {
 					getTableViewerTab().getTableViewer().getActionDecorators().add(newActionDecorator);
 					new EditActionController(newActionDecorator, tableViewerTab).show();
 				} catch (JAXBException | IOException e) {
-					ErrorLogger.registerException(e);
-				} 
-				
+					OwlLogger.registerException(1, e);
+				}
+
 			});
 			menuNewAction.getItems().add(menuItem);
 		}
 
 		openAction.setOnAction(event -> {
 			try {
-				OpenEntityDialog<ActionEntity> openDialog = new OpenEntityDialog<>(
-						ActionEntity.class,
-						SelectionMode.MULTIPLE,
-						TableViewers.getActionEntities(getTableViewerTab().getTableViewer()));
+				OpenEntityDialog<ActionEntity> openDialog = new OpenEntityDialog<>(ActionEntity.class,
+						SelectionMode.MULTIPLE, TableViewers.getActionEntities(getTableViewerTab().getTableViewer()));
 				openDialog.setModality(Modality.APPLICATION_MODAL);
 				openDialog.showAndWait();
 				if (openDialog.isOpened()) {
@@ -205,7 +207,7 @@ public class ActionController extends Controller {
 					}
 				}
 			} catch (IOException e) {
-				ErrorLogger.registerException(e);
+				OwlLogger.registerException(1, e);
 			}
 		});
 	}
@@ -228,8 +230,7 @@ public class ActionController extends Controller {
 			tagAccordion.setMatcher((item, crit) -> item.getTags().contains(crit));
 			tagAccordion.setCriteria(actionDecoratorsCollector.getTags());
 			tagAccordion.setButtonFactory(action -> new ActionButton(action, getTableViewerTab()));
-			tagAccordion
-			.setInternalItemСhangeNotifier((item, listener) -> item.tagsProperty().addListener(listener));
+			tagAccordion.setInternalItemСhangeNotifier((item, listener) -> item.tagsProperty().addListener(listener));
 			tagAccordion.setGroupNameFactory(s -> new SimpleStringProperty(s));
 			tagAccordion.setSortComparator((node1, node2) -> {
 				if (node1 instanceof ActionButton && node2 instanceof ActionButton) {
@@ -261,7 +262,7 @@ public class ActionController extends Controller {
 					return -1;
 				}
 			});
-			
+
 		}
 		return providerAccordion;
 	}

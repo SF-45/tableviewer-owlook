@@ -8,12 +8,12 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import space.sadfox.dataccess.dataccess.TableData;
-import space.sadfox.dataccess.dataccess.TableDataDao;
+import space.sadfox.dataccess.dataccess.TableDatas;
 import space.sadfox.owlook.jaxb.EntityChangeListener;
 import space.sadfox.owlook.ui.base.Controller;
 import space.sadfox.owlook.ui.tools.OpenEntityDialog;
-import space.sadfox.owlook.utils.ErrorLogger;
 import space.sadfox.owlook.utils.Nullable;
+import space.sadfox.owlook.utils.OwlLogger;
 
 public class TableViewerEditController extends Controller {
 
@@ -64,7 +64,7 @@ public class TableViewerEditController extends Controller {
 		refreshTableData();
 
 		createTableDataButton.setOnAction(event -> {
-			TableData newTableData = TableDataDao.createTableData();
+			TableData newTableData = TableDatas.createTableData();
 			getTableViewer().setTableData(newTableData);
 		});
 
@@ -72,7 +72,7 @@ public class TableViewerEditController extends Controller {
 			try {
 				getTableViewer().getTableDataSafe().getConfigController().show();
 			} catch (IOException e) {
-				ErrorLogger.registerException(e);
+				OwlLogger.registerException(1, e);
 			} catch (Nullable e) {}
 		});
 
@@ -84,7 +84,7 @@ public class TableViewerEditController extends Controller {
 					getTableViewer().setTableData(openEntityDialog.getOpenned().get(0));
 				}
 			} catch (IOException e) {
-				ErrorLogger.registerException(e);
+				OwlLogger.registerException(1, e);
 			}
 		});
 

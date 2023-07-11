@@ -6,10 +6,8 @@ import java.util.stream.Collectors;
 
 import jakarta.xml.bind.JAXBException;
 import space.sadfox.dataccess.action.ActionEntity;
-import space.sadfox.dataccess.dataccess.TableDataDao;
 import space.sadfox.owlook.jaxb.EntityLoader;
-import space.sadfox.owlook.utils.ErrorLogger;
-import space.sadfox.owlook.utils.Nullable;
+import space.sadfox.owlook.utils.OwlLogger;
 
 public class TableViewers {
 	public static List<ActionEntity> getActionEntities(TableViewer tableViewer) {
@@ -21,7 +19,7 @@ public class TableViewers {
 			newTableViewer.setTitle("New Table Viewer");
 			return newTableViewer;
 		} catch (JAXBException | IOException e) {
-			ErrorLogger.registerException(e);
+			OwlLogger.registerException(1, e);
 		}
 		return null;
 	}

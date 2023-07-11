@@ -6,10 +6,11 @@ import java.util.List;
 
 import space.sadfox.owlook.jaxb.JAXBEntity;
 import space.sadfox.owlook.moduleapi.Module;
+import space.sadfox.owlook.moduleapi.ModuleHasNoConfiguration;
 import space.sadfox.owlook.moduleapi.Workspace;
 import space.sadfox.owlook.ui.base.Controller;
-import space.sadfox.owlook.utils.ErrorLogger;
 import space.sadfox.owlook.utils.Nullable;
+import space.sadfox.owlook.utils.OwlLogger;
 
 public class TableViewerProvider implements Module, Workspace {
 	
@@ -51,16 +52,11 @@ public class TableViewerProvider implements Module, Workspace {
 			try {
 				ui = new TableViewerController();
 			} catch (IOException e) {
-				ErrorLogger.registerException(e);
+				OwlLogger.registerException(1, e);
 			}
 		}
 		
 		return ui;
-	}
-
-	@Override
-	public List<Workspace> getWorkspaces() {
-		return Arrays.asList(this);
 	}
 
 	@Override
@@ -72,6 +68,11 @@ public class TableViewerProvider implements Module, Workspace {
 	public void initModule() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public Class<? extends JAXBEntity> getConfigTarget() throws ModuleHasNoConfiguration {
+		throw new ModuleHasNoConfiguration();
 	}
 
 	

@@ -4,7 +4,6 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.ToggleButton;
 import space.sadfox.dataccess.filter.TableDataFilter;
 import space.sadfox.tableviewer.TableViewer;
-import space.sadfox.tableviewer.ui.base.ButtonList;
 import space.sadfox.tableviewer.ui.base.ButtonList.Moveble;
 
 public class FilterToggleButton extends ToggleButton implements Moveble {

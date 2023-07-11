@@ -1,12 +1,9 @@
 package space.sadfox.tableviewer.ui.view;
 
-import java.util.List;
-
 import javafx.event.ActionEvent;
 import javafx.scene.control.ToggleButton;
 import space.sadfox.dataccess.view.TableDataView;
 import space.sadfox.tableviewer.TableViewer;
-import space.sadfox.tableviewer.ui.base.ButtonList;
 import space.sadfox.tableviewer.ui.base.ButtonList.Moveble;
 
 public class ViewToggleButton extends ToggleButton implements Moveble {

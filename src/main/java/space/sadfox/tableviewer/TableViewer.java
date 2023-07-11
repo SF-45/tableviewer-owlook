@@ -112,11 +112,6 @@ public class TableViewer extends JAXBEntity {
 	}
 
 	@Override
-	public String getExtension() {
-		return ".wtable";
-	}
-
-	@Override
 	public void initialize() {
 		EntityLoader.INSTANCE.addDeleteChangeListener(entity -> {
 			if (entity.getClass().equals(TableDataFilter.class)) {

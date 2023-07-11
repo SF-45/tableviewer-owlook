@@ -16,6 +16,7 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import space.sadfox.tableviewer.ui.base.ButtonList.Moveble;
 
 public class ButtonList extends VBox {
 

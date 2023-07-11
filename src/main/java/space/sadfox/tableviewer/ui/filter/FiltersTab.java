@@ -19,8 +19,8 @@ import space.sadfox.dataccess.filter.TableDataFilter;
 import space.sadfox.dataccess.filter.TableDataFilters;
 import space.sadfox.owlook.jaxb.EntityLoader;
 import space.sadfox.owlook.ui.tools.OpenEntityDialog;
-import space.sadfox.owlook.utils.ErrorLogger;
 import space.sadfox.owlook.utils.Nullable;
+import space.sadfox.owlook.utils.OwlLogger;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 import space.sadfox.tableviewer.ui.base.ButtonList;
 
@@ -81,7 +81,7 @@ public class FiltersTab extends ButtonList {
 					openDialog.getOpenned().forEach(f -> getTableViewerTab().getTableViewer().getTableDataFilters().add(f));
 				}
 			} catch (IOException e) {
-				ErrorLogger.registerException(e);
+				OwlLogger.registerException(1, e);
 			}
 		});
 		contextMenu.getItems().add(open);
@@ -110,7 +110,7 @@ public class FiltersTab extends ButtonList {
 			DataEntity[] dataEntities = TableDataFilters.getDataEntities(filter, getTableViewerTab().getTableData());
 			getTableViewerTab().getTableDataViewTable().setItems(FXCollections.observableArrayList(dataEntities));
 			} catch (JAXBException e) {
-				ErrorLogger.registerException(e);
+				OwlLogger.registerException(1, e);
 			} catch (Nullable e) {}
 			setSelectedTableDataFilter(filter);
 		});
@@ -134,7 +134,7 @@ public class FiltersTab extends ButtonList {
 				getTableViewerTab().getTableViewer().getTableDataFilters().add(filter);
 				editFilter(newFilter);
 			} catch (JAXBException | IOException e) {
-				ErrorLogger.registerException(e);
+				OwlLogger.registerException(1, e);
 			}
 		});
 		contextMenu.getItems().add(duplicate);
@@ -200,12 +200,12 @@ public class FiltersTab extends ButtonList {
 		try {
 			tableDataFilter.getConfigController(getTableViewerTab().getTableViewer().getTableDataSafe()).show();
 		} catch (IOException e) {
-			ErrorLogger.registerException(e);
+			OwlLogger.registerException(1, e);
 		} catch (Nullable e) {
 			try {
 				tableDataFilter.getConfigController().show();
 			} catch (IOException e1) {
-				ErrorLogger.registerException(e1);
+				OwlLogger.registerException(1, e1);
 			}
 		}
 	}

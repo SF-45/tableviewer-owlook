@@ -3,18 +3,21 @@ package space.sadfox.tableviewer.ui.action;
 import java.io.IOException;
 
 import jakarta.xml.bind.JAXBException;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableView.TableViewSelectionModel;
+import javafx.scene.control.Tooltip;
 import space.sadfox.dataccess.action.Action;
 import space.sadfox.dataccess.action.ActionEntities;
 import space.sadfox.dataccess.action.ActionEntity;
 import space.sadfox.dataccess.action.ActionProviderNotFound;
 import space.sadfox.dataccess.dataccess.DataEntity;
 import space.sadfox.owlook.jaxb.EntityLoader;
-import space.sadfox.owlook.utils.ErrorLogger;
+import space.sadfox.owlook.ui.tools.MessageBox;
 import space.sadfox.owlook.utils.Nullable;
+import space.sadfox.owlook.utils.OwlLogger;
 import space.sadfox.tableviewer.ActionDecorator;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 
@@ -30,6 +33,11 @@ public class ActionButton extends Button {
 
 		this.setText(getActionEntity().getTitle());
 		getActionEntity().titleProperty().bindBidirectional(this.textProperty());
+		
+		Tooltip tooltip = new Tooltip();
+		tooltip.textProperty().bind(getActionEntity().descriptionProperty());
+		this.setTooltip(tooltip);
+		
 		TableViewSelectionModel<DataEntity> selection = parent.getTableDataViewTable().getSelectionModel();
 		this.setOnAction(event -> {
 			if (selection.isEmpty())
@@ -39,6 +47,10 @@ public class ActionButton extends Button {
 				getAction().run(selection.getSelectedItems().toArray(new DataEntity[0]));
 			} catch (ActionProviderNotFound e) {
 				// TODO Оповещение туть
+				MessageBox messageBox = new MessageBox(AlertType.WARNING);
+				messageBox.setTitle("Action provider not found");
+				messageBox.setHeaderText("Action provider not found");
+				messageBox.showAndWait();
 			}
 		});
 
@@ -50,7 +62,7 @@ public class ActionButton extends Button {
 			try {
 				new EditActionController(actionDecorator, parent).show();
 			} catch (IOException e) {
-				ErrorLogger.registerException(e);
+				OwlLogger.registerException(1, e);
 			}
 		});
 		contextMenu.getItems().add(edit);
@@ -64,7 +76,7 @@ public class ActionButton extends Button {
 				parent.getTableViewer().getActionDecorators().add(newActionDecorator);
 				new EditActionController(newActionDecorator, parent).show();
 			} catch (JAXBException | IOException e) {
-				ErrorLogger.registerException(e);
+				OwlLogger.registerException(1, e);
 			}
 		});
 		contextMenu.getItems().add(duplicate);

@@ -8,7 +8,6 @@ import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 public class ObservableListAdapter extends XmlAdapter<ArrayList<String>, List<StringProperty>> {
 

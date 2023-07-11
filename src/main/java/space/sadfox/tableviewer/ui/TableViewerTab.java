@@ -13,12 +13,11 @@ import space.sadfox.dataccess.dataccess.TableDataDao;
 import space.sadfox.dataccess.filter.TableDataFilter;
 import space.sadfox.dataccess.view.TableViewForTableData;
 import space.sadfox.owlook.jaxb.EntityChangeListener;
-import space.sadfox.owlook.utils.ErrorLogger;
 import space.sadfox.owlook.utils.Nullable;
+import space.sadfox.owlook.utils.OwlLogger;
 import space.sadfox.tableviewer.TableViewer;
 import space.sadfox.tableviewer.TableViewerEditController;
 import space.sadfox.tableviewer.ui.action.ActionController;
-import space.sadfox.tableviewer.ui.action.ActionController2;
 import space.sadfox.tableviewer.ui.filter.FiltersTab;
 import space.sadfox.tableviewer.ui.view.ViewsTab;
 
@@ -43,7 +42,7 @@ public class TableViewerTab extends Tab {
 		try {
 			actionsNode = new ActionController(this);
 		} catch (IOException e) {
-			ErrorLogger.registerException(e);
+			OwlLogger.registerException(1, e);
 		}
 		this.setContent(getTableDataViewTable());
 		initializ();
@@ -137,7 +136,7 @@ public class TableViewerTab extends Tab {
 				try {
 					new TableDataController(getTableViewer().getTableDataSafe()).show();
 				} catch (IOException e) {
-					ErrorLogger.registerException(e);
+					OwlLogger.registerException(1, e);
 				} catch (Nullable e) {
 				}
 			});
@@ -157,7 +156,7 @@ public class TableViewerTab extends Tab {
 				try {
 					new TableViewerEditController(getTableViewer()).show();
 				} catch (IOException e) {
-					ErrorLogger.registerException(e);
+					OwlLogger.registerException(1, e);
 				}
 			});
 			menu.getItems().add(editTableViewer);

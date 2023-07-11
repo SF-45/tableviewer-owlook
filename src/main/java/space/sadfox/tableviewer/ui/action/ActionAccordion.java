@@ -1,16 +1,6 @@
 package space.sadfox.tableviewer.ui.action;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javafx.beans.InvalidationListener;
-import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableMap;
 import javafx.scene.control.Accordion;
-import space.sadfox.tableviewer.ActionDecorator;
-import space.sadfox.tableviewer.ui.TableViewerTab;
 
 // TODD: Удалить класс
 public class ActionAccordion extends Accordion {
