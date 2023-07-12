@@ -5,27 +5,25 @@ import java.util.Arrays;
 import java.util.List;
 
 import space.sadfox.owlook.jaxb.JAXBEntity;
-import space.sadfox.owlook.moduleapi.Module;
+import space.sadfox.owlook.moduleapi.OwlookModule;
 import space.sadfox.owlook.moduleapi.ModuleHasNoConfiguration;
 import space.sadfox.owlook.moduleapi.Workspace;
 import space.sadfox.owlook.ui.base.Controller;
 import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.owlook.utils.OwlLogger;
 
-public class TableViewerProvider implements Module, Workspace {
+public class TableViewerProvider implements OwlookModule, Workspace {
 	
 	private TableViewerController ui;
 
 	@Override
-	public String getModuleName() {
-		// TODO Auto-generated method stub
-		return "table-viewer";
+	public String getShortModuleDescription() {
+		return "Displaying tabular data and performing actions with them";
 	}
 
 	@Override
 	public String getModuleDescription() {
-		// TODO Auto-generated method stub
-		return null;
+		return "Displaying tabular data and performing actions with them";
 	}
 
 	@Override

@@ -63,7 +63,7 @@ public class TableViewerController extends Controller {
 	public TableViewerController() throws IOException {
 		super(TableViewer.class.getResource("fxml/main-scene.fxml"));
 
-		getStage().setTitle("OwlookTV");
+		stageTitle.set("OwlookTV");
 
 		MenuItem createTableViewer = new MenuItem("Create new");
 		createTableViewer.setOnAction(event -> TableViewers.createTableViewer());

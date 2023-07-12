@@ -51,14 +51,14 @@ public class EditActionController extends Controller {
 	}
 
 	private void init() throws IOException {
-		getStage().titleProperty().bind(Bindings.concat("Edit Action [", getActionEntity().titleProperty(), "]"));
-
+		Controller actionEntityController;
 		try {
-			root.setCenter(getActionEntity().getConfigController(getParentTableData()).getParent());
+			actionEntityController = getActionEntity().getConfigController(getParentTableData());
 		} catch (Nullable e) {
-			root.setCenter(getActionEntity().getConfigController().getParent());
+			actionEntityController = getActionEntity().getConfigController();
 		}
-
+		root.setCenter(actionEntityController.getParent());
+		stageTitle.bind(actionEntityController.stageTitleProperty());
 		initTagsListView();
 	}
 

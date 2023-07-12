@@ -14,7 +14,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import space.sadfox.dataccess.action.ActionEntity;
 import space.sadfox.dataccess.action.ActionEntityAdapter;
-import space.sadfox.owlook.moduleapi.ChangeHistoryKeeping;
+import space.sadfox.owlook.jaxb.ChangeHistoryKeeping;
 
 @XmlAccessorType(XmlAccessType.NONE)
 public class ActionDecorator implements ChangeHistoryKeeping {

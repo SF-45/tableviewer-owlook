@@ -1,4 +1,4 @@
-import space.sadfox.owlook.moduleapi.Module;
+import space.sadfox.owlook.moduleapi.OwlookModule;
 import space.sadfox.owlook.moduleapi.Workspace;
 import space.sadfox.tableviewer.TableViewerProvider;
 
@@ -15,7 +15,7 @@ module space.sadfox.tableviewer {
 //	requires javafx.fxml;
 	
 	
-	provides Module with TableViewerProvider;
+	provides OwlookModule with TableViewerProvider;
 	provides Workspace with TableViewerProvider;
 	
 	opens space.sadfox.tableviewer to jakarta.xml.bind, javafx.fxml;
