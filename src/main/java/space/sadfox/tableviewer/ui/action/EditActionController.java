@@ -2,7 +2,6 @@ package space.sadfox.tableviewer.ui.action;
 
 import java.io.IOException;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;

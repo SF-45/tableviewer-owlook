@@ -24,7 +24,6 @@ import space.sadfox.tableviewer.ui.TableViewerTab;
 public class ActionButton extends Button {
 
 	private ActionDecorator actionDecorator;
-	private Action action;
 	private TableViewerTab parent;
 
 	public ActionButton(ActionDecorator actionDecorator, TableViewerTab parent) {
@@ -46,7 +45,6 @@ public class ActionButton extends Button {
 			try {
 				getAction().run(selection.getSelectedItems().toArray(new DataEntity[0]));
 			} catch (ActionProviderNotFound e) {
-				// TODO Оповещение туть
 				MessageBox messageBox = new MessageBox(AlertType.WARNING);
 				messageBox.setTitle("Action provider not found");
 				messageBox.setHeaderText("Action provider not found");
