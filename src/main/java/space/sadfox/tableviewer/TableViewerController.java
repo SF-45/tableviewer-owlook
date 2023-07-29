@@ -18,8 +18,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
-import space.sadfox.owlook.jaxb.EntityLoader;
 import space.sadfox.owlook.ui.base.Controller;
+import space.sadfox.owlook.utils.EntityLoader;
 import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 

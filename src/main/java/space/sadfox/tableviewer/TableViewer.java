@@ -25,14 +25,15 @@ import space.sadfox.dataccess.filter.TableDataFilter;
 import space.sadfox.dataccess.filter.TableDataFilterAdapter;
 import space.sadfox.dataccess.view.TableDataView;
 import space.sadfox.dataccess.view.TableDataViewAdapter;
-import space.sadfox.owlook.jaxb.EntityLoader;
-import space.sadfox.owlook.jaxb.JAXBEntity;
+import space.sadfox.owlook.base.jaxb.JAXBEntity;
+import space.sadfox.owlook.ui.base.Controllable;
 import space.sadfox.owlook.ui.base.Controller;
+import space.sadfox.owlook.utils.EntityLoader;
 import space.sadfox.owlook.utils.Nullable;
 
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement
-public class TableViewer extends JAXBEntity {
+public class TableViewer extends JAXBEntity implements Controllable {
 
 	private final StringProperty title = new SimpleStringProperty("");
 	private final ObjectProperty<TableData> tableData = new SimpleObjectProperty<>();

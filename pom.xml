@@ -1,14 +1,15 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	
+
 	<groupId>space.sadfox</groupId>
 	<artifactId>wstableviewer</artifactId>
-	<version>0.0.1</version>
+	<version>0.3.1</version>
 	<name>Table Viewer</name>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<junit.version>5.8.2</junit.version>
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
 	</properties>
@@ -16,42 +17,85 @@
 	<dependencies>
 		<dependency>
 			<groupId>space.sadfox</groupId>
+			<artifactId>owlook.base</artifactId>
+			<version>0.4.21</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>space.sadfox</groupId>
 			<artifactId>owlook</artifactId>
-			<version>${owlook.currentVersion}</version>
+			<version>0.4.13</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>space.sadfox</groupId>
 			<artifactId>xmldataccess</artifactId>
-			<version>${xmldataccess.currentVersion}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>space.sadfox</groupId>
-			<artifactId>execactions</artifactId>
-			<version>0.0.1</version>
+			<version>0.4.2</version>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>versions-maven-plugin</artifactId>
+				<version>2.16.0</version>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<goals>
+							<goal>use-latest-releases</goal>
+						</goals>
+						<configuration>
+							<includes>
+								space.sadfox:owlook.base,space.sadfox:owlook,space.sadfox:xmldataccess</includes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.10.1</version>
+				<version>3.11.0</version>
 				<configuration>
-					<source>${maven.compiler.source}</source>
-					<target>${maven.compiler.target}</target>
+					<source>11</source>
+					<target>11</target>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.3.0</version>
-				<configuration>
-					<outputDirectory>${owlook.moduleDirectory}</outputDirectory>
-				</configuration>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.4.0</version>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<excludeScope>provided</excludeScope>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
-
+			<plugin>
+				<groupId>space.sadfox</groupId>
+				<artifactId>owlook-packer-maven-plugin</artifactId>
+				<version>0.0.1</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>module-pack</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${owlook.moduleDirectory}</outputDirectory>
+							<requireOwlookModule>xmldataccess</requireOwlookModule>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 </project>

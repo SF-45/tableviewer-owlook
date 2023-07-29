@@ -9,7 +9,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import space.sadfox.dataccess.dataccess.TableData;
 import space.sadfox.dataccess.dataccess.TableDatas;
-import space.sadfox.owlook.jaxb.EntityChangeListener;
+import space.sadfox.owlook.base.jaxb.EntityChangeListener;
 import space.sadfox.owlook.ui.base.Controller;
 import space.sadfox.owlook.ui.tools.OpenEntityDialog;
 import space.sadfox.owlook.utils.Nullable;

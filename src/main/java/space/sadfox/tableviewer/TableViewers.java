@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import jakarta.xml.bind.JAXBException;
 import space.sadfox.dataccess.action.ActionEntity;
-import space.sadfox.owlook.jaxb.EntityLoader;
+import space.sadfox.owlook.utils.EntityLoader;
 import space.sadfox.owlook.utils.OwlLogger;
 
 public class TableViewers {

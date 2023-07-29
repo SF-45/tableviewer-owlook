@@ -171,7 +171,7 @@ public class ActionController extends Controller {
 		root.setCenter(getTagAccordion());
 
 		for (ActionProvider actionProvider : ActionEntities.getActionProviders()) {
-			MenuItem menuItem = new MenuItem(actionProvider.getModuleExtensionName());
+			MenuItem menuItem = new MenuItem(actionProvider.getComponentName());
 			menuItem.setOnAction(event -> {
 				ActionDecorator newActionDecorator = new ActionDecorator();
 				try {

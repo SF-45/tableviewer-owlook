@@ -7,12 +7,14 @@ import javafx.scene.Node;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
+import javafx.scene.control.Alert.AlertType;
 import space.sadfox.dataccess.dataccess.TableData;
 import space.sadfox.dataccess.dataccess.TableDataController;
 import space.sadfox.dataccess.dataccess.TableDataDao;
 import space.sadfox.dataccess.filter.TableDataFilter;
 import space.sadfox.dataccess.view.TableViewForTableData;
-import space.sadfox.owlook.jaxb.EntityChangeListener;
+import space.sadfox.owlook.base.jaxb.EntityChangeListener;
+import space.sadfox.owlook.ui.tools.MessageBox;
 import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.owlook.utils.OwlLogger;
 import space.sadfox.tableviewer.TableViewer;
@@ -138,6 +140,10 @@ public class TableViewerTab extends Tab {
 				} catch (IOException e) {
 					OwlLogger.registerException(1, e);
 				} catch (Nullable e) {
+					MessageBox messageBox = new MessageBox(AlertType.INFORMATION);
+					messageBox.setTitle("Table Data Not Set");
+					messageBox.setHeaderText("Table Data Not Set");
+					messageBox.showAndWait();
 				}
 			});
 			tableDataMenu.getItems().add(editTableData);
@@ -147,6 +153,10 @@ public class TableViewerTab extends Tab {
 				try {
 					new TableDataDao(getTableViewer().getTableDataSafe()).loadData();
 				} catch (Nullable e) {
+					MessageBox messageBox = new MessageBox(AlertType.INFORMATION);
+					messageBox.setTitle("Table Data Not Set");
+					messageBox.setHeaderText("Table Data Not Set");
+					messageBox.showAndWait();
 				}
 			});
 			tableDataMenu.getItems().add(reloadData);
