@@ -101,6 +101,7 @@ public class TableViewerTab extends Tab {
 	public TableViewForTableData getTableDataViewTable() {
 		if (tableDataViewTable == null) {
 			tableDataViewTable = new TableViewForTableData();
+			tableDataViewTable.getFindActionDelay().delayProperty().bind(getTableViewer().searchDelayProperty());
 		}
 		return tableDataViewTable;
 	}

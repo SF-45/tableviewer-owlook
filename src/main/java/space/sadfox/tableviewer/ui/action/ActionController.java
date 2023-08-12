@@ -21,7 +21,7 @@ import javafx.stage.Modality;
 import space.sadfox.dataccess.action.ActionEntities;
 import space.sadfox.dataccess.action.ActionEntity;
 import space.sadfox.dataccess.action.ActionProvider;
-import space.sadfox.owlook.ui.base.Controller;
+import space.sadfox.owlook.ui.base.FXMLController;
 import space.sadfox.owlook.ui.tools.OpenEntityDialog;
 import space.sadfox.owlook.utils.OwlLogger;
 import space.sadfox.tableviewer.ActionDecorator;
@@ -32,7 +32,7 @@ import space.sadfox.tableviewer.ui.TableViewerTab;
 import space.sadfox.tableviewer.ui.base.ButtonList;
 import space.sadfox.tableviewer.ui.base.GroupAccordion;
 
-public class ActionController extends Controller {
+public class ActionController extends FXMLController {
 
 	private class ActionDecoratorButtonList extends ButtonList {
 

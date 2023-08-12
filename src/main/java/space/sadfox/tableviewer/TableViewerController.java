@@ -10,6 +10,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.Tab;
@@ -18,17 +19,20 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
-import space.sadfox.owlook.ui.base.Controller;
+import space.sadfox.owlook.ui.base.FXMLController;
 import space.sadfox.owlook.utils.EntityLoader;
 import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 
-public class TableViewerController extends Controller {
+public class TableViewerController extends FXMLController {
 
 	
 
     @FXML
     private BorderPane actionsRoot;
+
+    @FXML
+    private ScrollPane filtersRoot;
 
     @FXML
     private MenuBar menuBar;
@@ -38,6 +42,9 @@ public class TableViewerController extends Controller {
 
     @FXML
     private Button searchButton;
+
+    @FXML
+    private ProgressBar searchDelay;
 
     @FXML
     private TextField searchField;
@@ -56,9 +63,6 @@ public class TableViewerController extends Controller {
 
     @FXML
     private ScrollPane viewsRoot;
-    
-    @FXML
-    private ScrollPane filtersRoot;
 
 	public TableViewerController() throws IOException {
 		super(TableViewer.class.getResource("fxml/main-scene.fxml"));
@@ -169,6 +173,7 @@ public class TableViewerController extends Controller {
 					removeTVMenu();
 					menuBar.getMenus().add(tableViewerTab.getMenu());
 					searchHistory.textProperty().bind(tableViewerTab.getTableDataViewTable().searchTextHistoryProperty());
+					searchDelay.progressProperty().bind(tableViewerTab.getTableDataViewTable().getFindActionDelay().progressProperty());
 					searchField.setText(tableViewerTab.getTableDataViewTable().getCurrentSearchText());
 					searchField.textProperty().bindBidirectional(tableViewerTab.getTableDataViewTable().currentSearchTextProperty());
 				} else {

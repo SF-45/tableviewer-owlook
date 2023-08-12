@@ -12,7 +12,9 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -36,6 +38,7 @@ import space.sadfox.owlook.utils.Nullable;
 public class TableViewer extends JAXBEntity implements Controllable {
 
 	private final StringProperty title = new SimpleStringProperty("");
+	private final LongProperty searchDelay = new SimpleLongProperty(0);
 	private final ObjectProperty<TableData> tableData = new SimpleObjectProperty<>();
 	private final ObservableList<TableDataFilter> tableDataFilters = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
 	private final ObservableList<TableDataView> tableDataViews = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
@@ -52,6 +55,19 @@ public class TableViewer extends JAXBEntity implements Controllable {
 
 	public StringProperty titleProperty() {
 		return title;
+	}
+	
+	@XmlElement(name = "searchDelay")
+	public long getSearchDelay() {
+		return searchDelayProperty().get();
+	}
+
+	public void setSearchDelay(long millis) {
+		searchDelayProperty().set(millis);
+	}
+
+	public LongProperty searchDelayProperty() {
+		return searchDelay;
 	}
 
 	@XmlElement(name = "TableData")
@@ -109,7 +125,7 @@ public class TableViewer extends JAXBEntity implements Controllable {
 
 	@Override
 	public List<Object> getProperties() {
-		return Arrays.asList(title, tableData, tableDataFilters, tableDataViews, actionDecorators);
+		return Arrays.asList(title, tableData, tableDataFilters, tableDataViews, actionDecorators, searchDelay);
 	}
 
 	@Override
@@ -163,10 +179,11 @@ public class TableViewer extends JAXBEntity implements Controllable {
 	public String toString() {
 		StringBuilder builder = new StringBuilder("TableViewer: " + getTitle() + "\n");
 		try {
-			builder.append("TableData: " + getTableDataSafe().getTitle() + "\n\n");
+			builder.append("TableData: " + getTableDataSafe().getTitle() + "\n");
 		} catch (Nullable e) {
 			builder.append("TableData: Indefined\n\n");
 		}
+		builder.append("Search Delay: " + searchDelay.get() + "ms\n\n");
 
 		builder.append("Filters:\n");
 		getTableDataFilters().forEach(s -> {

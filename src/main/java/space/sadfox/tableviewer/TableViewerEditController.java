@@ -4,18 +4,19 @@ import java.io.IOException;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.SelectionMode;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
+import javafx.util.StringConverter;
 import space.sadfox.dataccess.dataccess.TableData;
 import space.sadfox.dataccess.dataccess.TableDatas;
 import space.sadfox.owlook.base.jaxb.EntityChangeListener;
-import space.sadfox.owlook.ui.base.Controller;
-import space.sadfox.owlook.ui.tools.OpenEntityDialog;
+import space.sadfox.owlook.ui.base.FXMLController;
 import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.owlook.utils.OwlLogger;
 
-public class TableViewerEditController extends Controller {
+public class TableViewerEditController extends FXMLController {
 
 	@FXML
 	private Button createTableDataButton;
@@ -25,6 +26,12 @@ public class TableViewerEditController extends Controller {
 
 	@FXML
 	private TextArea previewTextArea;
+
+	@FXML
+	private Slider searchDelaySlider;
+
+	@FXML
+	private TextField searchDelayTextBox;
 
 	@FXML
 	private Button selectTableDataButton;
@@ -51,7 +58,7 @@ public class TableViewerEditController extends Controller {
 				refreshTableData();
 			}
 		};
-		
+
 		getTableViewer().tableDataProperty().addListener((property, oldValue, newValue) -> {
 			refreshTableData();
 			if (oldValue != null) {
@@ -73,21 +80,87 @@ public class TableViewerEditController extends Controller {
 				getTableViewer().getTableDataSafe().getConfigController().show();
 			} catch (IOException e) {
 				OwlLogger.registerException(1, e);
-			} catch (Nullable e) {}
-		});
-
-		selectTableDataButton.setOnAction(event -> {
-			try {
-				OpenEntityDialog<TableData> openEntityDialog = new OpenEntityDialog<>(TableData.class, SelectionMode.SINGLE);
-				openEntityDialog.showAndWait();
-				if (openEntityDialog.isOpened()) {
-					getTableViewer().setTableData(openEntityDialog.getOpenned().get(0));
-				}
-			} catch (IOException e) {
-				OwlLogger.registerException(1, e);
+			} catch (Nullable e) {
 			}
 		});
 
+		searchDelaySlider.setValue(getTableViewer().getSearchDelay());
+		searchDelaySlider.valueProperty().bindBidirectional(getTableViewer().searchDelayProperty());
+
+		searchDelayTextBox.setText(String.valueOf(searchDelaySlider.getValue()));
+		searchDelayTextBox.textProperty().bindBidirectional(searchDelaySlider.valueProperty().asObject(),
+				new StringConverter<Double>() {
+					@Override
+					public String toString(Double object) {
+						return String.valueOf(object.longValue());
+					}
+
+					@Override
+					public Double fromString(String string) {
+						Double min = searchDelaySlider.getMin();
+						Double max = searchDelaySlider.getMax();
+						try {
+							return normolizeDouble(min, max, Double.parseDouble(string));
+						} catch (NumberFormatException e) {
+							return min;
+						}
+					}
+				});
+
+		searchDelayTextBox.setTextFormatter(new TextFormatter<>(change -> {
+			if (change.getText().isEmpty()) {
+				return change;
+			} else if (!change.getText().matches("[0-9]+")) {
+				return null;
+			} else {
+				double max = searchDelaySlider.getMax();
+				Double i = searchDelaySlider.getMin();
+
+				int endRange = change.getControlText().length();
+
+				try {
+					i = Double.parseDouble(change.getControlNewText());
+					if (i > max) {
+						i = max;
+						throw new NumberFormatException();
+					}
+				} catch (NumberFormatException e) {
+					change.setRange(0, endRange);
+					change.setText(String.valueOf(i.longValue()));
+				}
+				return change;
+			}
+		}));
+		Runnable minValidate = () -> {
+			Double min = searchDelaySlider.getMin();
+			Double i = min;
+			String newText = searchDelayTextBox.getText();
+
+			try {
+				i = Double.parseDouble(newText);
+				if (i < min) {
+					i = min;
+					throw new NumberFormatException();
+				}
+
+			} catch (NumberFormatException e) {
+				searchDelayTextBox.setText(String.valueOf(i.longValue()));
+			}
+			System.out.println("Min = " + min + " i = " + i);
+		};
+		searchDelayTextBox.setOnAction(event -> minValidate.run());
+		searchDelayTextBox.focusedProperty().addListener((property, oldValue, newValue) -> minValidate.run());
+
+	}
+
+	private Double normolizeDouble(Double min, Double max, Double current) {
+		if (current < min) {
+			return min;
+		}
+		if (current > max) {
+			return max;
+		}
+		return current;
 	}
 
 	private TableViewer getTableViewer() {

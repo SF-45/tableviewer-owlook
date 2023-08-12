@@ -17,13 +17,14 @@ import javafx.scene.layout.BorderPane;
 import space.sadfox.dataccess.action.ActionEntity;
 import space.sadfox.dataccess.dataccess.TableData;
 import space.sadfox.owlook.ui.base.Controller;
+import space.sadfox.owlook.ui.base.FXMLController;
 import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.tableviewer.ActionDecorator;
 import space.sadfox.tableviewer.ActionDecoratorsCollector;
 import space.sadfox.tableviewer.ResourceTarget;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 
-public class EditActionController extends Controller {
+public class EditActionController extends FXMLController {
 
 	@FXML
 	private BorderPane root;
