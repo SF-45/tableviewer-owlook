@@ -46,7 +46,6 @@ public class TableViewerProvider implements OwlookModule, Workspace {
 
 	@Override
 	public void initModule() {
-		// TODO Auto-generated method stub
 		
 	}
 

@@ -164,11 +164,7 @@ public class TableViewerTab extends Tab {
 
 			MenuItem editTableViewer = new MenuItem("Properties");
 			editTableViewer.setOnAction(event -> {
-				try {
-					new TableViewerEditController(getTableViewer()).show();
-				} catch (IOException e) {
-					OwlLogger.registerException(1, e);
-				}
+				getTableViewer().getConfigController().show();
 			});
 			menu.getItems().add(editTableViewer);
 		}
