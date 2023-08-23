@@ -40,7 +40,7 @@ public class TableViewerProvider implements OwlookModule, Workspace {
 	}
 
 	@Override
-	public List<Class<? extends JAXBEntity>> getJaxbEntities() {
+	public List<Class<? extends JAXBEntity>> getOwlEntities() {
 		return Arrays.asList(TableViewer.class);
 	}
 
