@@ -1,178 +1,172 @@
 package space.sadfox.tableviewer.ui;
 
 import java.io.IOException;
-
 import javafx.beans.binding.Bindings;
 import javafx.scene.Node;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
-import javafx.scene.control.Alert.AlertType;
-import space.sadfox.dataccess.dataccess.TableData;
+import space.sadfox.dataccess.dataccess.TableData.DataUpdateListener;
 import space.sadfox.dataccess.dataccess.TableDataController;
 import space.sadfox.dataccess.dataccess.TableDataDao;
 import space.sadfox.dataccess.filter.TableDataFilter;
 import space.sadfox.dataccess.view.TableViewForTableData;
-import space.sadfox.owlook.base.jaxb.EntityChangeListener;
+import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.ui.tools.MessageBox;
+import space.sadfox.owlook.utils.Logger;
 import space.sadfox.owlook.utils.Nullable;
-import space.sadfox.owlook.utils.OwlLogger;
 import space.sadfox.tableviewer.TableViewer;
-import space.sadfox.tableviewer.TableViewerEditController;
 import space.sadfox.tableviewer.ui.action.ActionController;
 import space.sadfox.tableviewer.ui.filter.FiltersTab;
 import space.sadfox.tableviewer.ui.view.ViewsTab;
 
 public class TableViewerTab extends Tab {
 
-	private TableViewer tableViewer;
+  private Owl<TableViewer> tableViewerOwl;
 
-	private ActionController actionsNode;
-	private ViewsTab viewsNode;
-	private FiltersTab filtersNode;
+  private ActionController actionsNode;
+  private ViewsTab viewsNode;
+  private FiltersTab filtersNode;
 
-	private Menu menu;
+  private Menu menu;
 
-	private TableViewForTableData tableDataViewTable;
+  private TableViewForTableData tableDataViewTable;
 
-	public TableViewerTab(TableViewer tableViewer) {
-		this.tableViewer = tableViewer;
+  public TableViewerTab(Owl<TableViewer> tableViewerOwl) {
+    this.tableViewerOwl = tableViewerOwl;
 
-		filtersNode = new FiltersTab(this);
-		viewsNode = new ViewsTab(this);
+    filtersNode = new FiltersTab(this);
+    viewsNode = new ViewsTab(this);
 
-		try {
-			actionsNode = new ActionController(this);
-		} catch (IOException e) {
-			OwlLogger.registerException(1, e);
-		}
-		this.setContent(getTableDataViewTable());
-		initializ();
-	}
+    try {
+      actionsNode = new ActionController(this);
+    } catch (IOException e) {
+      Logger.registerException(1, e);
+    }
+    this.setContent(getTableDataViewTable());
+    initializ();
+  }
 
-	private void initializ() {
+  private void initializ() {
 
-		EntityChangeListener tableDataChangeListener = change -> {
-			if (change instanceof TableData.Change) {
-				TableData.Change tdchange = (TableData.Change) change;
-				if (tdchange.wasDataUpdate()) {
-					reloadCurrentData();
-				}
-				
-			}
-		};
-		
-		try {
-			getTableViewer().getTableDataSafe().addEntityChangeListener(tableDataChangeListener);
-		} catch (Nullable e) {
-		}
-		
-		getTableViewer().tableDataProperty().addListener((property, oldValue, newValue) -> {
-			if (oldValue != null) {
-				oldValue.removeEntityChangeListener(tableDataChangeListener);
-			}
-			if (newValue != null ) {
-				newValue.addEntityChangeListener(tableDataChangeListener);
-			}
-			reloadCurrentData();
-		});
+    DataUpdateListener tableDataUpdateListener = () -> {
+      reloadCurrentData();
+    };
 
-		
+    try {
+      getTableViewer().entity().getTableDataSafe().entity()
+          .addDataUpdateListener(tableDataUpdateListener);
+    } catch (Nullable e) {
+    }
 
-		if (filtersNode.getSelectedTableDataFilter() != null) {
-			TableDataFilter selectFilter = filtersNode.getSelectedTableDataFilter();
-			this.textProperty()
-					.bind(Bindings.concat(tableViewer.titleProperty(), "[", selectFilter.titleProperty(), "]"));
-		} else {
-			this.textProperty().bind(tableViewer.titleProperty());
-		}
-		filtersNode.selectedTableDataFilterProperty().addListener((property, oldValue, newValue) -> {
-			this.textProperty().unbind();
-			if (newValue != null) {
-				this.textProperty()
-						.bind(Bindings.concat(tableViewer.titleProperty(), "[", newValue.titleProperty(), "]"));
-			} else {
+    getTableViewer().entity().tableDataProperty().addListener((property, oldValue, newValue) -> {
+      if (oldValue != null) {
+        oldValue.entity().removeDataUpdateListener(tableDataUpdateListener);
+      }
+      if (newValue != null) {
+        newValue.entity().addDataUpdateListener(tableDataUpdateListener);
+      }
+      reloadCurrentData();
+    });
 
-				this.textProperty().bind(tableViewer.titleProperty());
-			}
-		});
-	}
 
-	public TableViewForTableData getTableDataViewTable() {
-		if (tableDataViewTable == null) {
-			tableDataViewTable = new TableViewForTableData();
-			tableDataViewTable.getFindActionDelay().delayProperty().bind(getTableViewer().searchDelayProperty());
-		}
-		return tableDataViewTable;
-	}
 
-	public TableViewer getTableViewer() {
-		return tableViewer;
-	}
-	
-	public TableData getTableData( ) throws Nullable {
-		return getTableViewer().getTableDataSafe();
-	}
+    if (filtersNode.getSelectedTableDataFilter() != null) {
+      Owl<TableDataFilter> selectFilter = filtersNode.getSelectedTableDataFilter();
+      this.textProperty().bind(Bindings.concat(tableViewerOwl.head().titleProperty(), "[",
+          selectFilter.head().titleProperty(), "]"));
+    } else {
+      this.textProperty().bind(tableViewerOwl.head().titleProperty());
+    }
+    filtersNode.selectedTableDataFilterProperty().addListener((property, oldValue, newValue) -> {
+      this.textProperty().unbind();
+      if (newValue != null) {
+        this.textProperty().bind(Bindings.concat(tableViewerOwl.head().titleProperty(), "[",
+            newValue.head().titleProperty(), "]"));
+      } else {
 
-	public Node getViewsNode() {
-		return viewsNode;
-	}
+        this.textProperty().bind(tableViewerOwl.head().titleProperty());
+      }
+    });
+  }
 
-	public Node getFiltersNode() {
-		return filtersNode;
-	}
+  public TableViewForTableData getTableDataViewTable() {
+    if (tableDataViewTable == null) {
+      tableDataViewTable = new TableViewForTableData();
+      tableDataViewTable.getFindActionDelay().delayProperty()
+          .bind(getTableViewer().entity().searchDelayProperty());
+    }
+    return tableDataViewTable;
+  }
 
-	public Node getActionsNode() {
-		return actionsNode.getParent();
-	}
+  public Owl<TableViewer> getTableViewer() {
+    return tableViewerOwl;
+  }
 
-	public Menu getMenu() {
-		if (menu == null) {
-			menu = new Menu(getTableViewer().getTitle());
-			menu.textProperty().bindBidirectional(getTableViewer().titleProperty());
+  public Node getViewsNode() {
+    return viewsNode;
+  }
 
-			Menu tableDataMenu = new Menu("Data");
-			menu.getItems().add(tableDataMenu);
+  public Node getFiltersNode() {
+    return filtersNode;
+  }
 
-			MenuItem editTableData = new MenuItem("Edit Table Data");
-			editTableData.setOnAction(event -> {
-				try {
-					new TableDataController(getTableViewer().getTableDataSafe()).show();
-				} catch (IOException e) {
-					OwlLogger.registerException(1, e);
-				} catch (Nullable e) {
-					MessageBox messageBox = new MessageBox(AlertType.INFORMATION);
-					messageBox.setTitle("Table Data Not Set");
-					messageBox.setHeaderText("Table Data Not Set");
-					messageBox.showAndWait();
-				}
-			});
-			tableDataMenu.getItems().add(editTableData);
+  public Node getActionsNode() {
+    return actionsNode.getParent();
+  }
 
-			MenuItem reloadData = new MenuItem("Reload");
-			reloadData.setOnAction(event -> {
-				try {
-					new TableDataDao(getTableViewer().getTableDataSafe()).loadData();
-				} catch (Nullable e) {
-					MessageBox messageBox = new MessageBox(AlertType.INFORMATION);
-					messageBox.setTitle("Table Data Not Set");
-					messageBox.setHeaderText("Table Data Not Set");
-					messageBox.showAndWait();
-				}
-			});
-			tableDataMenu.getItems().add(reloadData);
+  public Menu getMenu() {
+    if (menu == null) {
+      menu = new Menu(getTableViewer().head().getTitle());
+      menu.textProperty().bindBidirectional(getTableViewer().head().titleProperty());
 
-			MenuItem editTableViewer = new MenuItem("Properties");
-			editTableViewer.setOnAction(event -> {
-				getTableViewer().getConfigController().show();
-			});
-			menu.getItems().add(editTableViewer);
-		}
-		return menu;
-	}
+      Menu tableDataMenu = new Menu("Data");
+      menu.getItems().add(tableDataMenu);
 
-	public void reloadCurrentData() {
-		filtersNode.reloadData();
-	}
+      MenuItem editTableData = new MenuItem("Edit Table Data");
+      editTableData.setOnAction(event -> {
+        try {
+          new TableDataController(getTableViewer().entity().getTableDataSafe()).show();
+        } catch (IOException e) {
+          Logger.registerException(1, e);
+        } catch (Nullable e) {
+          MessageBox messageBox = new MessageBox(AlertType.INFORMATION);
+          messageBox.setTitle("Table Data Not Set");
+          messageBox.setHeaderText("Table Data Not Set");
+          messageBox.showAndWait();
+        }
+      });
+      tableDataMenu.getItems().add(editTableData);
+
+      MenuItem reloadData = new MenuItem("Reload");
+      reloadData.setOnAction(event -> {
+        try {
+          new TableDataDao(getTableViewer().entity().getTableDataSafe()).loadData();
+        } catch (Nullable e) {
+          MessageBox messageBox = new MessageBox(AlertType.INFORMATION);
+          messageBox.setTitle("Table Data Not Set");
+          messageBox.setHeaderText("Table Data Not Set");
+          messageBox.showAndWait();
+        }
+      });
+      tableDataMenu.getItems().add(reloadData);
+
+      MenuItem editTableViewer = new MenuItem("Properties");
+      editTableViewer.setOnAction(event -> {
+        try {
+          getTableViewer().entity().getController().show();
+        } catch (Exception e) {
+          Logger.registerException(1, e);
+        }
+      });
+      menu.getItems().add(editTableViewer);
+    }
+    return menu;
+  }
+
+  public void reloadCurrentData() {
+    filtersNode.reloadData();
+  }
 
 }

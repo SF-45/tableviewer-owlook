@@ -3,127 +3,130 @@ package space.sadfox.tableviewer;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import space.sadfox.owlook.base.owl.Owl;
 
 public class ActionDecoratorsCollector {
 
-	private final TableViewer tableViewer;
+  private final Owl<TableViewer> tableViewer;
 
-	private final ObservableList<String> actionTags = FXCollections
-			.synchronizedObservableList(FXCollections.observableArrayList());
-	private final ObservableList<String> actionProviders = FXCollections
-			.synchronizedObservableList(FXCollections.observableArrayList());
+  private final ObservableList<String> actionTags =
+      FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
+  private final ObservableList<String> actionProviders =
+      FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
 
-	private final ObservableList<String> roActionTags = FXCollections.unmodifiableObservableList(actionTags);
-	private final ObservableList<String> roActionProviders = FXCollections.unmodifiableObservableList(actionProviders);
+  private final ObservableList<String> roActionTags =
+      FXCollections.unmodifiableObservableList(actionTags);
+  private final ObservableList<String> roActionProviders =
+      FXCollections.unmodifiableObservableList(actionProviders);
 
-	private ListChangeListener<String> tagListChangeListener;
-	
-	public ActionDecoratorsCollector(TableViewer tableViewer) {
-		this.tableViewer = tableViewer;
-		
-		tableViewer.getActionDecorators().forEach(this::registerActionDecorator);
-		tableViewer.actionDecoratorsProperty().addListener((ListChangeListener<ActionDecorator>) change -> {
-			while (change.next()) {
-				if (change.wasAdded()) {
-					change.getAddedSubList().forEach(this::registerActionDecorator);
-				}
-				if (change.wasRemoved()) {
-					change.getRemoved().forEach(this::unregisterActionDecorator);
-				}
-			}
-		});
-		
-	}
+  private ListChangeListener<String> tagListChangeListener;
 
-	public ObservableList<String> getTags() {
-		return roActionTags;
-	}
+  public ActionDecoratorsCollector(Owl<TableViewer> tableViewer) {
+    this.tableViewer = tableViewer;
 
-	public ObservableList<String> getProviders() {
-		return roActionProviders;
-	}
-	
-	private void registerActionDecorator(ActionDecorator actionDecorator) {
-		actionDecorator.getTags().forEach(this::checkAndAddTag);
-		checkAndAddProvider(actionDecorator.getAction().getActionProvider());
-		actionDecorator.tagsProperty().addListener(getTagListChangeListener());
-	}
-	
-	private void unregisterActionDecorator(ActionDecorator actionDecorator) {
-		actionDecorator.getTags().forEach(this::checkAndRemoveTag);
-		checkAndRemoveProvider(actionDecorator.getAction().getActionProvider());
-		actionDecorator.tagsProperty().removeListener(getTagListChangeListener());
-	}
-	
-	public void replaceTag(String oldTag, String newTag) {
-		tableViewer.getActionDecorators().forEach(actionDecorator -> {
-			boolean isDel = actionDecorator.getTags().remove(oldTag);
-			if (isDel) {
-				actionDecorator.getTags().add(newTag);
-			}
-		});
-		FXCollections.sort(actionTags);
-	}
-	
-	public void removeTag(String tag) {
-		tableViewer.getActionDecorators().forEach(actionDecorator -> {
-			actionDecorator.getTags().remove(tag);
-		});
-	}
-	
-	private void checkAndAddTag(String tag) {
-		
-		if (!actionTags.contains(tag)) {
-			actionTags.add(tag);
-			FXCollections.sort(actionTags);
-			//actionTags.sort((s1, s2) -> s1.compareTo(s2));
-		}
-	}
-	
-	private void checkAndRemoveTag(String tag) {
-		int countTag = 0;
-		for (ActionDecorator actionDecorator : tableViewer.getActionDecorators()) {
-			if (actionDecorator.getTags().contains(tag)) {
-				countTag++;
-			}
-		}
-		if (countTag == 0) {
-			actionTags.remove(tag);
-		}
-	}
-	
-	private void checkAndAddProvider(String provider) {
-		if (!actionProviders.contains(provider)) {
-			actionProviders.add(provider);
-		}
-	}
-	
-	private void checkAndRemoveProvider(String provider) {
-		int providerCount = 0;
-		for (ActionDecorator actionDecorator : tableViewer.getActionDecorators()) {
-			if (actionDecorator.getAction().getActionProvider().equals(provider)) {
-				providerCount++;
-			}
-		}
-		if (providerCount == 0) {
-			actionProviders.remove(provider);
-		}
-	}
-	
-	private ListChangeListener<String> getTagListChangeListener() {
-		if (tagListChangeListener == null) {
-			tagListChangeListener = change -> {
-				while (change.next()) {
-					if (change.wasAdded()) {
-						change.getAddedSubList().forEach(this::checkAndAddTag);
-					}
-					if (change.wasRemoved()) {
-						change.getRemoved().forEach(this::checkAndRemoveTag);
-					}
-				}
-			};
-		}
-		return tagListChangeListener;
-	}
+    tableViewer.entity().getActionDecorators().forEach(this::registerActionDecorator);
+    tableViewer.entity().actionDecoratorsProperty()
+        .addListener((ListChangeListener<ActionDecorator>) change -> {
+          while (change.next()) {
+            if (change.wasAdded()) {
+              change.getAddedSubList().forEach(this::registerActionDecorator);
+            }
+            if (change.wasRemoved()) {
+              change.getRemoved().forEach(this::unregisterActionDecorator);
+            }
+          }
+        });
+  }
+
+  public ObservableList<String> getTags() {
+    return roActionTags;
+  }
+
+  public ObservableList<String> getProviders() {
+    return roActionProviders;
+  }
+
+  private void registerActionDecorator(ActionDecorator actionDecorator) {
+    actionDecorator.getTags().forEach(this::checkAndAddTag);
+    checkAndAddProvider(actionDecorator.getActionOwl().entity().getActionProvider());
+    actionDecorator.tagsProperty().addListener(getTagListChangeListener());
+  }
+
+  private void unregisterActionDecorator(ActionDecorator actionDecorator) {
+    actionDecorator.getTags().forEach(this::checkAndRemoveTag);
+    checkAndRemoveProvider(actionDecorator.getActionOwl().entity().getActionProvider());
+    actionDecorator.tagsProperty().removeListener(getTagListChangeListener());
+  }
+
+  public void replaceTag(String oldTag, String newTag) {
+    tableViewer.entity().getActionDecorators().forEach(actionDecorator -> {
+      boolean isDel = actionDecorator.getTags().remove(oldTag);
+      if (isDel) {
+        actionDecorator.getTags().add(newTag);
+      }
+    });
+    FXCollections.sort(actionTags);
+  }
+
+  public void removeTag(String tag) {
+    tableViewer.entity().getActionDecorators().forEach(actionDecorator -> {
+      actionDecorator.getTags().remove(tag);
+    });
+  }
+
+  private void checkAndAddTag(String tag) {
+
+    if (!actionTags.contains(tag)) {
+      actionTags.add(tag);
+      FXCollections.sort(actionTags);
+      // actionTags.sort((s1, s2) -> s1.compareTo(s2));
+    }
+  }
+
+  private void checkAndRemoveTag(String tag) {
+    int countTag = 0;
+    for (ActionDecorator actionDecorator : tableViewer.entity().getActionDecorators()) {
+      if (actionDecorator.getTags().contains(tag)) {
+        countTag++;
+      }
+    }
+    if (countTag == 0) {
+      actionTags.remove(tag);
+    }
+  }
+
+  private void checkAndAddProvider(String provider) {
+    if (!actionProviders.contains(provider)) {
+      actionProviders.add(provider);
+    }
+  }
+
+  private void checkAndRemoveProvider(String provider) {
+    int providerCount = 0;
+    for (ActionDecorator actionDecorator : tableViewer.entity().getActionDecorators()) {
+      if (actionDecorator.getActionOwl().entity().getActionProvider().equals(provider)) {
+        providerCount++;
+      }
+    }
+    if (providerCount == 0) {
+      actionProviders.remove(provider);
+    }
+  }
+
+  private ListChangeListener<String> getTagListChangeListener() {
+    if (tagListChangeListener == null) {
+      tagListChangeListener = change -> {
+        while (change.next()) {
+          if (change.wasAdded()) {
+            change.getAddedSubList().forEach(this::checkAndAddTag);
+          }
+          if (change.wasRemoved()) {
+            change.getRemoved().forEach(this::checkAndRemoveTag);
+          }
+        }
+      };
+    }
+    return tagListChangeListener;
+  }
 
 }

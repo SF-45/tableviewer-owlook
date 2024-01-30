@@ -1,174 +1,173 @@
 package space.sadfox.tableviewer.ui.view;
 
 import java.io.IOException;
-
-import jakarta.xml.bind.JAXBException;
 import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.SelectionMode;
 import javafx.scene.control.ToggleGroup;
-import javafx.stage.Modality;
 import space.sadfox.dataccess.view.TableDataView;
 import space.sadfox.dataccess.view.TableDataViews;
-import space.sadfox.owlook.ui.tools.OpenEntityDialog;
-import space.sadfox.owlook.utils.EntityLoader;
+import space.sadfox.owlook.base.owl.Owl;
+import space.sadfox.owlook.owlery.OwlLoader;
+import space.sadfox.owlook.utils.Logger;
 import space.sadfox.owlook.utils.Nullable;
-import space.sadfox.owlook.utils.OwlLogger;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 import space.sadfox.tableviewer.ui.base.ButtonList;
 
 public class ViewsTab extends ButtonList {
 
-	private ToggleGroup toggleGroup;
-	private TableViewerTab tableViewerTab;
+  private ToggleGroup toggleGroup;
+  private TableViewerTab tableViewerTab;
 
-	public ViewsTab(TableViewerTab tableViewerTab) {
+  public ViewsTab(TableViewerTab tableViewerTab) {
 
-		this.tableViewerTab = tableViewerTab;
+    this.tableViewerTab = tableViewerTab;
 
-		toggleGroup = new ToggleGroup();
-		getTableViewerTab().getTableViewer().getTableDataViews().forEach(this::addView);
-		getTableViewerTab().getTableViewer().tableDataViewsProperty()
-				.addListener((ListChangeListener<TableDataView>) change -> {
-					while (change.next()) {
-						if (change.wasAdded()) {
-							change.getAddedSubList().forEach(view -> {
-								int ind = getTableViewerTab().getTableViewer().getTableDataViews().indexOf(view);
-								addView(ind, view);
+    toggleGroup = new ToggleGroup();
+    getTableViewerTab().getTableViewer().entity().getTableDataViews().forEach(this::addView);
+    getTableViewerTab().getTableViewer().entity().tableDataViewsProperty()
+        .addListener((ListChangeListener<Owl<TableDataView>>) change -> {
+          while (change.next()) {
+            if (change.wasAdded()) {
+              change.getAddedSubList().forEach(view -> {
+                int ind =
+                    getTableViewerTab().getTableViewer().entity().getTableDataViews().indexOf(view);
+                addView(ind, view);
 
-							});
-						}
-						if (change.wasRemoved()) {
-							change.getRemoved().forEach(view -> {
-								deleteView(view);
-							});
-						}
-					}
-				});
+              });
+            }
+            if (change.wasRemoved()) {
+              change.getRemoved().forEach(view -> {
+                deleteView(view);
+              });
+            }
+          }
+        });
 
-		ContextMenu contextMenu = new ContextMenu();
-		setContextMenu(contextMenu);
+    ContextMenu contextMenu = new ContextMenu();
+    setContextMenu(contextMenu);
 
-		MenuItem createView = new MenuItem("Create View");
-		createView.setOnAction(event -> {
-			TableDataView newView = TableDataViews.createTableDataView();
-			if (newView == null)
-				return;
-			newView.setTitle("New View");
-			getTableViewerTab().getTableViewer().getTableDataViews().add(newView);
-			editView(newView);
-		});
-		contextMenu.getItems().add(createView);
+    MenuItem createView = new MenuItem("Create View");
+    createView.setOnAction(event -> {
+      Owl<TableDataView> newView = TableDataViews.createTableDataView();
+      if (newView == null)
+        return;
+      newView.head().setTitle("New View");
+      getTableViewerTab().getTableViewer().entity().getTableDataViews().add(newView);
+      editView(newView);
+    });
+    contextMenu.getItems().add(createView);
 
-		MenuItem open = new MenuItem("Open View");
-		open.setOnAction(event -> {
-			try {
-				OpenEntityDialog<TableDataView> openDialog = new OpenEntityDialog<>(TableDataView.class,
-						SelectionMode.MULTIPLE, getTableViewerTab().getTableViewer().getTableDataViews());
-				openDialog.setModality(Modality.APPLICATION_MODAL);
-				openDialog.showAndWait();
-				if (openDialog.isOpened()) {
-					openDialog.getOpenned().forEach(v -> {
-						getTableViewerTab().getTableViewer().getTableDataViews().add(v);
-					});
-				}
-			} catch (IOException e) {
-				OwlLogger.registerException(1, e);
-			}
-		});
-		contextMenu.getItems().add(open);
+    // MenuItem open = new MenuItem("Open View");
+    // open.setOnAction(event -> {
+    // try {
+    // OpenEntityDialog<TableDataView> openDialog = new OpenEntityDialog<>(TableDataView.class,
+    // SelectionMode.MULTIPLE, getTableViewerTab().getTableViewer().getTableDataViews());
+    // openDialog.setModality(Modality.APPLICATION_MODAL);
+    // openDialog.showAndWait();
+    // if (openDialog.isOpened()) {
+    // openDialog.getOpenned().forEach(v -> {
+    // getTableViewerTab().getTableViewer().getTableDataViews().add(v);
+    // });
+    // }
+    // } catch (IOException e) {
+    // OwlLogger.registerException(1, e);
+    // }
+    // });
+    // contextMenu.getItems().add(open);
+    // TODO: Сделвать диалог открытия Совы
 
-	}
+  }
 
-	private void addView(int ind, TableDataView view) {
-		if (view == null)
-			return;
+  private void addView(int ind, Owl<TableDataView> view) {
+    if (view == null)
+      return;
 
-		ViewToggleButton button = new ViewToggleButton(view, getTableViewerTab().getTableViewer());
-		button.setToggleGroup(toggleGroup);
-		button.setOnAction(event -> {
-			getTableViewerTab().getTableDataViewTable().setTableDataView(view);
-		});
-		if (getChildren().size() == 0) {
-			button.fire();
-		}
-		ContextMenu contextMenu = new ContextMenu();
-		button.setContextMenu(contextMenu);
+    ViewToggleButton button = new ViewToggleButton(view, getTableViewerTab().getTableViewer());
+    button.setToggleGroup(toggleGroup);
+    button.setOnAction(event -> {
+      getTableViewerTab().getTableDataViewTable().setTableDataView(view);
+    });
+    if (getChildren().size() == 0) {
+      button.fire();
+    }
+    ContextMenu contextMenu = new ContextMenu();
+    button.setContextMenu(contextMenu);
 
-		MenuItem edit = new MenuItem("Edit View");
-		edit.setOnAction(event -> {
-			editView(view);
-		});
-		contextMenu.getItems().add(edit);
+    MenuItem edit = new MenuItem("Edit View");
+    edit.setOnAction(event -> {
+      editView(view);
+    });
+    contextMenu.getItems().add(edit);
 
-		MenuItem duplicate = new MenuItem("Duplicate View");
-		duplicate.setOnAction(event -> {
-			try {
-				TableDataView newView = EntityLoader.INSTANCE.duplicateEntity(view);
-				getTableViewerTab().getTableViewer().getTableDataViews().add(newView);
-				editView(newView);
-			} catch (JAXBException | IOException e) {
-				OwlLogger.registerException(1, e);
-			}
-		});
-		contextMenu.getItems().add(duplicate);
+    MenuItem duplicate = new MenuItem("Duplicate View");
+    duplicate.setOnAction(event -> {
+      try {
+        Owl<TableDataView> newView = OwlLoader.INSTANCE.duplicateOwl(view);
+        getTableViewerTab().getTableViewer().entity().getTableDataViews().add(newView);
+        editView(newView);
+      } catch (Exception e) {
+        Logger.registerException(1, e);
+      }
+    });
+    contextMenu.getItems().add(duplicate);
 
-		MenuItem close = new MenuItem("Close View");
-		close.setOnAction(event -> {
-			getTableViewerTab().getTableViewer().getTableDataViews().remove(view);
-		});
-		contextMenu.getItems().add(close);
+    MenuItem close = new MenuItem("Close View");
+    close.setOnAction(event -> {
+      getTableViewerTab().getTableViewer().entity().getTableDataViews().remove(view);
+    });
+    contextMenu.getItems().add(close);
 
-		MenuItem delete = new MenuItem("Delete View");
-		delete.setOnAction(event -> {
-			if (TableDataViews.deleteTableDataView(view)) {
-				getTableViewerTab().getTableViewer().getTableDataViews().remove(view);
-			}
-		});
-		contextMenu.getItems().add(delete);
+    MenuItem delete = new MenuItem("Delete View");
+    delete.setOnAction(event -> {
+      if (TableDataViews.deleteTableDataView(view)) {
+        getTableViewerTab().getTableViewer().entity().getTableDataViews().remove(view);
+      }
+    });
+    contextMenu.getItems().add(delete);
 
-		if (ind < 0)
-			getChildren().add(button);
-		else
-			getChildren().add(ind, button);
-	}
+    if (ind < 0)
+      getChildren().add(button);
+    else
+      getChildren().add(ind, button);
+  }
 
-	private void addView(TableDataView view) {
-		addView(-1, view);
-	}
+  private void addView(Owl<TableDataView> view) {
+    addView(-1, view);
+  }
 
-	private void deleteView(TableDataView view) {
-		var btnList = getChildren();
-		for (int i = 0; i < btnList.size(); i++) {
-			Node node = btnList.get(i);
-			if (node instanceof ViewToggleButton) {
-				ViewToggleButton viewButton = (ViewToggleButton) node;
-				if (viewButton.getView().equals(view)) {
-					btnList.remove(i);
-					return;
-				}
-			}
-		}
-	}
+  private void deleteView(Owl<TableDataView> view) {
+    var btnList = getChildren();
+    for (int i = 0; i < btnList.size(); i++) {
+      Node node = btnList.get(i);
+      if (node instanceof ViewToggleButton) {
+        ViewToggleButton viewButton = (ViewToggleButton) node;
+        if (viewButton.getView().equals(view)) {
+          btnList.remove(i);
+          return;
+        }
+      }
+    }
+  }
 
-	private void editView(TableDataView view) {
-		try {
-			view.getConfigController(getTableViewerTab().getTableData()).show();
-		} catch (IOException e) {
-			OwlLogger.registerException(1, e);
-		} catch (Nullable e) {
-			try {
-				view.getConfigController().show();
-			} catch (IOException e1) {
-				OwlLogger.registerException(1, e1);
-			}
-		}
-	}
+  private void editView(Owl<TableDataView> view) {
+    try {
+      view.entity().getController(getTableViewerTab().getTableViewer().entity().getTableDataSafe())
+          .show();
+    } catch (IOException e) {
+      Logger.registerException(1, e);
+    } catch (Nullable e) {
+      try {
+        view.entity().getController().show();
+      } catch (IOException e1) {
+        Logger.registerException(1, e1);
+      }
+    }
+  }
 
-	public TableViewerTab getTableViewerTab() {
-		return tableViewerTab;
-	}
+  public TableViewerTab getTableViewerTab() {
+    return tableViewerTab;
+  }
 
 }

@@ -1,8 +1,6 @@
 package space.sadfox.tableviewer.ui.action;
 
 import java.io.IOException;
-
-import jakarta.xml.bind.JAXBException;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
@@ -14,101 +12,104 @@ import space.sadfox.dataccess.action.ActionEntities;
 import space.sadfox.dataccess.action.ActionEntity;
 import space.sadfox.dataccess.action.ActionProviderNotFound;
 import space.sadfox.dataccess.dataccess.DataEntity;
+import space.sadfox.owlook.base.owl.Owl;
+import space.sadfox.owlook.owlery.OwlLoader;
 import space.sadfox.owlook.ui.tools.MessageBox;
-import space.sadfox.owlook.utils.EntityLoader;
+import space.sadfox.owlook.utils.Logger;
 import space.sadfox.owlook.utils.Nullable;
-import space.sadfox.owlook.utils.OwlLogger;
 import space.sadfox.tableviewer.ActionDecorator;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 
 public class ActionButton extends Button {
 
-	private ActionDecorator actionDecorator;
-	private TableViewerTab parent;
+  private ActionDecorator actionDecorator;
+  private TableViewerTab parent;
 
-	public ActionButton(ActionDecorator actionDecorator, TableViewerTab parent) {
-		this.actionDecorator = actionDecorator;
-		this.parent = parent;
+  public ActionButton(ActionDecorator actionDecorator, TableViewerTab parent) {
+    this.actionDecorator = actionDecorator;
+    this.parent = parent;
 
-		this.setText(getActionEntity().getTitle());
-		getActionEntity().titleProperty().bindBidirectional(this.textProperty());
-		
-		Tooltip tooltip = new Tooltip();
-		tooltip.textProperty().bind(getActionEntity().descriptionProperty());
-		this.setTooltip(tooltip);
-		
-		TableViewSelectionModel<DataEntity> selection = parent.getTableDataViewTable().getSelectionModel();
-		this.setOnAction(event -> {
-			if (selection.isEmpty())
-				return;
+    this.setText(getActionOwl().head().getTitle());
+    getActionOwl().head().titleProperty().bindBidirectional(this.textProperty());
 
-			try {
-				getAction().run(selection.getSelectedItems().toArray(new DataEntity[0]));
-			} catch (ActionProviderNotFound e) {
-				MessageBox messageBox = new MessageBox(AlertType.WARNING);
-				messageBox.setTitle("Action provider not found");
-				messageBox.setHeaderText("Action provider not found");
-				messageBox.showAndWait();
-			}
-		});
+    Tooltip tooltip = new Tooltip();
+    tooltip.textProperty().bind(getActionOwl().entity().descriptionProperty());
+    this.setTooltip(tooltip);
 
-		ContextMenu contextMenu = new ContextMenu();
-		this.setContextMenu(contextMenu);
+    TableViewSelectionModel<DataEntity> selection =
+        parent.getTableDataViewTable().getSelectionModel();
+    this.setOnAction(event -> {
+      if (selection.isEmpty())
+        return;
 
-		MenuItem edit = new MenuItem("Edit Action");
-		edit.setOnAction(event -> {
-			try {
-				new EditActionController(actionDecorator, parent).show();
-			} catch (IOException e) {
-				OwlLogger.registerException(1, e);
-			}
-		});
-		contextMenu.getItems().add(edit);
+      try {
+        getAction().run(selection.getSelectedItems().toArray(new DataEntity[0]));
+      } catch (ActionProviderNotFound e) {
+        MessageBox messageBox = new MessageBox(AlertType.WARNING);
+        messageBox.setTitle("Action provider not found");
+        messageBox.setHeaderText("Action provider not found");
+        messageBox.showAndWait();
+      }
+    });
 
-		MenuItem duplicate = new MenuItem("Duplicate Action");
-		duplicate.setOnAction(event -> {
-			try {
-				ActionEntity newActionEntity = EntityLoader.INSTANCE.duplicateEntity(getActionEntity());
-				ActionDecorator newActionDecorator = new ActionDecorator(newActionEntity,
-						getActionDecorator().getTags());
-				parent.getTableViewer().getActionDecorators().add(newActionDecorator);
-				new EditActionController(newActionDecorator, parent).show();
-			} catch (JAXBException | IOException e) {
-				OwlLogger.registerException(1, e);
-			}
-		});
-		contextMenu.getItems().add(duplicate);
+    ContextMenu contextMenu = new ContextMenu();
+    this.setContextMenu(contextMenu);
 
-		MenuItem close = new MenuItem("Close Action");
-		close.setOnAction(event -> {
-			parent.getTableViewer().getActionDecorators().remove(actionDecorator);
-		});
-		contextMenu.getItems().add(close);
+    MenuItem edit = new MenuItem("Edit Action");
+    edit.setOnAction(event -> {
+      try {
+        new EditActionController(actionDecorator, parent).show();
+      } catch (IOException e) {
+        Logger.registerException(1, e);
+      }
+    });
+    contextMenu.getItems().add(edit);
 
-		MenuItem delete = new MenuItem("Delete Filter");
-		delete.setOnAction(event -> {
-			if (ActionEntities.deleteActionEntity(getActionEntity())) {
-				parent.getTableViewer().getActionDecorators().remove(actionDecorator);
-			}
-		});
-		contextMenu.getItems().add(delete);
-	}
+    MenuItem duplicate = new MenuItem("Duplicate Action");
+    duplicate.setOnAction(event -> {
+      try {
+        Owl<ActionEntity> newActionOwl = OwlLoader.INSTANCE.duplicateOwl(getActionOwl());
+        ActionDecorator newActionDecorator =
+            new ActionDecorator(newActionOwl, getActionDecorator().getTags());
+        parent.getTableViewer().entity().getActionDecorators().add(newActionDecorator);
+        new EditActionController(newActionDecorator, parent).show();
+      } catch (Exception e) {
+        Logger.registerException(1, e);
+      }
+    });
+    contextMenu.getItems().add(duplicate);
 
-	public ActionDecorator getActionDecorator() {
-		return actionDecorator;
-	}
+    MenuItem close = new MenuItem("Close Action");
+    close.setOnAction(event -> {
+      parent.getTableViewer().entity().getActionDecorators().remove(actionDecorator);
+    });
+    contextMenu.getItems().add(close);
 
-	public ActionEntity getActionEntity() {
-		return getActionDecorator().getAction();
-	}
+    MenuItem delete = new MenuItem("Delete Filter");
+    delete.setOnAction(event -> {
+      if (ActionEntities.deleteActionEntity(getActionOwl())) {
+        parent.getTableViewer().entity().getActionDecorators().remove(actionDecorator);
+      }
+    });
+    contextMenu.getItems().add(delete);
+  }
 
-	public Action getAction() throws ActionProviderNotFound {
-		try {
-			return ActionEntities.createAction(getActionEntity(), parent.getTableData());
-		} catch (Nullable e) {
-			return ActionEntities.createAction(getActionEntity());
-		}
+  public ActionDecorator getActionDecorator() {
+    return actionDecorator;
+  }
 
-	}
+  public Owl<ActionEntity> getActionOwl() {
+    return getActionDecorator().getActionOwl();
+  }
+
+  public Action getAction() throws ActionProviderNotFound {
+    try {
+      return ActionEntities.createAction(getActionOwl(),
+          parent.getTableViewer().entity().getTableDataSafe());
+    } catch (Nullable e) {
+      return ActionEntities.createAction(getActionOwl());
+    }
+
+  }
 
 }

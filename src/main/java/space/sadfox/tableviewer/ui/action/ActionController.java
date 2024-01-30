@@ -2,8 +2,6 @@ package space.sadfox.tableviewer.ui.action;
 
 import java.io.IOException;
 import java.util.stream.Collectors;
-
-import jakarta.xml.bind.JAXBException;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -13,264 +11,265 @@ import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioButton;
-import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
-import javafx.stage.Modality;
 import space.sadfox.dataccess.action.ActionEntities;
-import space.sadfox.dataccess.action.ActionEntity;
 import space.sadfox.dataccess.action.ActionProvider;
 import space.sadfox.owlook.ui.base.FXMLController;
-import space.sadfox.owlook.ui.tools.OpenEntityDialog;
-import space.sadfox.owlook.utils.OwlLogger;
+import space.sadfox.owlook.utils.Logger;
 import space.sadfox.tableviewer.ActionDecorator;
 import space.sadfox.tableviewer.ActionDecoratorsCollector;
 import space.sadfox.tableviewer.TableViewerProvider;
-import space.sadfox.tableviewer.TableViewers;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 import space.sadfox.tableviewer.ui.base.ButtonList;
 import space.sadfox.tableviewer.ui.base.GroupAccordion;
 
 public class ActionController extends FXMLController {
 
-	private class ActionDecoratorButtonList extends ButtonList {
+  private class ActionDecoratorButtonList extends ButtonList {
 
-		final ObservableList<ActionButton> buttons = FXCollections.observableArrayList();
-		String currentFilter = "";
+    final ObservableList<ActionButton> buttons = FXCollections.observableArrayList();
+    String currentFilter = "";
 
-		ActionDecoratorButtonList() {
-			init();
-			getActionDecorators().forEach(this::createActionButton);
-			getActionDecorators().addListener((ListChangeListener<ActionDecorator>) change -> {
-				while (change.next()) {
-					if (change.wasAdded()) {
-						change.getAddedSubList().forEach(this::createActionButton);
-					}
-					if (change.wasRemoved()) {
-						change.getRemoved().forEach(this::removeActionButton);
-					}
-				}
-			});
+    ActionDecoratorButtonList() {
+      init();
+      getActionDecorators().forEach(this::createActionButton);
+      getActionDecorators().addListener((ListChangeListener<ActionDecorator>) change -> {
+        while (change.next()) {
+          if (change.wasAdded()) {
+            change.getAddedSubList().forEach(this::createActionButton);
+          }
+          if (change.wasRemoved()) {
+            change.getRemoved().forEach(this::removeActionButton);
+          }
+        }
+      });
 
-		}
+    }
 
-		void init() {
-			setSortComparator((node1, node2) -> {
-				if (node1 instanceof ActionButton && node2 instanceof ActionButton) {
-					String buttonName1 = ((ActionButton) node1).getActionEntity().getTitle();
-					String buttonName2 = ((ActionButton) node2).getActionEntity().getTitle();
-					return buttonName1.compareToIgnoreCase(buttonName2);
-				} else {
-					return -1;
-				}
-			});
-		}
+    void init() {
+      setSortComparator((node1, node2) -> {
+        if (node1 instanceof ActionButton && node2 instanceof ActionButton) {
+          String buttonName1 = ((ActionButton) node1).getActionOwl().head().getTitle();
+          String buttonName2 = ((ActionButton) node2).getActionOwl().head().getTitle();
+          return buttonName1.compareToIgnoreCase(buttonName2);
+        } else {
+          return -1;
+        }
+      });
+    }
 
-		void createActionButton(ActionDecorator actionDecorator) {
-			buttons.add(new ActionButton(actionDecorator, getTableViewerTab()));
-			filtred();
-		}
+    void createActionButton(ActionDecorator actionDecorator) {
+      buttons.add(new ActionButton(actionDecorator, getTableViewerTab()));
+      filtred();
+    }
 
-		void removeActionButton(ActionDecorator actionDecorator) {
-			for (int i = 0; i < buttons.size(); i++) {
-				ActionButton actionButton = buttons.get(i);
-				if (actionButton.getActionDecorator().equals(actionDecorator)) {
-					buttons.remove(i);
-					i--;
-				}
-			}
-			filtred();
-		}
+    void removeActionButton(ActionDecorator actionDecorator) {
+      for (int i = 0; i < buttons.size(); i++) {
+        ActionButton actionButton = buttons.get(i);
+        if (actionButton.getActionDecorator().equals(actionDecorator)) {
+          buttons.remove(i);
+          i--;
+        }
+      }
+      filtred();
+    }
 
-		void setFilter(String filter) {
-			currentFilter = filter;
-			filtred();
-		}
+    void setFilter(String filter) {
+      currentFilter = filter;
+      filtred();
+    }
 
-		void filtred() {
-			getChildren().clear();
-			if (currentFilter.equals("")) {
-				addAllAndSort(buttons);
-			} else {
-				var filtredButtons = buttons.stream().filter(but -> but.getActionEntity().getTitle().toLowerCase()
-						.contains(serachTextBox.getText().toLowerCase())).collect(Collectors.toList());
-				addAllAndSort(filtredButtons);
-			}
-		}
+    void filtred() {
+      getChildren().clear();
+      if (currentFilter.equals("")) {
+        addAllAndSort(buttons);
+      } else {
+        var filtredButtons =
+            buttons.stream().filter(but -> but.getActionOwl().head().getTitle().toLowerCase()
+                .contains(serachTextBox.getText().toLowerCase())).collect(Collectors.toList());
+        addAllAndSort(filtredButtons);
+      }
+    }
 
-	}
+  }
 
-	@FXML
-	private MenuButton menuNewAction;
+  @FXML
+  private MenuButton menuNewAction;
 
-	@FXML
-	private Button openAction;
+  @FXML
+  private Button openAction;
 
-	@FXML
-	private RadioButton radioByNone;
+  @FXML
+  private RadioButton radioByNone;
 
-	@FXML
-	private RadioButton radioByProvider;
+  @FXML
+  private RadioButton radioByProvider;
 
-	@FXML
-	private RadioButton radioByTag;
+  @FXML
+  private RadioButton radioByTag;
 
-	@FXML
-	private BorderPane root;
+  @FXML
+  private BorderPane root;
 
-	@FXML
-	private TextField serachTextBox;
+  @FXML
+  private TextField serachTextBox;
 
-	private TableViewerTab tableViewerTab;
-	private ObservableList<ActionDecorator> actionDecorators;
+  private TableViewerTab tableViewerTab;
+  private ObservableList<ActionDecorator> actionDecorators;
 
-	private final ToggleGroup toggleGroup = new ToggleGroup();
+  private final ToggleGroup toggleGroup = new ToggleGroup();
 
-	private GroupAccordion<ActionDecorator, String> tagAccordion;
-	private GroupAccordion<ActionDecorator, String> providerAccordion;
-	private ActionDecoratorButtonList actionDecoratorButtonList;
+  private GroupAccordion<ActionDecorator, String> tagAccordion;
+  private GroupAccordion<ActionDecorator, String> providerAccordion;
+  private ActionDecoratorButtonList actionDecoratorButtonList;
 
-	private final ActionDecoratorsCollector actionDecoratorsCollector;
+  private final ActionDecoratorsCollector actionDecoratorsCollector;
 
-	public ActionController(TableViewerTab tableViewerTab) throws IOException {
-		super(TableViewerProvider.class.getResource("fxml/acion-pane.fxml"));
-		this.tableViewerTab = tableViewerTab;
-		actionDecoratorsCollector = new ActionDecoratorsCollector(tableViewerTab.getTableViewer());
+  public ActionController(TableViewerTab tableViewerTab) throws IOException {
+    super(TableViewerProvider.class.getResource("fxml/acion-pane.fxml"));
+    this.tableViewerTab = tableViewerTab;
+    actionDecoratorsCollector = new ActionDecoratorsCollector(tableViewerTab.getTableViewer());
 
-		initializ();
+    initializ();
 
-	}
+  }
 
-	private void initializ() {
-		root.setCenter(tagAccordion);
-		radioByTag.setToggleGroup(toggleGroup);
-		radioByProvider.setToggleGroup(toggleGroup);
-		radioByNone.setToggleGroup(toggleGroup);
-		serachTextBox.textProperty().addListener((property, oldValue, newValue) -> {
-			if (oldValue.equals(newValue))
-				return;
-			if (newValue != "") {
-				toggleGroup.selectToggle(radioByNone);
-			}
-			getActionDecoratorButtonList().setFilter(newValue);
-		});
+  private void initializ() {
+    root.setCenter(tagAccordion);
+    radioByTag.setToggleGroup(toggleGroup);
+    radioByProvider.setToggleGroup(toggleGroup);
+    radioByNone.setToggleGroup(toggleGroup);
+    serachTextBox.textProperty().addListener((property, oldValue, newValue) -> {
+      if (oldValue.equals(newValue))
+        return;
+      if (newValue != "") {
+        toggleGroup.selectToggle(radioByNone);
+      }
+      getActionDecoratorButtonList().setFilter(newValue);
+    });
 
-		toggleGroup.selectedToggleProperty().addListener((property, oldValue, newValue) -> {
-			
-			if (newValue == radioByTag) {
-				serachTextBox.clear();
-				root.setCenter(getTagAccordion());
-			} else if (newValue == radioByProvider) {
-				serachTextBox.clear();
-				root.setCenter(getProviderAccordion());
-			} else {
-				root.setCenter(getActionDecoratorButtonList());
-			}
-		});
-		root.setCenter(getTagAccordion());
+    toggleGroup.selectedToggleProperty().addListener((property, oldValue, newValue) -> {
 
-		for (ActionProvider actionProvider : ActionEntities.getActionProviders()) {
-			MenuItem menuItem = new MenuItem(actionProvider.getComponentName());
-			menuItem.setOnAction(event -> {
-				ActionDecorator newActionDecorator = new ActionDecorator();
-				try {
-					newActionDecorator.setAction(ActionEntities.createActionEntity(actionProvider));
-					getTableViewerTab().getTableViewer().getActionDecorators().add(newActionDecorator);
-					new EditActionController(newActionDecorator, tableViewerTab).show();
-				} catch (JAXBException | IOException e) {
-					OwlLogger.registerException(1, e);
-				}
+      if (newValue == radioByTag) {
+        serachTextBox.clear();
+        root.setCenter(getTagAccordion());
+      } else if (newValue == radioByProvider) {
+        serachTextBox.clear();
+        root.setCenter(getProviderAccordion());
+      } else {
+        root.setCenter(getActionDecoratorButtonList());
+      }
+    });
+    root.setCenter(getTagAccordion());
 
-			});
-			menuNewAction.getItems().add(menuItem);
-		}
+    for (ActionProvider actionProvider : ActionEntities.getActionProviders()) {
+      MenuItem menuItem = new MenuItem(actionProvider.getComponentName());
+      menuItem.setOnAction(event -> {
+        ActionDecorator newActionDecorator = new ActionDecorator();
+        try {
+          newActionDecorator.setActionOwl(ActionEntities.createActionEntity(actionProvider));
+          getTableViewerTab().getTableViewer().entity().getActionDecorators()
+              .add(newActionDecorator);
+          new EditActionController(newActionDecorator, tableViewerTab).show();
+        } catch (Exception e) {
+          Logger.registerException(1, e);
+        }
 
-		openAction.setOnAction(event -> {
-			try {
-				OpenEntityDialog<ActionEntity> openDialog = new OpenEntityDialog<>(ActionEntity.class,
-						SelectionMode.MULTIPLE, TableViewers.getActionEntities(getTableViewerTab().getTableViewer()));
-				openDialog.setModality(Modality.APPLICATION_MODAL);
-				openDialog.showAndWait();
-				if (openDialog.isOpened()) {
-					if (openDialog.getOpenned().size() == 1) {
-						ActionDecorator actionDecorator = new ActionDecorator();
-						actionDecorator.setAction(openDialog.getOpenned().get(0));
-						tableViewerTab.getTableViewer().getActionDecorators().add(actionDecorator);
-						new EditActionController(actionDecorator, tableViewerTab).show();
-					} else {
-						for (ActionEntity actionEntity : openDialog.getOpenned()) {
-							ActionDecorator actionDecorator = new ActionDecorator();
-							actionDecorator.setAction(actionEntity);
-							tableViewerTab.getTableViewer().getActionDecorators().add(actionDecorator);
-						}
-					}
-				}
-			} catch (IOException e) {
-				OwlLogger.registerException(1, e);
-			}
-		});
-	}
+      });
+      menuNewAction.getItems().add(menuItem);
+    }
 
-	private TableViewerTab getTableViewerTab() {
-		return tableViewerTab;
-	}
+    // openAction.setOnAction(event -> {
+    // try {
+    // OpenEntityDialog<ActionEntity> openDialog =
+    // new OpenEntityDialog<>(ActionEntity.class, SelectionMode.MULTIPLE,
+    // TableViewers.getActionEntities(getTableViewerTab().getTableViewer()));
+    // openDialog.setModality(Modality.APPLICATION_MODAL);
+    // openDialog.showAndWait();
+    // if (openDialog.isOpened()) {
+    // if (openDialog.getOpenned().size() == 1) {
+    // ActionDecorator actionDecorator = new ActionDecorator();
+    // actionDecorator.setAction(openDialog.getOpenned().get(0));
+    // tableViewerTab.getTableViewer().getActionDecorators().add(actionDecorator);
+    // new EditActionController(actionDecorator, tableViewerTab).show();
+    // } else {
+    // for (ActionEntity actionEntity : openDialog.getOpenned()) {
+    // ActionDecorator actionDecorator = new ActionDecorator();
+    // actionDecorator.setAction(actionEntity);
+    // tableViewerTab.getTableViewer().getActionDecorators().add(actionDecorator);
+    // }
+    // }
+    // }
+    // } catch (IOException e) {
+    // OwlLogger.registerException(1, e);
+    // }
+    // });
+    // TODO: Сделвать диалог открытия Совы
+  }
 
-	private ObservableList<ActionDecorator> getActionDecorators() {
-		if (actionDecorators == null) {
-			actionDecorators = getTableViewerTab().getTableViewer().actionDecoratorsProperty();
-		}
-		return actionDecorators;
-	}
+  private TableViewerTab getTableViewerTab() {
+    return tableViewerTab;
+  }
 
-	private GroupAccordion<ActionDecorator, String> getTagAccordion() {
-		if (tagAccordion == null) {
-			tagAccordion = new GroupAccordion<>();
-			tagAccordion.setItems(getActionDecorators());
-			tagAccordion.setMatcher((item, crit) -> item.getTags().contains(crit));
-			tagAccordion.setCriteria(actionDecoratorsCollector.getTags());
-			tagAccordion.setButtonFactory(action -> new ActionButton(action, getTableViewerTab()));
-			tagAccordion.setInternalItemСhangeNotifier((item, listener) -> item.tagsProperty().addListener(listener));
-			tagAccordion.setGroupNameFactory(s -> new SimpleStringProperty(s));
-			tagAccordion.setSortComparator((node1, node2) -> {
-				if (node1 instanceof ActionButton && node2 instanceof ActionButton) {
-					String buttonName1 = ((ActionButton) node1).getActionEntity().getTitle();
-					String buttonName2 = ((ActionButton) node2).getActionEntity().getTitle();
-					return buttonName1.compareToIgnoreCase(buttonName2);
-				} else {
-					return -1;
-				}
-			});
-		}
-		return tagAccordion;
-	}
+  private ObservableList<ActionDecorator> getActionDecorators() {
+    if (actionDecorators == null) {
+      actionDecorators = getTableViewerTab().getTableViewer().entity().actionDecoratorsProperty();
+    }
+    return actionDecorators;
+  }
 
-	private GroupAccordion<ActionDecorator, String> getProviderAccordion() {
-		if (providerAccordion == null) {
-			providerAccordion = new GroupAccordion<>();
-			providerAccordion.setItems(getActionDecorators());
-			providerAccordion.setMatcher((item, crit) -> item.getAction().getActionProvider().equals(crit));
-			providerAccordion.setCriteria(actionDecoratorsCollector.getProviders());
-			providerAccordion.setButtonFactory(action -> new ActionButton(action, getTableViewerTab()));
-			providerAccordion.setGroupNameFactory(p -> new SimpleStringProperty(p));
-			providerAccordion.setSortComparator((node1, node2) -> {
-				if (node1 instanceof ActionButton && node2 instanceof ActionButton) {
-					String buttonName1 = ((ActionButton) node1).getActionEntity().getTitle();
-					String buttonName2 = ((ActionButton) node2).getActionEntity().getTitle();
-					return buttonName1.compareToIgnoreCase(buttonName2);
-				} else {
-					return -1;
-				}
-			});
+  private GroupAccordion<ActionDecorator, String> getTagAccordion() {
+    if (tagAccordion == null) {
+      tagAccordion = new GroupAccordion<>();
+      tagAccordion.setItems(getActionDecorators());
+      tagAccordion.setMatcher((item, crit) -> item.getTags().contains(crit));
+      tagAccordion.setCriteria(actionDecoratorsCollector.getTags());
+      tagAccordion.setButtonFactory(action -> new ActionButton(action, getTableViewerTab()));
+      tagAccordion.setInternalItemСhangeNotifier(
+          (item, listener) -> item.tagsProperty().addListener(listener));
+      tagAccordion.setGroupNameFactory(s -> new SimpleStringProperty(s));
+      tagAccordion.setSortComparator((node1, node2) -> {
+        if (node1 instanceof ActionButton && node2 instanceof ActionButton) {
+          String buttonName1 = ((ActionButton) node1).getActionOwl().head().getTitle();
+          String buttonName2 = ((ActionButton) node2).getActionOwl().head().getTitle();
+          return buttonName1.compareToIgnoreCase(buttonName2);
+        } else {
+          return -1;
+        }
+      });
+    }
+    return tagAccordion;
+  }
 
-		}
-		return providerAccordion;
-	}
+  private GroupAccordion<ActionDecorator, String> getProviderAccordion() {
+    if (providerAccordion == null) {
+      providerAccordion = new GroupAccordion<>();
+      providerAccordion.setItems(getActionDecorators());
+      providerAccordion.setMatcher(
+          (item, crit) -> item.getActionOwl().entity().getActionProvider().equals(crit));
+      providerAccordion.setCriteria(actionDecoratorsCollector.getProviders());
+      providerAccordion.setButtonFactory(action -> new ActionButton(action, getTableViewerTab()));
+      providerAccordion.setGroupNameFactory(p -> new SimpleStringProperty(p));
+      providerAccordion.setSortComparator((node1, node2) -> {
+        if (node1 instanceof ActionButton && node2 instanceof ActionButton) {
+          String buttonName1 = ((ActionButton) node1).getActionOwl().head().getTitle();
+          String buttonName2 = ((ActionButton) node2).getActionOwl().head().getTitle();
+          return buttonName1.compareToIgnoreCase(buttonName2);
+        } else {
+          return -1;
+        }
+      });
 
-	private ActionDecoratorButtonList getActionDecoratorButtonList() {
-		if (actionDecoratorButtonList == null) {
-			actionDecoratorButtonList = new ActionDecoratorButtonList();
-		}
-		return actionDecoratorButtonList;
-	}
+    }
+    return providerAccordion;
+  }
+
+  private ActionDecoratorButtonList getActionDecoratorButtonList() {
+    if (actionDecoratorButtonList == null) {
+      actionDecoratorButtonList = new ActionDecoratorButtonList();
+    }
+    return actionDecoratorButtonList;
+  }
 }

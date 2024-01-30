@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAttribute;
@@ -20,221 +19,215 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import space.sadfox.dataccess.action.ActionEntity;
 import space.sadfox.dataccess.dataccess.TableData;
 import space.sadfox.dataccess.dataccess.TableDataAdapter;
 import space.sadfox.dataccess.filter.TableDataFilter;
 import space.sadfox.dataccess.filter.TableDataFilterAdapter;
 import space.sadfox.dataccess.view.TableDataView;
 import space.sadfox.dataccess.view.TableDataViewAdapter;
-import space.sadfox.owlook.base.jaxb.JAXBEntity;
+import space.sadfox.owlook.base.owl.Owl;
+import space.sadfox.owlook.base.owl.OwlEntity;
+import space.sadfox.owlook.owlery.OwlLoader;
 import space.sadfox.owlook.ui.base.Controllable;
 import space.sadfox.owlook.ui.base.Controller;
-import space.sadfox.owlook.utils.EntityLoader;
 import space.sadfox.owlook.utils.Nullable;
 
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement
-public class TableViewer extends JAXBEntity implements Controllable {
+public class TableViewer extends OwlEntity implements Controllable {
 
-	private final StringProperty title = new SimpleStringProperty("");
-	private final LongProperty searchDelay = new SimpleLongProperty(0);
-	private final ObjectProperty<TableData> tableData = new SimpleObjectProperty<>();
-	private final ObservableList<TableDataFilter> tableDataFilters = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
-	private final ObservableList<TableDataView> tableDataViews = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
-	private final ObservableList<ActionDecorator> actionDecorators = FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
-	
-	@XmlAttribute(name = "title")
-	public String getTitle() {
-		return titleProperty().get();
-	}
+  private final StringProperty title = new SimpleStringProperty("");
+  private final LongProperty searchDelay = new SimpleLongProperty(0);
+  private final ObjectProperty<Owl<TableData>> tableData = new SimpleObjectProperty<>();
+  private final ObservableList<Owl<TableDataFilter>> tableDataFilters =
+      FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
+  private final ObservableList<Owl<TableDataView>> tableDataViews =
+      FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
+  private final ObservableList<ActionDecorator> actionDecorators =
+      FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
 
-	public void setTitle(String name) {
-		titleProperty().set(name);
-	}
+  @XmlAttribute(name = "title")
+  public String getTitle() {
+    return titleProperty().get();
+  }
 
-	public StringProperty titleProperty() {
-		return title;
-	}
-	
-	@XmlElement(name = "searchDelay")
-	public long getSearchDelay() {
-		return searchDelayProperty().get();
-	}
+  public void setTitle(String name) {
+    titleProperty().set(name);
+  }
 
-	public void setSearchDelay(long millis) {
-		searchDelayProperty().set(millis);
-	}
+  public StringProperty titleProperty() {
+    return title;
+  }
 
-	public LongProperty searchDelayProperty() {
-		return searchDelay;
-	}
+  @XmlElement(name = "searchDelay")
+  public long getSearchDelay() {
+    return searchDelayProperty().get();
+  }
 
-	@XmlElement(name = "TableData")
-	@XmlJavaTypeAdapter(TableDataAdapter.class)
-	public TableData getTableData() {
-		return tableDataProperty().get();
-	}
-	
-	public TableData getTableDataSafe() throws Nullable {
-		if (tableDataProperty().get() == null) {
-			throw new Nullable();
-		}
-		return tableDataProperty().get();
-	}
+  public void setSearchDelay(long millis) {
+    searchDelayProperty().set(millis);
+  }
 
-	public void setTableData(TableData tableData) {
-		tableDataProperty().set(tableData);
-	}
+  public LongProperty searchDelayProperty() {
+    return searchDelay;
+  }
 
-	public ObjectProperty<TableData> tableDataProperty() {
-		return tableData;
-	}
+  @XmlElement(name = "tableData")
+  @XmlJavaTypeAdapter(TableDataAdapter.class)
+  public Owl<TableData> getTableData() {
+    return tableDataProperty().get();
+  }
 
-	@XmlElementWrapper(name = "TableDataFilters")
-	@XmlElement(name = "Filter")
-	@XmlJavaTypeAdapter(TableDataFilterAdapter.class)
-	public List<TableDataFilter> getTableDataFilters() {
-		return tableDataFiltersProperty();
-	}
+  public Owl<TableData> getTableDataSafe() throws Nullable {
+    if (tableDataProperty().get() == null) {
+      throw new Nullable();
+    }
+    return tableDataProperty().get();
+  }
 
-	public ObservableList<TableDataFilter> tableDataFiltersProperty() {
-		return tableDataFilters;
-	}
+  public void setTableData(Owl<TableData> tableData) {
+    tableDataProperty().set(tableData);
+  }
 
-	@XmlElementWrapper(name = "TableDataViews")
-	@XmlElement(name = "View")
-	@XmlJavaTypeAdapter(TableDataViewAdapter.class)
-	public List<TableDataView> getTableDataViews() {
-		return tableDataViewsProperty();
-	}
+  public ObjectProperty<Owl<TableData>> tableDataProperty() {
+    return tableData;
+  }
 
-	public ObservableList<TableDataView> tableDataViewsProperty() {
-		return tableDataViews;
-	}
+  @XmlElementWrapper(name = "tableDataFilters")
+  @XmlElement(name = "filter")
+  @XmlJavaTypeAdapter(TableDataFilterAdapter.class)
+  public List<Owl<TableDataFilter>> getTableDataFilters() {
+    return tableDataFiltersProperty();
+  }
 
-	@XmlElementWrapper(name = "actions")
-	@XmlElement(name = "action")
-	public List<ActionDecorator> getActionDecorators() {
-		return actionDecoratorsProperty();
-	}
+  public ObservableList<Owl<TableDataFilter>> tableDataFiltersProperty() {
+    return tableDataFilters;
+  }
 
-	public ObservableList<ActionDecorator> actionDecoratorsProperty() {
-		return actionDecorators;
-	}
+  @XmlElementWrapper(name = "tableDataViews")
+  @XmlElement(name = "view")
+  @XmlJavaTypeAdapter(TableDataViewAdapter.class)
+  public List<Owl<TableDataView>> getTableDataViews() {
+    return tableDataViewsProperty();
+  }
 
-	@Override
-	public List<Object> getProperties() {
-		return Arrays.asList(title, tableData, tableDataFilters, tableDataViews, actionDecorators, searchDelay);
-	}
+  public ObservableList<Owl<TableDataView>> tableDataViewsProperty() {
+    return tableDataViews;
+  }
 
-	@Override
-	public void initialize() {
-		EntityLoader.INSTANCE.addDeleteChangeListener(entity -> {
-			if (entity.getClass().equals(TableDataFilter.class)) {
-				getTableDataFilters().remove(entity);
-			} else if (entity.getClass().equals(TableDataView.class)) {
-				getTableDataViews().remove(entity);
-			} else if (entity.getClass().equals(ActionEntity.class)) {
-				getActionDecorators()
-						.removeIf(actionDecrator -> actionDecrator.getAction().equals(entity));
-			} else if (entity.getClass().equals(TableData.class)) {
-				setTableData(null);
-			}
-		});
-		
+  @XmlElementWrapper(name = "actions")
+  @XmlElement(name = "action")
+  public List<ActionDecorator> getActionDecorators() {
+    return actionDecoratorsProperty();
+  }
 
-	}
+  public ObservableList<ActionDecorator> actionDecoratorsProperty() {
+    return actionDecorators;
+  }
 
-	@Override
-	public void validate() {
-		for (int i = 0; i < getActionDecorators().size(); i++) {
-			if (getActionDecorators().get(i).getAction() == null) {
-				getActionDecorators().remove(i);
-				i--;
-			}
-		}
-		for (int i = 0; i < getTableDataFilters().size(); i++) {
-			if (getTableDataFilters().get(i) == null) {
-				getTableDataFilters().remove(i);
-				i--;
-			}
-		}
-		for (int i = 0; i < getTableDataViews().size(); i++) {
-			if (getTableDataViews().get(i) == null) {
-				getTableDataViews().remove(i);
-				i--;
-			}
-		} 
-		
-	}
+  @Override
+  public List<Object> getProperties() {
+    return Arrays.asList(title, tableData, tableDataFilters, tableDataViews, actionDecorators,
+        searchDelay);
+  }
 
+  @Override
+  public void initialize() {
+    for (int i = 0; i < getActionDecorators().size(); i++) {
+      if (getActionDecorators().get(i).getActionOwl() == null) {
+        getActionDecorators().remove(i);
+        i--;
+      }
+    }
+    for (int i = 0; i < getTableDataFilters().size(); i++) {
+      if (getTableDataFilters().get(i) == null) {
+        getTableDataFilters().remove(i);
+        i--;
+      }
+    }
+    for (int i = 0; i < getTableDataViews().size(); i++) {
+      if (getTableDataViews().get(i) == null) {
+        getTableDataViews().remove(i);
+        i--;
+      }
+    }
 
-	@Override
-	public Controller getConfigController() {
-		return new TableViewerEditController(this);
-	}
+    OwlLoader.INSTANCE.addDeleteOwlListener(owl -> {
+      if (owl.entityClass().equals(TableDataFilter.class)) {
+        getTableDataFilters().remove(owl);
+      } else if (owl.entityClass().equals(TableDataView.class)) {
+        getTableDataViews().remove(owl);
+      } else if (owl.entityClass().equals(TableData.class)) {
+        setTableData(null);
+      }
+    });
+  }
 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder("TableViewer: " + getTitle() + "\n");
-		try {
-			builder.append("TableData: " + getTableDataSafe().getTitle() + "\n");
-		} catch (Nullable e) {
-			builder.append("TableData: Indefined\n\n");
-		}
-		builder.append("Search Delay: " + searchDelay.get() + "ms\n\n");
+  @Override
+  public Controller getController() throws IOException {
+    return new TableViewerEditController(this);
+  }
 
-		builder.append("Filters:\n");
-		getTableDataFilters().forEach(s -> {
-			builder.append("\t" + s.getTitle() + "\n");
-		});
+  @Override
+  public String toString() {
+    StringBuilder builder = new StringBuilder("TableViewer: " + getTitle() + "\n");
+    try {
+      builder.append("TableData: " + getTableDataSafe().head().getTitle() + "\n");
+    } catch (Nullable e) {
+      builder.append("TableData: Indefined\n\n");
+    }
+    builder.append("Search Delay: " + searchDelay.get() + "ms\n\n");
 
-		builder.append("\n");
+    builder.append("Filters:\n");
+    getTableDataFilters().forEach(s -> {
+      builder.append("\t" + s.head().getTitle() + "\n");
+    });
 
-		builder.append("Views:\n");
-		getTableDataViews().forEach(s -> {
-			builder.append("\t" + s.getTitle() + "\n");
-		});
+    builder.append("\n");
 
-		builder.append("\n");
+    builder.append("Views:\n");
+    getTableDataViews().forEach(s -> {
+      builder.append("\t" + s.head().getTitle() + "\n");
+    });
 
-		builder.append("Actions:\n");
-		getActionDecorators().forEach(action -> {
-			builder.append("\t" + action.getAction().getTitle());
-			builder.append(
-					" [" + action.getTags().stream().map(p -> p).collect(Collectors.joining(", ")) + "]\n");
+    builder.append("\n");
 
-		});
-		return builder.toString();
-	}
+    builder.append("Actions:\n");
+    getActionDecorators().forEach(action -> {
+      builder.append("\t" + action.getActionOwl().head().getTitle());
+      builder.append(
+          " [" + action.getTags().stream().map(p -> p).collect(Collectors.joining(", ")) + "]\n");
 
-	@Override
-	public void syncWith(JAXBEntity entity) {
-		if (!(entity instanceof TableViewer)) {
-			return;
-		}
+    });
+    return builder.toString();
+  }
 
-		TableViewer targetTableView = (TableViewer) entity;
+  @Override
+  public void syncWith(OwlEntity entity) {
+    if (!(entity instanceof TableViewer)) {
+      return;
+    }
 
-		setTitle(targetTableView.getTitle());
-		try {
-			setTableData(targetTableView.getTableDataSafe());
-		} catch (Nullable e) {}
-		getTableDataFilters().clear();
-		getTableDataFilters().addAll(targetTableView.getTableDataFilters());
+    TableViewer targetTableView = (TableViewer) entity;
 
-		getTableDataViews().clear();
-		getTableDataViews().addAll(targetTableView.getTableDataViews());
+    setTitle(targetTableView.getTitle());
+    try {
+      setTableData(targetTableView.getTableDataSafe());
+    } catch (Nullable e) {
+    }
+    getTableDataFilters().clear();
+    getTableDataFilters().addAll(targetTableView.getTableDataFilters());
 
-		getActionDecorators().clear();
-		targetTableView.getActionDecorators().forEach(targetActionDecorator -> {
-			ActionDecorator newActionDecorator = new ActionDecorator();
-			newActionDecorator.setAction(targetActionDecorator.getAction());
-			targetActionDecorator.getTags().forEach(newActionDecorator.getTags()::add);
-			getActionDecorators().add(newActionDecorator);
-		});
-		
-	}
+    getTableDataViews().clear();
+    getTableDataViews().addAll(targetTableView.getTableDataViews());
 
+    getActionDecorators().clear();
+    targetTableView.getActionDecorators().forEach(targetActionDecorator -> {
+      ActionDecorator newActionDecorator = new ActionDecorator();
+      newActionDecorator.setActionOwl(targetActionDecorator.getActionOwl());
+      targetActionDecorator.getTags().forEach(newActionDecorator.getTags()::add);
+      getActionDecorators().add(newActionDecorator);
+    });
+
+  }
 }
