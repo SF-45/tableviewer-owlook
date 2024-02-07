@@ -1,5 +1,7 @@
 import space.sadfox.owlook.base.moduleapi.OwlookModule;
 import space.sadfox.owlook.base.moduleapi.OwlookModuleComponent;
+import space.sadfox.owlook.base.owl.OwlEntity;
+import space.sadfox.tableviewer.TableViewer;
 import space.sadfox.tableviewer.TableViewerProvider;
 
 module tableviewer {
@@ -17,6 +19,7 @@ module tableviewer {
 
   provides OwlookModule with TableViewerProvider;
   provides OwlookModuleComponent with TableViewerProvider;
+  provides OwlEntity with TableViewer;
 
   opens space.sadfox.tableviewer to jakarta.xml.bind, javafx.fxml;
   opens space.sadfox.tableviewer.ui.filter to javafx.fxml;

@@ -1,6 +1,7 @@
 package space.sadfox.tableviewer;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -229,5 +230,20 @@ public class TableViewer extends OwlEntity implements Controllable {
       getActionDecorators().add(newActionDecorator);
     });
 
+  }
+
+  @Override
+  public List<Owl<?>> getChildrenOwls() {
+    List<Owl<?>> childOwls = new ArrayList<>();
+    try {
+      childOwls.add(getTableDataSafe());
+    } catch (Nullable e) {
+    }
+    childOwls.addAll(getTableDataFilters());
+    childOwls.addAll(getTableDataViews());
+    childOwls.addAll(getActionDecorators().stream().map(actionDec -> actionDec.getActionOwl())
+        .collect(Collectors.toList()));
+
+    return childOwls;
   }
 }
