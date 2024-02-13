@@ -1,6 +1,7 @@
 package space.sadfox.tableviewer.ui.action;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.stream.Collectors;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -11,16 +12,22 @@ import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.Modality;
 import space.sadfox.dataccess.action.ActionEntities;
+import space.sadfox.dataccess.action.ActionEntity;
 import space.sadfox.dataccess.action.ActionProvider;
+import space.sadfox.owlook.base.owl.Owl;
+import space.sadfox.owlook.owlery.OwleryOpenDialog;
 import space.sadfox.owlook.ui.base.FXMLController;
 import space.sadfox.owlook.utils.Logger;
 import space.sadfox.tableviewer.ActionDecorator;
 import space.sadfox.tableviewer.ActionDecoratorsCollector;
 import space.sadfox.tableviewer.TableViewerProvider;
+import space.sadfox.tableviewer.TableViewers;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 import space.sadfox.tableviewer.ui.base.ButtonList;
 import space.sadfox.tableviewer.ui.base.GroupAccordion;
@@ -181,32 +188,25 @@ public class ActionController extends FXMLController {
       menuNewAction.getItems().add(menuItem);
     }
 
-    // openAction.setOnAction(event -> {
-    // try {
-    // OpenEntityDialog<ActionEntity> openDialog =
-    // new OpenEntityDialog<>(ActionEntity.class, SelectionMode.MULTIPLE,
-    // TableViewers.getActionEntities(getTableViewerTab().getTableViewer()));
-    // openDialog.setModality(Modality.APPLICATION_MODAL);
-    // openDialog.showAndWait();
-    // if (openDialog.isOpened()) {
-    // if (openDialog.getOpenned().size() == 1) {
-    // ActionDecorator actionDecorator = new ActionDecorator();
-    // actionDecorator.setAction(openDialog.getOpenned().get(0));
-    // tableViewerTab.getTableViewer().getActionDecorators().add(actionDecorator);
-    // new EditActionController(actionDecorator, tableViewerTab).show();
-    // } else {
-    // for (ActionEntity actionEntity : openDialog.getOpenned()) {
-    // ActionDecorator actionDecorator = new ActionDecorator();
-    // actionDecorator.setAction(actionEntity);
-    // tableViewerTab.getTableViewer().getActionDecorators().add(actionDecorator);
-    // }
-    // }
-    // }
-    // } catch (IOException e) {
-    // OwlLogger.registerException(1, e);
-    // }
-    // });
-    // TODO: Сделвать диалог открытия Совы
+    openAction.setOnAction(event -> {
+      try {
+        OwleryOpenDialog<ActionEntity> openDialog = new OwleryOpenDialog<>(ActionEntity.class);
+        openDialog.setSelectionModel(SelectionMode.MULTIPLE);
+        List<Owl<ActionEntity>> alredyOpenedActions =
+            TableViewers.getActionEntities(getTableViewerTab().getTableViewer());
+        openDialog.setAlredyOpenedOwls(FXCollections.observableList(alredyOpenedActions));
+        openDialog.showAndWait(Modality.APPLICATION_MODAL);
+        if (openDialog.isOpened()) {
+          for (Owl<ActionEntity> actionEntity : openDialog.getOpenedOwls()) {
+            ActionDecorator openedActionDecorator = new ActionDecorator(actionEntity);
+            getTableViewerTab().getTableViewer().entity().getActionDecorators()
+                .add(openedActionDecorator);
+          }
+        }
+      } catch (ReflectiveOperationException e) {
+        Logger.registerException(1, e);
+      }
+    });
   }
 
   private TableViewerTab getTableViewerTab() {

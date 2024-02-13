@@ -5,11 +5,14 @@ import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.ToggleGroup;
+import javafx.stage.Modality;
 import space.sadfox.dataccess.view.TableDataView;
 import space.sadfox.dataccess.view.TableDataViews;
 import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.owlery.OwlLoader;
+import space.sadfox.owlook.owlery.OwleryOpenDialog;
 import space.sadfox.owlook.utils.Logger;
 import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.tableviewer.ui.TableViewerTab;
@@ -59,24 +62,24 @@ public class ViewsTab extends ButtonList {
     });
     contextMenu.getItems().add(createView);
 
-    // MenuItem open = new MenuItem("Open View");
-    // open.setOnAction(event -> {
-    // try {
-    // OpenEntityDialog<TableDataView> openDialog = new OpenEntityDialog<>(TableDataView.class,
-    // SelectionMode.MULTIPLE, getTableViewerTab().getTableViewer().getTableDataViews());
-    // openDialog.setModality(Modality.APPLICATION_MODAL);
-    // openDialog.showAndWait();
-    // if (openDialog.isOpened()) {
-    // openDialog.getOpenned().forEach(v -> {
-    // getTableViewerTab().getTableViewer().getTableDataViews().add(v);
-    // });
-    // }
-    // } catch (IOException e) {
-    // OwlLogger.registerException(1, e);
-    // }
-    // });
-    // contextMenu.getItems().add(open);
-    // TODO: Сделвать диалог открытия Совы
+    MenuItem open = new MenuItem("Open View");
+    open.setOnAction(event -> {
+      try {
+        OwleryOpenDialog<TableDataView> openDialog = new OwleryOpenDialog<>(TableDataView.class);
+        openDialog.setSelectionModel(SelectionMode.MULTIPLE);
+        openDialog.setAlredyOpenedOwls(
+            getTableViewerTab().getTableViewer().entity().tableDataViewsProperty());
+        openDialog.showAndWait(Modality.APPLICATION_MODAL);
+        if (openDialog.isOpened()) {
+          getTableViewerTab().getTableViewer().entity().getTableDataViews()
+              .addAll(openDialog.getOpenedOwls());
+        }
+
+      } catch (ReflectiveOperationException e) {
+        Logger.registerException(1, e);
+      }
+    });
+    contextMenu.getItems().add(open);
 
   }
 

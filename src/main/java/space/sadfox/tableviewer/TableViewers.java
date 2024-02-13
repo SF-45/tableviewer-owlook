@@ -9,8 +9,8 @@ import space.sadfox.owlook.owlery.OwlLoader;
 import space.sadfox.owlook.utils.Logger;
 
 public class TableViewers {
-  public static List<Owl<ActionEntity>> getActionEntities(TableViewer tableViewer) {
-    return tableViewer.getActionDecorators().stream().map(ActionDecorator::getActionOwl)
+  public static List<Owl<ActionEntity>> getActionEntities(Owl<TableViewer> tableViewer) {
+    return tableViewer.entity().getActionDecorators().stream().map(ActionDecorator::getActionOwl)
         .collect(Collectors.toList());
   }
 

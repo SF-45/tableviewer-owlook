@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -16,8 +15,6 @@ import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import space.sadfox.dataccess.dataccess.TableData;
@@ -37,7 +34,6 @@ import space.sadfox.owlook.utils.Nullable;
 @XmlRootElement
 public class TableViewer extends OwlEntity implements Controllable {
 
-  private final StringProperty title = new SimpleStringProperty("");
   private final LongProperty searchDelay = new SimpleLongProperty(0);
   private final ObjectProperty<Owl<TableData>> tableData = new SimpleObjectProperty<>();
   private final ObservableList<Owl<TableDataFilter>> tableDataFilters =
@@ -46,19 +42,6 @@ public class TableViewer extends OwlEntity implements Controllable {
       FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
   private final ObservableList<ActionDecorator> actionDecorators =
       FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
-
-  @XmlAttribute(name = "title")
-  public String getTitle() {
-    return titleProperty().get();
-  }
-
-  public void setTitle(String name) {
-    titleProperty().set(name);
-  }
-
-  public StringProperty titleProperty() {
-    return title;
-  }
 
   @XmlElement(name = "searchDelay")
   public long getSearchDelay() {
@@ -128,7 +111,7 @@ public class TableViewer extends OwlEntity implements Controllable {
 
   @Override
   public List<Object> getProperties() {
-    return Arrays.asList(title, tableData, tableDataFilters, tableDataViews, actionDecorators,
+    return Arrays.asList(tableData, tableDataFilters, tableDataViews, actionDecorators,
         searchDelay);
   }
 
@@ -166,12 +149,11 @@ public class TableViewer extends OwlEntity implements Controllable {
 
   @Override
   public Controller getController() throws IOException {
-    return new TableViewerEditController(this);
+    return new TableViewerEditController((Owl<TableViewer>) getOwl());
   }
-
   @Override
   public String toString() {
-    StringBuilder builder = new StringBuilder("TableViewer: " + getTitle() + "\n");
+    StringBuilder builder = new StringBuilder("TableViewer: " + getOwl().head().getTitle() + "\n");
     try {
       builder.append("TableData: " + getTableDataSafe().head().getTitle() + "\n");
     } catch (Nullable e) {
@@ -211,7 +193,6 @@ public class TableViewer extends OwlEntity implements Controllable {
 
     TableViewer targetTableView = (TableViewer) entity;
 
-    setTitle(targetTableView.getTitle());
     try {
       setTableData(targetTableView.getTableDataSafe());
     } catch (Nullable e) {

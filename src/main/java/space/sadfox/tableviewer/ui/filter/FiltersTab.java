@@ -10,12 +10,15 @@ import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.ToggleGroup;
+import javafx.stage.Modality;
 import space.sadfox.dataccess.dataccess.DataEntity;
 import space.sadfox.dataccess.filter.TableDataFilter;
 import space.sadfox.dataccess.filter.TableDataFilters;
 import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.owlery.OwlLoader;
+import space.sadfox.owlook.owlery.OwleryOpenDialog;
 import space.sadfox.owlook.utils.Logger;
 import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.tableviewer.ui.TableViewerTab;
@@ -66,25 +69,24 @@ public class FiltersTab extends ButtonList {
     });
     contextMenu.getItems().add(createFilter);
 
-    // MenuItem open = new MenuItem("Open Filter");
-    // open.setOnAction(event -> {
-    // try {
-    // OpenEntityDialog<TableDataFilter> openDialog = new OpenEntityDialog<>(TableDataFilter.class,
-    // SelectionMode.MULTIPLE, getTableViewerTab().getTableViewer().getTableDataFilters());
-    //
-    // openDialog.setModality(Modality.APPLICATION_MODAL);
-    // openDialog.showAndWait();
-    // if (openDialog.isOpened()) {
-    // openDialog.getOpenned()
-    // .forEach(f -> getTableViewerTab().getTableViewer().getTableDataFilters().add(f));
-    // }
-    // } catch (IOException e) {
-    // OwlLogger.registerException(1, e);
-    // }
-    // });
-    // contextMenu.getItems().add(open);
-    // TODO: Сделвать диалог открытия Совы
-
+    MenuItem open = new MenuItem("Open Filter");
+    open.setOnAction(event -> {
+      try {
+        OwleryOpenDialog<TableDataFilter> openDialog =
+            new OwleryOpenDialog<>(TableDataFilter.class);
+        openDialog.setSelectionModel(SelectionMode.MULTIPLE);
+        openDialog.setAlredyOpenedOwls(
+            getTableViewerTab().getTableViewer().entity().tableDataFiltersProperty());
+        openDialog.showAndWait(Modality.APPLICATION_MODAL);
+        if (openDialog.isOpened()) {
+          getTableViewerTab().getTableViewer().entity().getTableDataFilters()
+              .addAll(openDialog.getOpenedOwls());
+        }
+      } catch (ReflectiveOperationException e) {
+        e.printStackTrace();
+      }
+    });
+    contextMenu.getItems().add(open);
   }
 
   public void reloadData() {
