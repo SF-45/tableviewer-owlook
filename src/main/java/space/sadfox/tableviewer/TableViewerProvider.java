@@ -1,10 +1,10 @@
 package space.sadfox.tableviewer;
 
 import java.io.IOException;
+import space.sadfox.owlook.api.Workspace;
 import space.sadfox.owlook.base.jaxb.ObservedJAXBEntity;
 import space.sadfox.owlook.base.moduleapi.ModuleHasNoConfiguration;
 import space.sadfox.owlook.base.moduleapi.OwlookModule;
-import space.sadfox.owlook.component.Workspace;
 import space.sadfox.owlook.ui.base.Controller;
 import space.sadfox.owlook.utils.Logger;
 
@@ -52,14 +52,13 @@ public class TableViewerProvider implements OwlookModule, Workspace {
   // }
 
   @Override
-  public String getComponentName() {
-    return "Table Viever";
+  public String getWorkspaceName() {
+    return "Table Viewer";
   }
 
   @Override
-  public String getComponentDescription() {
-    // TODO Auto-generated method stub
-    return null;
+  public String getWorkspaceDescriprion() {
+    return "Displaying tabular data and performing actions with them";
   }
 
   @Override
