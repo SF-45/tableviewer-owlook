@@ -72,22 +72,22 @@
          <items>
             <BorderPane fx:id="actionsRoot" prefHeight="200.0" prefWidth="200.0" />
             <TabPane fx:id="tableTabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="ALL_TABS" tabDragPolicy="REORDER" />
-            <SplitPane dividerPositions="0.4028708133971292" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+            <SplitPane dividerPositions="0.5578947368421052" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
                <items>
-                  <BorderPane prefHeight="200.0" prefWidth="200.0">
-                     <top>
-                        <Label text="Views" BorderPane.alignment="CENTER" />
-                     </top>
-                     <center>
-                        <ScrollPane fx:id="viewsRoot" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
-                     </center>
-                  </BorderPane>
                   <BorderPane prefHeight="200.0" prefWidth="200.0">
                      <top>
                         <Label text="Filters" BorderPane.alignment="CENTER" />
                      </top>
                      <center>
-                        <ScrollPane fx:id="filtersRoot" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+                        <ScrollPane fx:id="filtersRoot" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+                     </center>
+                  </BorderPane>
+                  <BorderPane prefHeight="200.0" prefWidth="200.0">
+                     <top>
+                        <Label text="Views" BorderPane.alignment="CENTER" />
+                     </top>
+                     <center>
+                        <ScrollPane fx:id="viewsRoot" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                            <BorderPane.margin>
                               <Insets />
                            </BorderPane.margin>
