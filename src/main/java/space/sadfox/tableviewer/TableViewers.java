@@ -18,7 +18,6 @@ public class TableViewers {
     try {
       // TableViewer newTableViewer = EntityLoader.INSTANCE.createEntity(TableViewer.class);
       Owl<TableViewer> newTableViewer = OwlLoader.INSTANCE.createOwl(TableViewer.class);
-      newTableViewer.head().setTitle("New Table Viewer");
       return newTableViewer;
     } catch (Exception e) {
       Logger.registerException(1, e);
