@@ -6,7 +6,7 @@ import space.sadfox.owlook.base.jaxb.ObservedJAXBEntity;
 import space.sadfox.owlook.base.moduleapi.ModuleHasNoConfiguration;
 import space.sadfox.owlook.base.moduleapi.OwlookModule;
 import space.sadfox.owlook.ui.base.Controller;
-import space.sadfox.owlook.utils.Logger;
+import space.sadfox.owlook.utils.Owlook;
 
 public class TableViewerProvider implements OwlookModule, Workspace {
 
@@ -29,7 +29,7 @@ public class TableViewerProvider implements OwlookModule, Workspace {
       try {
         ui = new TableViewerController();
       } catch (IOException e) {
-        Logger.registerException(1, e);
+        Owlook.registerException(1, e);
       }
     }
 

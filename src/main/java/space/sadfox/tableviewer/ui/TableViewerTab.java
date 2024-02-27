@@ -14,7 +14,7 @@ import space.sadfox.dataccess.filter.TableDataFilter;
 import space.sadfox.dataccess.view.TableViewForTableData;
 import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.ui.tools.MessageBox;
-import space.sadfox.owlook.utils.Logger;
+import space.sadfox.owlook.utils.Owlook;
 import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.tableviewer.TableViewer;
 import space.sadfox.tableviewer.ui.action.ActionController;
@@ -42,7 +42,7 @@ public class TableViewerTab extends Tab {
     try {
       actionsNode = new ActionController(this);
     } catch (IOException e) {
-      Logger.registerException(1, e);
+      Owlook.registerException(1, e);
     }
     this.setContent(getTableDataViewTable());
     initializ();
@@ -129,7 +129,7 @@ public class TableViewerTab extends Tab {
         try {
           new TableDataController(getTableViewer().entity().getTableDataSafe()).show();
         } catch (IOException e) {
-          Logger.registerException(1, e);
+          Owlook.registerException(1, e);
         } catch (Nullable e) {
           MessageBox messageBox = new MessageBox(AlertType.INFORMATION);
           messageBox.setTitle("Table Data Not Set");
@@ -157,7 +157,7 @@ public class TableViewerTab extends Tab {
         try {
           getTableViewer().entity().getController().show();
         } catch (Exception e) {
-          Logger.registerException(1, e);
+          Owlook.registerException(1, e);
         }
       });
       menu.getItems().add(editTableViewer);

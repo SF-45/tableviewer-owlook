@@ -15,7 +15,7 @@ import space.sadfox.dataccess.dataccess.DataEntity;
 import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.owlery.OwlLoader;
 import space.sadfox.owlook.ui.tools.MessageBox;
-import space.sadfox.owlook.utils.Logger;
+import space.sadfox.owlook.utils.Owlook;
 import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.tableviewer.ActionDecorator;
 import space.sadfox.tableviewer.ui.TableViewerTab;
@@ -60,7 +60,7 @@ public class ActionButton extends Button {
       try {
         new EditActionController(actionDecorator, parent).show();
       } catch (IOException e) {
-        Logger.registerException(1, e);
+        Owlook.registerException(1, e);
       }
     });
     contextMenu.getItems().add(edit);
@@ -74,7 +74,7 @@ public class ActionButton extends Button {
         parent.getTableViewer().entity().getActionDecorators().add(newActionDecorator);
         new EditActionController(newActionDecorator, parent).show();
       } catch (Exception e) {
-        Logger.registerException(1, e);
+        Owlook.registerException(1, e);
       }
     });
     contextMenu.getItems().add(duplicate);

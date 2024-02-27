@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import space.sadfox.dataccess.action.ActionEntity;
 import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.owlery.OwlLoader;
-import space.sadfox.owlook.utils.Logger;
+import space.sadfox.owlook.utils.Owlook;
 
 public class TableViewers {
   public static List<Owl<ActionEntity>> getActionEntities(Owl<TableViewer> tableViewer) {
@@ -20,7 +20,7 @@ public class TableViewers {
       Owl<TableViewer> newTableViewer = OwlLoader.INSTANCE.createOwl(TableViewer.class);
       return newTableViewer;
     } catch (Exception e) {
-      Logger.registerException(1, e);
+      Owlook.registerException(1, e);
     }
     return null;
   }

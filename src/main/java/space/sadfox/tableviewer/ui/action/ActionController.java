@@ -23,7 +23,7 @@ import space.sadfox.dataccess.action.ActionProvider;
 import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.owlery.OwleryOpenDialog;
 import space.sadfox.owlook.ui.base.FXMLController;
-import space.sadfox.owlook.utils.Logger;
+import space.sadfox.owlook.utils.Owlook;
 import space.sadfox.tableviewer.ActionDecorator;
 import space.sadfox.tableviewer.ActionDecoratorsCollector;
 import space.sadfox.tableviewer.TableViewerProvider;
@@ -181,7 +181,7 @@ public class ActionController extends FXMLController {
               .add(newActionDecorator);
           new EditActionController(newActionDecorator, tableViewerTab).show();
         } catch (Exception e) {
-          Logger.registerException(1, e);
+          Owlook.registerException(1, e);
         }
 
       });
@@ -204,7 +204,7 @@ public class ActionController extends FXMLController {
           }
         }
       } catch (ReflectiveOperationException e) {
-        Logger.registerException(1, e);
+        Owlook.registerException(1, e);
       }
     });
   }

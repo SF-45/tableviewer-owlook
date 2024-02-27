@@ -19,7 +19,7 @@ import space.sadfox.dataccess.filter.TableDataFilters;
 import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.owlery.OwlLoader;
 import space.sadfox.owlook.owlery.OwleryOpenDialog;
-import space.sadfox.owlook.utils.Logger;
+import space.sadfox.owlook.utils.Owlook;
 import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 import space.sadfox.tableviewer.ui.base.ButtonList;
@@ -114,7 +114,7 @@ public class FiltersTab extends ButtonList {
         getTableViewerTab().getTableDataViewTable()
             .setItems(FXCollections.observableArrayList(dataEntities));
       } catch (JAXBException e) {
-        Logger.registerException(1, e);
+        Owlook.registerException(1, e);
       } catch (Nullable e) {
       }
       setSelectedTableDataFilter(filter);
@@ -139,7 +139,7 @@ public class FiltersTab extends ButtonList {
         getTableViewerTab().getTableViewer().entity().getTableDataFilters().add(newFilter);
         editFilter(newFilter);
       } catch (Exception e) {
-        Logger.registerException(1, e);
+        Owlook.registerException(1, e);
       }
     });
     contextMenu.getItems().add(duplicate);
@@ -206,12 +206,12 @@ public class FiltersTab extends ButtonList {
       tableDataFilter.entity()
           .getController(getTableViewerTab().getTableViewer().entity().getTableDataSafe()).show();
     } catch (IOException e) {
-      Logger.registerException(1, e);
+      Owlook.registerException(1, e);
     } catch (Nullable e) {
       try {
         tableDataFilter.entity().getController().show();
       } catch (IOException e1) {
-        Logger.registerException(1, e1);
+        Owlook.registerException(1, e1);
       }
     }
   }

@@ -9,7 +9,7 @@ import space.sadfox.dataccess.dataccess.TableDatas;
 import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.owlery.OwleryOpenDialog;
 import space.sadfox.owlook.ui.base.DesignController;
-import space.sadfox.owlook.utils.Logger;
+import space.sadfox.owlook.utils.Owlook;
 import space.sadfox.owlook.utils.Nullable;
 
 public class TableViewerEditController extends DesignController<TableViewerEditDesigner> {
@@ -43,7 +43,7 @@ public class TableViewerEditController extends DesignController<TableViewerEditD
         Owl<TableData> newTableData = TableDatas.createTableDataOwl();
         tableViewer.entity().setTableData(newTableData);
       } catch (Exception e) {
-        Logger.registerException(1, e);
+        Owlook.registerException(1, e);
       }
     });
 
@@ -51,7 +51,7 @@ public class TableViewerEditController extends DesignController<TableViewerEditD
       try {
         tableViewer.entity().getTableDataSafe().entity().getController().show();
       } catch (IOException e) {
-        Logger.registerException(1, e);
+        Owlook.registerException(1, e);
       } catch (Nullable e) {
       }
     });
@@ -79,7 +79,7 @@ public class TableViewerEditController extends DesignController<TableViewerEditD
           tableViewer.entity().setTableData(openDialog.getOpenedOwls().get(0));
         }
       } catch (ReflectiveOperationException e) {
-        Logger.registerException(1, e);
+        Owlook.registerException(1, e);
       }
     });
   }
