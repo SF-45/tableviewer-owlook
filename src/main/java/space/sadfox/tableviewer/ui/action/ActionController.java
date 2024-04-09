@@ -2,6 +2,7 @@ package space.sadfox.tableviewer.ui.action;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -17,9 +18,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
-import space.sadfox.dataccess.action.ActionEntities;
 import space.sadfox.dataccess.action.ActionEntity;
 import space.sadfox.dataccess.action.ActionProvider;
+import space.sadfox.dataccess.action.Actions;
 import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.owlery.OwleryOpenDialog;
 import space.sadfox.owlook.ui.base.FXMLController;
@@ -171,12 +172,12 @@ public class ActionController extends FXMLController {
     });
     root.setCenter(getTagAccordion());
 
-    for (ActionProvider actionProvider : ActionEntities.getActionProviders()) {
+    for (ActionProvider actionProvider : Actions.getActionProviders()) {
       MenuItem menuItem = new MenuItem(actionProvider.getComponentName());
       menuItem.setOnAction(event -> {
         ActionDecorator newActionDecorator = new ActionDecorator();
         try {
-          newActionDecorator.setActionOwl(ActionEntities.createActionEntity(actionProvider));
+          newActionDecorator.setActionOwl(Actions.createActionEntity(actionProvider));
           getTableViewerTab().getTableViewer().entity().getActionDecorators()
               .add(newActionDecorator);
           new EditActionController(newActionDecorator, tableViewerTab).show();
@@ -247,8 +248,14 @@ public class ActionController extends FXMLController {
     if (providerAccordion == null) {
       providerAccordion = new GroupAccordion<>();
       providerAccordion.setItems(getActionDecorators());
-      providerAccordion.setMatcher(
-          (item, crit) -> item.getActionOwl().entity().getActionProvider().equals(crit));
+      providerAccordion.setMatcher((item, crit) -> {
+        Optional<ActionProvider> oProvider = item.getActionOwl().entity().getActionProviderSafe();
+        if (oProvider.isPresent()) {
+          return oProvider.get().getIdentifier().equals(crit);
+        } else {
+          return false;
+        }
+      });
       providerAccordion.setCriteria(actionDecoratorsCollector.getProviders());
       providerAccordion.setButtonFactory(action -> new ActionButton(action, getTableViewerTab()));
       providerAccordion.setGroupNameFactory(p -> new SimpleStringProperty(p));

@@ -1,6 +1,7 @@
 package space.sadfox.tableviewer.ui.filter;
 
 import java.io.IOException;
+import java.util.Arrays;
 import jakarta.xml.bind.JAXBException;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -18,9 +19,10 @@ import space.sadfox.dataccess.filter.TableDataFilter;
 import space.sadfox.dataccess.filter.TableDataFilters;
 import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.owlery.OwlLoader;
+import space.sadfox.owlook.owlery.OwlLoader.DeleteFlag;
 import space.sadfox.owlook.owlery.OwleryOpenDialog;
-import space.sadfox.owlook.utils.Owlook;
 import space.sadfox.owlook.utils.Nullable;
+import space.sadfox.owlook.utils.Owlook;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 import space.sadfox.tableviewer.ui.base.ButtonList;
 
@@ -63,7 +65,6 @@ public class FiltersTab extends ButtonList {
       Owl<TableDataFilter> newFilter = TableDataFilters.createTableDataFilter();
       if (newFilter == null)
         return;
-      newFilter.head().setTitle("New Filter");
       getTableViewerTab().getTableViewer().entity().getTableDataFilters().add(newFilter);
       editFilter(newFilter);
     });
@@ -152,8 +153,12 @@ public class FiltersTab extends ButtonList {
 
     MenuItem delete = new MenuItem("Delete Filter");
     delete.setOnAction(event -> {
-      if (TableDataFilters.deleteTableDataFilter(filter)) {
-        getTableViewerTab().getTableViewer().entity().getTableDataFilters().remove(filter);
+      var tableViewer = getTableViewerTab().getTableViewer();
+      try {
+        OwlLoader.INSTANCE.deleteOwl(filter, Arrays.asList(tableViewer),
+            DeleteFlag.NO_DEPENDENCIES);
+      } catch (Exception e) {
+        Owlook.registerException(3, e);
       }
     });
     contextMenu.getItems().add(delete);

@@ -1,6 +1,8 @@
 package space.sadfox.tableviewer.ui.action;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Optional;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
@@ -8,15 +10,16 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableView.TableViewSelectionModel;
 import javafx.scene.control.Tooltip;
 import space.sadfox.dataccess.action.Action;
-import space.sadfox.dataccess.action.ActionEntities;
 import space.sadfox.dataccess.action.ActionEntity;
+import space.sadfox.dataccess.action.ActionProvider;
 import space.sadfox.dataccess.action.ActionProviderNotFound;
 import space.sadfox.dataccess.dataccess.DataEntity;
 import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.owlery.OwlLoader;
+import space.sadfox.owlook.owlery.OwlLoader.DeleteFlag;
 import space.sadfox.owlook.ui.tools.MessageBox;
-import space.sadfox.owlook.utils.Owlook;
 import space.sadfox.owlook.utils.Nullable;
+import space.sadfox.owlook.utils.Owlook;
 import space.sadfox.tableviewer.ActionDecorator;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 
@@ -85,10 +88,13 @@ public class ActionButton extends Button {
     });
     contextMenu.getItems().add(close);
 
-    MenuItem delete = new MenuItem("Delete Filter");
+    MenuItem delete = new MenuItem("Delete Action");
     delete.setOnAction(event -> {
-      if (ActionEntities.deleteActionEntity(getActionOwl())) {
-        parent.getTableViewer().entity().getActionDecorators().remove(actionDecorator);
+      try {
+        OwlLoader.INSTANCE.deleteOwl(getActionOwl(), Arrays.asList(parent.getTableViewer()),
+            DeleteFlag.NO_DEPENDENCIES);
+      } catch (Exception e) {
+        Owlook.registerException(2, e);
       }
     });
     contextMenu.getItems().add(delete);
@@ -103,13 +109,18 @@ public class ActionButton extends Button {
   }
 
   public Action getAction() throws ActionProviderNotFound {
-    try {
-      return ActionEntities.createAction(getActionOwl(),
-          parent.getTableViewer().entity().getTableDataSafe());
-    } catch (Nullable e) {
-      return ActionEntities.createAction(getActionOwl());
-    }
+    Optional<ActionProvider> oProvider = getActionOwl().entity().getActionProviderSafe();
+    if (oProvider.isPresent()) {
+      try {
+        return oProvider.get().createAction(getActionOwl(),
+            parent.getTableViewer().entity().getTableDataSafe());
+      } catch (Nullable e) {
+        return oProvider.get().createAction(getActionOwl());
+      }
 
+    } else {
+      throw new ActionProviderNotFound();
+    }
   }
 
 }

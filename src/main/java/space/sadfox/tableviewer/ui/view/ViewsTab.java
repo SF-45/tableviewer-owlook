@@ -1,6 +1,7 @@
 package space.sadfox.tableviewer.ui.view;
 
 import java.io.IOException;
+import java.util.Arrays;
 import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
@@ -12,9 +13,10 @@ import space.sadfox.dataccess.view.TableDataView;
 import space.sadfox.dataccess.view.TableDataViews;
 import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.owlery.OwlLoader;
+import space.sadfox.owlook.owlery.OwlLoader.DeleteFlag;
 import space.sadfox.owlook.owlery.OwleryOpenDialog;
-import space.sadfox.owlook.utils.Owlook;
 import space.sadfox.owlook.utils.Nullable;
+import space.sadfox.owlook.utils.Owlook;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 import space.sadfox.tableviewer.ui.base.ButtonList;
 
@@ -124,8 +126,11 @@ public class ViewsTab extends ButtonList {
 
     MenuItem delete = new MenuItem("Delete View");
     delete.setOnAction(event -> {
-      if (TableDataViews.deleteTableDataView(view)) {
-        getTableViewerTab().getTableViewer().entity().getTableDataViews().remove(view);
+      var tableViewer = getTableViewerTab().getTableViewer();
+      try {
+        OwlLoader.INSTANCE.deleteOwl(view, Arrays.asList(tableViewer), DeleteFlag.NO_DEPENDENCIES);
+      } catch (Exception e) {
+        Owlook.registerException(3, e);
       }
     });
     contextMenu.getItems().add(delete);

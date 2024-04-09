@@ -1,16 +1,17 @@
 package space.sadfox.tableviewer;
 
 import java.io.IOException;
+import javafx.beans.binding.Bindings;
 import javafx.scene.control.SelectionMode;
 import javafx.stage.Modality;
 import space.sadfox.dataccess.dataccess.TableData;
 import space.sadfox.dataccess.dataccess.TableData.DataUpdateListener;
-import space.sadfox.dataccess.dataccess.TableDatas;
 import space.sadfox.owlook.base.owl.Owl;
+import space.sadfox.owlook.owlery.OwlLoader;
 import space.sadfox.owlook.owlery.OwleryOpenDialog;
 import space.sadfox.owlook.ui.base.DesignController;
-import space.sadfox.owlook.utils.Owlook;
 import space.sadfox.owlook.utils.Nullable;
+import space.sadfox.owlook.utils.Owlook;
 
 public class TableViewerEditController extends DesignController<TableViewerEditDesigner> {
 
@@ -19,8 +20,8 @@ public class TableViewerEditController extends DesignController<TableViewerEditD
   public TableViewerEditController(Owl<TableViewer> tableViewer) {
     super(new TableViewerEditDesigner());
     this.tableViewer = tableViewer;
-
-    stageTitle.bind(tableViewer.head().titleProperty());
+    stageTitle
+        .bind(Bindings.concat("Edit TableViewer [", tableViewer.head().titleProperty(), "]"));
 
     DESIGN.titleTextField.setText(tableViewer.head().getTitle());
     DESIGN.titleTextField.textProperty().bindBidirectional(tableViewer.head().titleProperty());
@@ -40,7 +41,7 @@ public class TableViewerEditController extends DesignController<TableViewerEditD
 
     DESIGN.createTableDataButton.setOnAction(event -> {
       try {
-        Owl<TableData> newTableData = TableDatas.createTableDataOwl();
+        Owl<TableData> newTableData = OwlLoader.INSTANCE.createOwl(TableData.class);
         tableViewer.entity().setTableData(newTableData);
       } catch (Exception e) {
         Owlook.registerException(1, e);

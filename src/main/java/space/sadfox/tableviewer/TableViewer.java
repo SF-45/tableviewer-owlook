@@ -17,6 +17,7 @@ import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import space.sadfox.dataccess.action.ActionEntity;
 import space.sadfox.dataccess.dataccess.TableData;
 import space.sadfox.dataccess.dataccess.TableDataAdapter;
 import space.sadfox.dataccess.filter.TableDataFilter;
@@ -142,7 +143,20 @@ public class TableViewer extends OwlEntity implements Controllable {
       } else if (owl.entityClass().equals(TableDataView.class)) {
         getTableDataViews().remove(owl);
       } else if (owl.entityClass().equals(TableData.class)) {
-        setTableData(null);
+        try {
+          if (getTableDataSafe().equals(owl)) {
+            setTableData(null);
+          }
+        } catch (Nullable e) {
+        }
+      } else if (owl.entityClass().equals(ActionEntity.class)) {
+        for (int i = 0; i < getActionDecorators().size(); i++) {
+          ActionDecorator ad = getActionDecorators().get(i);
+          if (ad.getActionOwl().equals(owl)) {
+            getActionDecorators().remove(i);
+            i--;
+          }
+        }
       }
     });
   }
@@ -151,6 +165,7 @@ public class TableViewer extends OwlEntity implements Controllable {
   public Controller getController() throws IOException {
     return new TableViewerEditController((Owl<TableViewer>) getOwl());
   }
+
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder("TableViewer: " + getOwl().head().getTitle() + "\n");

@@ -1,13 +1,16 @@
 package space.sadfox.tableviewer;
 
+import java.util.Optional;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import space.sadfox.dataccess.action.ActionProvider;
 import space.sadfox.owlook.base.owl.Owl;
 
 public class ActionDecoratorsCollector {
 
   private final Owl<TableViewer> tableViewer;
+  private static final String PROVIDER_NOT_FOUND = "unknown";
 
   private final ObservableList<String> actionTags =
       FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
@@ -48,13 +51,13 @@ public class ActionDecoratorsCollector {
 
   private void registerActionDecorator(ActionDecorator actionDecorator) {
     actionDecorator.getTags().forEach(this::checkAndAddTag);
-    checkAndAddProvider(actionDecorator.getActionOwl().entity().getActionProvider());
+    checkAndAddProvider(actionDecorator.getActionOwl().entity().getActionProviderSafe());
     actionDecorator.tagsProperty().addListener(getTagListChangeListener());
   }
 
   private void unregisterActionDecorator(ActionDecorator actionDecorator) {
     actionDecorator.getTags().forEach(this::checkAndRemoveTag);
-    checkAndRemoveProvider(actionDecorator.getActionOwl().entity().getActionProvider());
+    checkAndRemoveProvider(actionDecorator.getActionOwl().entity().getActionProviderSafe());
     actionDecorator.tagsProperty().removeListener(getTagListChangeListener());
   }
 
@@ -95,21 +98,30 @@ public class ActionDecoratorsCollector {
     }
   }
 
-  private void checkAndAddProvider(String provider) {
-    if (!actionProviders.contains(provider)) {
-      actionProviders.add(provider);
+  private void checkAndAddProvider(Optional<ActionProvider> provider) {
+    if (provider.isPresent()) {
+      if (!actionProviders.contains(provider.get().getIdentifier())) {
+        actionProviders.add(provider.get().getIdentifier());
+      }
     }
   }
 
-  private void checkAndRemoveProvider(String provider) {
-    int providerCount = 0;
-    for (ActionDecorator actionDecorator : tableViewer.entity().getActionDecorators()) {
-      if (actionDecorator.getActionOwl().entity().getActionProvider().equals(provider)) {
-        providerCount++;
+  private void checkAndRemoveProvider(Optional<ActionProvider> oProvider) {
+    if (oProvider.isPresent()) {
+      ActionProvider provider = oProvider.get();
+      int providerCount = 0;
+      for (ActionDecorator actionDecorator : tableViewer.entity().getActionDecorators()) {
+        Optional<ActionProvider> coProvider =
+            actionDecorator.getActionOwl().entity().getActionProviderSafe();
+        if (coProvider.isPresent()) {
+          if (coProvider.get().equals(provider)) {
+            providerCount++;
+          }
+        }
       }
-    }
-    if (providerCount == 0) {
-      actionProviders.remove(provider);
+      if (providerCount == 0) {
+        actionProviders.remove(provider.getIdentifier());
+      }
     }
   }
 
