@@ -27,13 +27,14 @@ import space.sadfox.dataccess.view.TableDataViewAdapter;
 import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.base.owl.OwlEntity;
 import space.sadfox.owlook.owlery.OwlLoader;
+import space.sadfox.owlook.owlery.OwleryCreatable;
 import space.sadfox.owlook.ui.base.Controllable;
 import space.sadfox.owlook.ui.base.Controller;
 import space.sadfox.owlook.utils.Nullable;
 
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement
-public class TableViewer extends OwlEntity implements Controllable {
+public class TableViewer extends OwlEntity implements Controllable, OwleryCreatable {
 
   private final LongProperty searchDelay = new SimpleLongProperty(0);
   private final ObjectProperty<Owl<TableData>> tableData = new SimpleObjectProperty<>();
