@@ -42,7 +42,7 @@ public class TableViewerTab extends Tab {
     try {
       actionsNode = new ActionController(this);
     } catch (IOException e) {
-      Owlook.registerException(1, e);
+      Owlook.registerException(e);
     }
     this.setContent(getTableDataViewTable());
     initializ();
@@ -129,7 +129,7 @@ public class TableViewerTab extends Tab {
         try {
           new TableDataController(getTableViewer().entity().getTableDataSafe()).show();
         } catch (IOException e) {
-          Owlook.registerException(1, e);
+          Owlook.registerException(e);
         } catch (Nullable e) {
           MessageBox messageBox = new MessageBox(AlertType.INFORMATION);
           messageBox.setTitle("Table Data Not Set");
@@ -157,7 +157,7 @@ public class TableViewerTab extends Tab {
         try {
           getTableViewer().entity().getController().show();
         } catch (Exception e) {
-          Owlook.registerException(1, e);
+          Owlook.registerException(e);
         }
       });
       menu.getItems().add(editTableViewer);

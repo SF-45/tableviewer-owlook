@@ -78,7 +78,7 @@ public class ViewsTab extends ButtonList {
         }
 
       } catch (ReflectiveOperationException e) {
-        Owlook.registerException(1, e);
+        Owlook.registerException(e);
       }
     });
     contextMenu.getItems().add(open);
@@ -113,7 +113,7 @@ public class ViewsTab extends ButtonList {
         getTableViewerTab().getTableViewer().entity().getTableDataViews().add(newView);
         editView(newView);
       } catch (Exception e) {
-        Owlook.registerException(1, e);
+        Owlook.registerException(e);
       }
     });
     contextMenu.getItems().add(duplicate);
@@ -130,7 +130,7 @@ public class ViewsTab extends ButtonList {
       try {
         OwlLoader.INSTANCE.deleteOwl(view, Arrays.asList(tableViewer), DeleteFlag.NO_DEPENDENCIES);
       } catch (Exception e) {
-        Owlook.registerException(3, e);
+        Owlook.registerException(e);
       }
     });
     contextMenu.getItems().add(delete);
@@ -164,12 +164,12 @@ public class ViewsTab extends ButtonList {
       view.entity().getController(getTableViewerTab().getTableViewer().entity().getTableDataSafe())
           .show();
     } catch (IOException e) {
-      Owlook.registerException(1, e);
+      Owlook.registerException(e);
     } catch (Nullable e) {
       try {
         view.entity().getController().show();
       } catch (IOException e1) {
-        Owlook.registerException(1, e1);
+        Owlook.registerException(e1);
       }
     }
   }

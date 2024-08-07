@@ -182,7 +182,7 @@ public class ActionController extends FXMLController {
               .add(newActionDecorator);
           new EditActionController(newActionDecorator, tableViewerTab).show();
         } catch (Exception e) {
-          Owlook.registerException(1, e);
+          Owlook.registerException(e);
         }
 
       });
@@ -205,7 +205,7 @@ public class ActionController extends FXMLController {
           }
         }
       } catch (ReflectiveOperationException e) {
-        Owlook.registerException(1, e);
+        Owlook.registerException(e);
       }
     });
   }

@@ -44,7 +44,7 @@ public class TableViewerEditController extends DesignController<TableViewerEditD
         Owl<TableData> newTableData = OwlLoader.INSTANCE.createOwl(TableData.class);
         tableViewer.entity().setTableData(newTableData);
       } catch (Exception e) {
-        Owlook.registerException(1, e);
+        Owlook.registerException(e);
       }
     });
 
@@ -52,7 +52,7 @@ public class TableViewerEditController extends DesignController<TableViewerEditD
       try {
         tableViewer.entity().getTableDataSafe().entity().getController().show();
       } catch (IOException e) {
-        Owlook.registerException(1, e);
+        Owlook.registerException(e);
       } catch (Nullable e) {
       }
     });
@@ -80,7 +80,7 @@ public class TableViewerEditController extends DesignController<TableViewerEditD
           tableViewer.entity().setTableData(openDialog.getOpenedOwls().get(0));
         }
       } catch (ReflectiveOperationException e) {
-        Owlook.registerException(1, e);
+        Owlook.registerException(e);
       }
     });
   }

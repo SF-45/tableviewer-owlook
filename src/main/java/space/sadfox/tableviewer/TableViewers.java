@@ -20,7 +20,7 @@ public class TableViewers {
       Owl<TableViewer> newTableViewer = OwlLoader.INSTANCE.createOwl(TableViewer.class);
       return newTableViewer;
     } catch (Exception e) {
-      Owlook.registerException(1, e);
+      Owlook.registerException(e);
     }
     return null;
   }

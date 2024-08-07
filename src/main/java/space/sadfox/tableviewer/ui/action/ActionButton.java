@@ -63,7 +63,7 @@ public class ActionButton extends Button {
       try {
         new EditActionController(actionDecorator, parent).show();
       } catch (IOException e) {
-        Owlook.registerException(1, e);
+        Owlook.registerException(e);
       }
     });
     contextMenu.getItems().add(edit);
@@ -77,7 +77,7 @@ public class ActionButton extends Button {
         parent.getTableViewer().entity().getActionDecorators().add(newActionDecorator);
         new EditActionController(newActionDecorator, parent).show();
       } catch (Exception e) {
-        Owlook.registerException(1, e);
+        Owlook.registerException(e);
       }
     });
     contextMenu.getItems().add(duplicate);
@@ -94,7 +94,7 @@ public class ActionButton extends Button {
         OwlLoader.INSTANCE.deleteOwl(getActionOwl(), Arrays.asList(parent.getTableViewer()),
             DeleteFlag.NO_DEPENDENCIES);
       } catch (Exception e) {
-        Owlook.registerException(2, e);
+        Owlook.registerException(e);
       }
     });
     contextMenu.getItems().add(delete);

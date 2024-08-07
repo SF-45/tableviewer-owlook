@@ -29,7 +29,7 @@ public class TableViewerProvider implements OwlookModule, Workspace {
       try {
         ui = new TableViewerController();
       } catch (IOException e) {
-        Owlook.registerException(1, e);
+        Owlook.registerException(e);
       }
     }
 

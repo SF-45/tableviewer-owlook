@@ -115,7 +115,7 @@ public class FiltersTab extends ButtonList {
         getTableViewerTab().getTableDataViewTable()
             .setItems(FXCollections.observableArrayList(dataEntities));
       } catch (JAXBException e) {
-        Owlook.registerException(1, e);
+        Owlook.registerException(e);
       } catch (Nullable e) {
       }
       setSelectedTableDataFilter(filter);
@@ -140,7 +140,7 @@ public class FiltersTab extends ButtonList {
         getTableViewerTab().getTableViewer().entity().getTableDataFilters().add(newFilter);
         editFilter(newFilter);
       } catch (Exception e) {
-        Owlook.registerException(1, e);
+        Owlook.registerException(e);
       }
     });
     contextMenu.getItems().add(duplicate);
@@ -158,7 +158,7 @@ public class FiltersTab extends ButtonList {
         OwlLoader.INSTANCE.deleteOwl(filter, Arrays.asList(tableViewer),
             DeleteFlag.NO_DEPENDENCIES);
       } catch (Exception e) {
-        Owlook.registerException(3, e);
+        Owlook.registerException(e);
       }
     });
     contextMenu.getItems().add(delete);
@@ -211,12 +211,12 @@ public class FiltersTab extends ButtonList {
       tableDataFilter.entity()
           .getController(getTableViewerTab().getTableViewer().entity().getTableDataSafe()).show();
     } catch (IOException e) {
-      Owlook.registerException(1, e);
+      Owlook.registerException(e);
     } catch (Nullable e) {
       try {
         tableDataFilter.entity().getController().show();
       } catch (IOException e1) {
-        Owlook.registerException(1, e1);
+        Owlook.registerException(e1);
       }
     }
   }
