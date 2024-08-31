@@ -16,9 +16,9 @@ import javafx.scene.layout.BorderPane;
 import space.sadfox.dataccess.action.ActionEntity;
 import space.sadfox.dataccess.dataccess.TableData;
 import space.sadfox.owlook.base.owl.Owl;
+import space.sadfox.owlook.owlery.OwlReference;
 import space.sadfox.owlook.ui.base.Controller;
 import space.sadfox.owlook.ui.base.FXMLController;
-import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.tableviewer.ActionDecorator;
 import space.sadfox.tableviewer.ActionDecoratorsCollector;
 import space.sadfox.tableviewer.ResourceTarget;
@@ -53,9 +53,9 @@ public class EditActionController extends FXMLController {
 
   private void init() throws IOException {
     Controller actionEntityController;
-    try {
-      actionEntityController = getActionOwl().entity().getController(getParentTableData());
-    } catch (Nullable e) {
+    if (getParentTableData().isPresent()) {
+      actionEntityController = getActionOwl().entity().getController(getParentTableData().get());
+    } else {
       actionEntityController = getActionOwl().entity().getController();
     }
     root.setCenter(actionEntityController.getParent());
@@ -162,7 +162,7 @@ public class EditActionController extends FXMLController {
   }
 
   private Owl<ActionEntity> getActionOwl() {
-    return getActionDecorator().getActionOwl();
+    return getActionDecorator().getActionOwlRef().get();
   }
 
   private TableViewerTab getTableViewerTab() {
@@ -170,8 +170,8 @@ public class EditActionController extends FXMLController {
     return tableViewerTab;
   }
 
-  private Owl<TableData> getParentTableData() throws Nullable {
-    return getTableViewerTab().getTableViewer().entity().getTableDataSafe();
+  private OwlReference<TableData> getParentTableData() {
+    return getTableViewerTab().getTableViewer().entity().getTableDataRef();
   }
 
 }

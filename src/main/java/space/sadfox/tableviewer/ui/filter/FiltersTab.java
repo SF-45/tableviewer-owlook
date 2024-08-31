@@ -15,13 +15,14 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Modality;
 import space.sadfox.dataccess.dataccess.DataEntity;
+import space.sadfox.dataccess.dataccess.TableData;
 import space.sadfox.dataccess.filter.TableDataFilter;
 import space.sadfox.dataccess.filter.TableDataFilters;
 import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.owlery.OwlLoader;
 import space.sadfox.owlook.owlery.OwlLoader.DeleteFlag;
+import space.sadfox.owlook.owlery.OwlReference;
 import space.sadfox.owlook.owlery.OwleryOpenDialog;
-import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.owlook.utils.Owlook;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 import space.sadfox.tableviewer.ui.base.ButtonList;
@@ -39,7 +40,7 @@ public class FiltersTab extends ButtonList {
     toggleGroup = new ToggleGroup();
 
     getTableViewerTab().getTableViewer().entity().getTableDataFilters().forEach(this::addFilter);
-    getTableViewerTab().getTableViewer().entity().tableDataFiltersProperty()
+    getTableViewerTab().getTableViewer().entity().getTableDataFilters()
         .addListener((ListChangeListener<Owl<TableDataFilter>>) change -> {
           while (change.next()) {
             if (change.wasAdded()) {
@@ -77,7 +78,7 @@ public class FiltersTab extends ButtonList {
             new OwleryOpenDialog<>(TableDataFilter.class);
         openDialog.setSelectionModel(SelectionMode.MULTIPLE);
         openDialog.setAlredyOpenedOwls(
-            getTableViewerTab().getTableViewer().entity().tableDataFiltersProperty());
+            getTableViewerTab().getTableViewer().entity().getTableDataFilters());
         openDialog.showAndWait(Modality.APPLICATION_MODAL);
         if (openDialog.isOpened()) {
           getTableViewerTab().getTableViewer().entity().getTableDataFilters()
@@ -109,14 +110,16 @@ public class FiltersTab extends ButtonList {
         new FilterToggleButton(filter, getTableViewerTab().getTableViewer());
     button.setToggleGroup(toggleGroup);
     button.setOnAction(event -> {
-      try {
-        DataEntity[] dataEntities = TableDataFilters.getDataEntities(filter,
-            getTableViewerTab().getTableViewer().entity().getTableDataSafe());
-        getTableViewerTab().getTableDataViewTable()
-            .setItems(FXCollections.observableArrayList(dataEntities));
-      } catch (JAXBException e) {
-        Owlook.registerException(e);
-      } catch (Nullable e) {
+      OwlReference<TableData> tableDataRef =
+          getTableViewerTab().getTableViewer().entity().getTableDataRef();
+      if (tableDataRef.isPresent()) {
+        try {
+          DataEntity[] dataEntities = TableDataFilters.getDataEntities(filter, tableDataRef.get());
+          getTableViewerTab().getTableDataViewTable()
+              .setItems(FXCollections.observableArrayList(dataEntities));
+        } catch (JAXBException e) {
+          Owlook.registerException(e);
+        }
       }
       setSelectedTableDataFilter(filter);
     });
@@ -208,17 +211,15 @@ public class FiltersTab extends ButtonList {
 
   private void editFilter(Owl<TableDataFilter> tableDataFilter) {
     try {
-      tableDataFilter.entity()
-          .getController(getTableViewerTab().getTableViewer().entity().getTableDataSafe()).show();
+      OwlReference<TableData> tableDataRef =
+          getTableViewerTab().getTableViewer().entity().getTableDataRef();
+      if (tableDataRef.isPresent()) {
+        tableDataFilter.entity().getController(tableDataRef.get()).show();
+      } else {
+        tableDataFilter.entity().getController().show();
+      }
     } catch (IOException e) {
       Owlook.registerException(e);
-    } catch (Nullable e) {
-      try {
-        tableDataFilter.entity().getController().show();
-      } catch (IOException e1) {
-        Owlook.registerException(e1);
-      }
     }
   }
-
 }

@@ -14,11 +14,12 @@ import space.sadfox.dataccess.action.ActionEntity;
 import space.sadfox.dataccess.action.ActionProvider;
 import space.sadfox.dataccess.action.ActionProviderNotFound;
 import space.sadfox.dataccess.dataccess.DataEntity;
+import space.sadfox.dataccess.dataccess.TableData;
 import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.owlery.OwlLoader;
 import space.sadfox.owlook.owlery.OwlLoader.DeleteFlag;
+import space.sadfox.owlook.owlery.OwlReference;
 import space.sadfox.owlook.ui.tools.MessageBox;
-import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.owlook.utils.Owlook;
 import space.sadfox.tableviewer.ActionDecorator;
 import space.sadfox.tableviewer.ui.TableViewerTab;
@@ -105,19 +106,18 @@ public class ActionButton extends Button {
   }
 
   public Owl<ActionEntity> getActionOwl() {
-    return getActionDecorator().getActionOwl();
+    return getActionDecorator().getActionOwlRef().get();
   }
 
   public Action getAction() throws ActionProviderNotFound {
     Optional<ActionProvider> oProvider = getActionOwl().entity().getActionProviderSafe();
+    OwlReference<TableData> tableDataRef = parent.getTableViewer().entity().getTableDataRef();
     if (oProvider.isPresent()) {
-      try {
-        return oProvider.get().createAction(getActionOwl(),
-            parent.getTableViewer().entity().getTableDataSafe());
-      } catch (Nullable e) {
+      if (tableDataRef.isPresent()) {
+        return oProvider.get().createAction(getActionOwl(), tableDataRef.get());
+      } else {
         return oProvider.get().createAction(getActionOwl());
       }
-
     } else {
       throw new ActionProviderNotFound();
     }

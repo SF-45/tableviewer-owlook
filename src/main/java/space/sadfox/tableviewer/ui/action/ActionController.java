@@ -177,7 +177,7 @@ public class ActionController extends FXMLController {
       menuItem.setOnAction(event -> {
         ActionDecorator newActionDecorator = new ActionDecorator();
         try {
-          newActionDecorator.setActionOwl(Actions.createActionEntity(actionProvider));
+          newActionDecorator.getActionOwlRef().set(Actions.createActionEntity(actionProvider));
           getTableViewerTab().getTableViewer().entity().getActionDecorators()
               .add(newActionDecorator);
           new EditActionController(newActionDecorator, tableViewerTab).show();
@@ -249,7 +249,8 @@ public class ActionController extends FXMLController {
       providerAccordion = new GroupAccordion<>();
       providerAccordion.setItems(getActionDecorators());
       providerAccordion.setMatcher((item, crit) -> {
-        Optional<ActionProvider> oProvider = item.getActionOwl().entity().getActionProviderSafe();
+        Optional<ActionProvider> oProvider =
+            item.getActionOwlRef().get().entity().getActionProviderSafe();
         if (oProvider.isPresent()) {
           return oProvider.get().getIdentifier().equals(crit);
         } else {

@@ -9,13 +9,14 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.ToggleGroup;
 import javafx.stage.Modality;
+import space.sadfox.dataccess.dataccess.TableData;
 import space.sadfox.dataccess.view.TableDataView;
 import space.sadfox.dataccess.view.TableDataViews;
 import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.owlery.OwlLoader;
 import space.sadfox.owlook.owlery.OwlLoader.DeleteFlag;
+import space.sadfox.owlook.owlery.OwlReference;
 import space.sadfox.owlook.owlery.OwleryOpenDialog;
-import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.owlook.utils.Owlook;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 import space.sadfox.tableviewer.ui.base.ButtonList;
@@ -31,7 +32,7 @@ public class ViewsTab extends ButtonList {
 
     toggleGroup = new ToggleGroup();
     getTableViewerTab().getTableViewer().entity().getTableDataViews().forEach(this::addView);
-    getTableViewerTab().getTableViewer().entity().tableDataViewsProperty()
+    getTableViewerTab().getTableViewer().entity().getTableDataViews()
         .addListener((ListChangeListener<Owl<TableDataView>>) change -> {
           while (change.next()) {
             if (change.wasAdded()) {
@@ -69,8 +70,8 @@ public class ViewsTab extends ButtonList {
       try {
         OwleryOpenDialog<TableDataView> openDialog = new OwleryOpenDialog<>(TableDataView.class);
         openDialog.setSelectionModel(SelectionMode.MULTIPLE);
-        openDialog.setAlredyOpenedOwls(
-            getTableViewerTab().getTableViewer().entity().tableDataViewsProperty());
+        openDialog
+            .setAlredyOpenedOwls(getTableViewerTab().getTableViewer().entity().getTableDataViews());
         openDialog.showAndWait(Modality.APPLICATION_MODAL);
         if (openDialog.isOpened()) {
           getTableViewerTab().getTableViewer().entity().getTableDataViews()
@@ -161,21 +162,19 @@ public class ViewsTab extends ButtonList {
 
   private void editView(Owl<TableDataView> view) {
     try {
-      view.entity().getController(getTableViewerTab().getTableViewer().entity().getTableDataSafe())
-          .show();
+      OwlReference<TableData> tableDataRef =
+          getTableViewerTab().getTableViewer().entity().getTableDataRef();
+      if (tableDataRef.isPresent()) {
+        view.entity().getController(tableDataRef.get());
+      } else {
+        view.entity().getController().show();
+      }
     } catch (IOException e) {
       Owlook.registerException(e);
-    } catch (Nullable e) {
-      try {
-        view.entity().getController().show();
-      } catch (IOException e1) {
-        Owlook.registerException(e1);
-      }
     }
   }
 
   public TableViewerTab getTableViewerTab() {
     return tableViewerTab;
   }
-
 }

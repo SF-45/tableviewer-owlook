@@ -7,15 +7,16 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
+import space.sadfox.dataccess.dataccess.TableData;
 import space.sadfox.dataccess.dataccess.TableData.DataUpdateListener;
 import space.sadfox.dataccess.dataccess.TableDataController;
 import space.sadfox.dataccess.dataccess.TableDataDao;
 import space.sadfox.dataccess.filter.TableDataFilter;
 import space.sadfox.dataccess.view.TableViewForTableData;
 import space.sadfox.owlook.base.owl.Owl;
+import space.sadfox.owlook.owlery.OwlReference;
 import space.sadfox.owlook.ui.tools.MessageBox;
 import space.sadfox.owlook.utils.Owlook;
-import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.tableviewer.TableViewer;
 import space.sadfox.tableviewer.ui.action.ActionController;
 import space.sadfox.tableviewer.ui.filter.FiltersTab;
@@ -54,13 +55,13 @@ public class TableViewerTab extends Tab {
       reloadCurrentData();
     };
 
-    try {
-      getTableViewer().entity().getTableDataSafe().entity()
-          .addDataUpdateListener(tableDataUpdateListener);
-    } catch (Nullable e) {
+    OwlReference<TableData> tableDataRef = getTableViewer().entity().getTableDataRef();
+
+    if (tableDataRef.isPresent()) {
+      tableDataRef.get().entity().addDataUpdateListener(tableDataUpdateListener);
     }
 
-    getTableViewer().entity().tableDataProperty().addListener((property, oldValue, newValue) -> {
+    tableDataRef.addListener((property, oldValue, newValue) -> {
       if (oldValue != null) {
         oldValue.entity().removeDataUpdateListener(tableDataUpdateListener);
       }
@@ -126,11 +127,14 @@ public class TableViewerTab extends Tab {
 
       MenuItem editTableData = new MenuItem("Edit Table Data");
       editTableData.setOnAction(event -> {
-        try {
-          new TableDataController(getTableViewer().entity().getTableDataSafe()).show();
-        } catch (IOException e) {
-          Owlook.registerException(e);
-        } catch (Nullable e) {
+        OwlReference<TableData> tableDataRef = getTableViewer().entity().getTableDataRef();
+        if (tableDataRef.isPresent()) {
+          try {
+            new TableDataController(tableDataRef.get()).show();
+          } catch (IOException e) {
+            Owlook.registerException(e);
+          }
+        } else {
           MessageBox messageBox = new MessageBox(AlertType.INFORMATION);
           messageBox.setTitle("Table Data Not Set");
           messageBox.setHeaderText("Table Data Not Set");
@@ -141,9 +145,10 @@ public class TableViewerTab extends Tab {
 
       MenuItem reloadData = new MenuItem("Reload");
       reloadData.setOnAction(event -> {
-        try {
-          new TableDataDao(getTableViewer().entity().getTableDataSafe()).loadData();
-        } catch (Nullable e) {
+        OwlReference<TableData> tableDataRef = getTableViewer().entity().getTableDataRef();
+        if (tableDataRef.isPresent()) {
+          new TableDataDao(tableDataRef.get()).loadData();
+        } else {
           MessageBox messageBox = new MessageBox(AlertType.INFORMATION);
           messageBox.setTitle("Table Data Not Set");
           messageBox.setHeaderText("Table Data Not Set");

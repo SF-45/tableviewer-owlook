@@ -6,12 +6,13 @@ import java.util.stream.Collectors;
 import space.sadfox.dataccess.action.ActionEntity;
 import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.owlery.OwlLoader;
+import space.sadfox.owlook.owlery.OwlReference;
 import space.sadfox.owlook.utils.Owlook;
 
 public class TableViewers {
   public static List<Owl<ActionEntity>> getActionEntities(Owl<TableViewer> tableViewer) {
-    return tableViewer.entity().getActionDecorators().stream().map(ActionDecorator::getActionOwl)
-        .collect(Collectors.toList());
+    return tableViewer.entity().getActionDecorators().stream().map(ActionDecorator::getActionOwlRef)
+        .map(OwlReference::get).collect(Collectors.toList());
   }
 
   public static Owl<TableViewer> createTableViewer() {

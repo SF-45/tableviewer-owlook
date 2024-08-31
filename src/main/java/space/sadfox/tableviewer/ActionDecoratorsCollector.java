@@ -51,13 +51,14 @@ public class ActionDecoratorsCollector {
 
   private void registerActionDecorator(ActionDecorator actionDecorator) {
     actionDecorator.getTags().forEach(this::checkAndAddTag);
-    checkAndAddProvider(actionDecorator.getActionOwl().entity().getActionProviderSafe());
+    checkAndAddProvider(actionDecorator.getActionOwlRef().get().entity().getActionProviderSafe());
     actionDecorator.tagsProperty().addListener(getTagListChangeListener());
   }
 
   private void unregisterActionDecorator(ActionDecorator actionDecorator) {
     actionDecorator.getTags().forEach(this::checkAndRemoveTag);
-    checkAndRemoveProvider(actionDecorator.getActionOwl().entity().getActionProviderSafe());
+    checkAndRemoveProvider(
+        actionDecorator.getActionOwlRef().get().entity().getActionProviderSafe());
     actionDecorator.tagsProperty().removeListener(getTagListChangeListener());
   }
 
@@ -112,7 +113,7 @@ public class ActionDecoratorsCollector {
       int providerCount = 0;
       for (ActionDecorator actionDecorator : tableViewer.entity().getActionDecorators()) {
         Optional<ActionProvider> coProvider =
-            actionDecorator.getActionOwl().entity().getActionProviderSafe();
+            actionDecorator.getActionOwlRef().get().entity().getActionProviderSafe();
         if (coProvider.isPresent()) {
           if (coProvider.get().equals(provider)) {
             providerCount++;
