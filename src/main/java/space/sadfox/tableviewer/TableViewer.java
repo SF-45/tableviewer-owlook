@@ -1,7 +1,6 @@
 package space.sadfox.tableviewer;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,8 +20,7 @@ import space.sadfox.dataccess.filter.TableDataFilter;
 import space.sadfox.dataccess.view.TableDataView;
 import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.base.owl.OwlEntity;
-import space.sadfox.owlook.owlery.InternalOwlDependence;
-import space.sadfox.owlook.owlery.OwlDependence;
+import space.sadfox.owlook.base.owl.OwlEntityInitializeException;
 import space.sadfox.owlook.owlery.OwlLoader;
 import space.sadfox.owlook.owlery.OwlReference;
 import space.sadfox.owlook.owlery.OwlReferenceAdapter;
@@ -57,7 +55,6 @@ public class TableViewer extends OwlEntity implements Controllable, OwleryCreata
     return searchDelay;
   }
 
-  @OwlDependence
   @XmlJavaTypeAdapter(OwlReferenceAdapter.class)
   public OwlReference<TableData> getTableDataRef() {
     return tableData;
@@ -68,7 +65,6 @@ public class TableViewer extends OwlEntity implements Controllable, OwleryCreata
     this.tableData = tableDataRef;
   }
 
-  @OwlDependence
   @XmlJavaTypeAdapter(OwlReferenceListAdapter.class)
   public OwlReferenceList<TableDataFilter> getTableDataFilters() {
     return tableDataFilters;
@@ -79,7 +75,6 @@ public class TableViewer extends OwlEntity implements Controllable, OwleryCreata
     this.tableDataFilters = tableDataFilters;
   }
 
-  @OwlDependence
   @XmlJavaTypeAdapter(OwlReferenceListAdapter.class)
   public OwlReferenceList<TableDataView> getTableDataViews() {
     return tableDataViews;
@@ -92,7 +87,6 @@ public class TableViewer extends OwlEntity implements Controllable, OwleryCreata
 
   @XmlElementWrapper(name = "actions")
   @XmlElement(name = "action")
-  @InternalOwlDependence
   public List<ActionDecorator> getActionDecorators() {
     return actionDecoratorsProperty();
   }
@@ -108,7 +102,7 @@ public class TableViewer extends OwlEntity implements Controllable, OwleryCreata
   }
 
   @Override
-  public void initialize() {
+  public void initialize() throws OwlEntityInitializeException {
     for (int i = 0; i < getActionDecorators().size(); i++) {
       if (getActionDecorators().get(i).getActionOwlRef().isEmpty()) {
         getActionDecorators().remove(i);
@@ -127,6 +121,17 @@ public class TableViewer extends OwlEntity implements Controllable, OwleryCreata
         }
       }
     });
+
+    boolean pTd = getTableDataRef().setParent(thisOwl());
+    boolean pTv = getTableDataViews().setParent(thisOwl());
+    boolean pTf = getTableDataFilters().setParent(thisOwl());
+    boolean pA = true;
+    for (ActionDecorator ad : getActionDecorators()) {
+      pA = pA && ad.getActionOwlRef().setParent(thisOwl());
+    }
+    if (!(pTd && pTv && pTf && pA)) {
+      throw new OwlEntityInitializeException("Parent is not set");
+    }
   }
 
   @Override
@@ -193,19 +198,5 @@ public class TableViewer extends OwlEntity implements Controllable, OwleryCreata
       getActionDecorators().add(newActionDecorator);
     });
 
-  }
-
-  @Override
-  public List<Owl<?>> getChildrenOwls() {
-    List<Owl<?>> childOwls = new ArrayList<>();
-    if (getTableDataRef().isPresent()) {
-      childOwls.add(getTableDataRef().get());
-    }
-    childOwls.addAll(getTableDataFilters());
-    childOwls.addAll(getTableDataViews());
-    childOwls.addAll(getActionDecorators().stream().map(actionDec -> actionDec.getActionOwlRef())
-        .map(OwlReference::get).collect(Collectors.toList()));
-
-    return childOwls;
   }
 }

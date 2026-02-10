@@ -11,7 +11,6 @@ import javafx.collections.ObservableList;
 import space.sadfox.dataccess.action.ActionEntity;
 import space.sadfox.owlook.base.jaxb.ChangeHistoryKeeping;
 import space.sadfox.owlook.base.owl.Owl;
-import space.sadfox.owlook.owlery.OwlDependence;
 import space.sadfox.owlook.owlery.OwlReference;
 import space.sadfox.owlook.owlery.OwlReferenceAdapter;
 
@@ -35,7 +34,6 @@ public class ActionDecorator implements ChangeHistoryKeeping {
     getTags().addAll(tags);
   }
 
-  @OwlDependence
   @XmlJavaTypeAdapter(OwlReferenceAdapter.class)
   public OwlReference<ActionEntity> getActionOwlRef() {
     return actionOwlRef;
