@@ -5,33 +5,53 @@
 
   <groupId>space.sadfox</groupId>
   <artifactId>wstableviewer</artifactId>
-  <version>0.7.3-beta</version>
+  <version>1.0.0</version>
   <name>Table Viewer</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <java.source>11</java.source>
-    <java.target>11</java.target>
+    <java.source>17</java.source>
+    <java.target>17</java.target>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>space.sadfox</groupId>
+        <artifactId>owlook-bom</artifactId>
+        <version>1.0.0</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
       <groupId>space.sadfox</groupId>
-      <artifactId>owlook.base</artifactId>
-      <version>0.7.3-beta</version>
+      <artifactId>owlook-base</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>space.sadfox</groupId>
       <artifactId>owlook</artifactId>
-      <version>0.7.3-beta</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>space.sadfox</groupId>
       <artifactId>xmldataccess</artifactId>
-      <version>0.7.3-beta</version>
+      <version>1.0.0</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
@@ -49,7 +69,7 @@
             </goals>
             <configuration>
               <includes>
-                space.sadfox:owlook.base,space.sadfox:owlook,space.sadfox:xmldataccess</includes>
+                space.sadfox:xmldataccess</includes>
             </configuration>
           </execution>
         </executions>
@@ -75,22 +95,44 @@
               <goal>copy-dependencies</goal>
             </goals>
             <configuration>
-              <excludeScope>provided</excludeScope>
+              <includeScope>runtime</includeScope>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.4</version>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.14</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
       <plugin>
         <groupId>space.sadfox</groupId>
         <artifactId>owlook-packer-maven-plugin</artifactId>
-        <version>0.0.1</version>
+        <version>1.0.0</version>
         <executions>
           <execution>
             <goals>
               <goal>module-pack</goal>
             </goals>
             <configuration>
-              <outputDirectory>${owlook.moduleDirectory}</outputDirectory>
               <requireOwlookModule>xmldataccess</requireOwlookModule>
             </configuration>
           </execution>
