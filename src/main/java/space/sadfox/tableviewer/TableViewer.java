@@ -1,9 +1,9 @@
 package space.sadfox.tableviewer;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -29,6 +29,7 @@ import space.sadfox.owlook.owlery.OwlReferenceListAdapter;
 import space.sadfox.owlook.owlery.OwleryCreatable;
 import space.sadfox.owlook.ui.base.Controllable;
 import space.sadfox.owlook.ui.base.Controller;
+import space.sadfox.owlook.ui.base.ControllerException;
 
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement
@@ -36,12 +37,10 @@ public class TableViewer extends OwlEntity implements Controllable, OwleryCreata
 
   private final LongProperty searchDelay = new SimpleLongProperty(0);
   private OwlReference<TableData> tableData = new OwlReference<>(TableData.class);
-  private OwlReferenceList<TableDataFilter> tableDataFilters =
-      new OwlReferenceList<>(TableDataFilter.class);
-  private OwlReferenceList<TableDataView> tableDataViews =
-      new OwlReferenceList<>(TableDataView.class);
-  private final ObservableList<ActionDecorator> actionDecorators =
-      FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
+  private OwlReferenceList<TableDataFilter> tableDataFilters = new OwlReferenceList<>(TableDataFilter.class);
+  private OwlReferenceList<TableDataView> tableDataViews = new OwlReferenceList<>(TableDataView.class);
+  private final ObservableList<ActionDecorator> actionDecorators = FXCollections
+      .synchronizedObservableList(FXCollections.observableArrayList());
 
   public long getSearchDelay() {
     return searchDelayProperty().get();
@@ -135,7 +134,7 @@ public class TableViewer extends OwlEntity implements Controllable, OwleryCreata
   }
 
   @Override
-  public Controller getController() throws IOException {
+  public Controller getController() throws ControllerException {
     return new TableViewerEditController((Owl<TableViewer>) thisOwl());
   }
 

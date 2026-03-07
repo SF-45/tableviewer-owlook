@@ -1,7 +1,7 @@
 package space.sadfox.tableviewer.ui.filter;
 
-import java.io.IOException;
 import java.util.Arrays;
+
 import jakarta.xml.bind.JAXBException;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -23,6 +23,7 @@ import space.sadfox.owlook.owlery.OwlLoader;
 import space.sadfox.owlook.owlery.OwlLoader.DeleteFlag;
 import space.sadfox.owlook.owlery.OwlReference;
 import space.sadfox.owlook.owlery.OwleryOpenDialog;
+import space.sadfox.owlook.ui.base.ControllerException;
 import space.sadfox.owlook.utils.Owlook;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 import space.sadfox.tableviewer.ui.base.ButtonList;
@@ -74,8 +75,7 @@ public class FiltersTab extends ButtonList {
     MenuItem open = new MenuItem("Open Filter");
     open.setOnAction(event -> {
       try {
-        OwleryOpenDialog<TableDataFilter> openDialog =
-            new OwleryOpenDialog<>(TableDataFilter.class);
+        OwleryOpenDialog<TableDataFilter> openDialog = new OwleryOpenDialog<>(TableDataFilter.class);
         openDialog.setSelectionModel(SelectionMode.MULTIPLE);
         openDialog.setAlredyOpenedOwls(
             getTableViewerTab().getTableViewer().entity().getTableDataFilters());
@@ -99,19 +99,15 @@ public class FiltersTab extends ButtonList {
     }
   }
 
-
-
   public TableViewerTab getTableViewerTab() {
     return tableViewerTab;
   }
 
   private void addFilter(int ind, Owl<TableDataFilter> filter) {
-    FilterToggleButton button =
-        new FilterToggleButton(filter, getTableViewerTab().getTableViewer());
+    FilterToggleButton button = new FilterToggleButton(filter, getTableViewerTab().getTableViewer());
     button.setToggleGroup(toggleGroup);
     button.setOnAction(event -> {
-      OwlReference<TableData> tableDataRef =
-          getTableViewerTab().getTableViewer().entity().getTableDataRef();
+      OwlReference<TableData> tableDataRef = getTableViewerTab().getTableViewer().entity().getTableDataRef();
       if (tableDataRef.isPresent()) {
         try {
           DataEntity[] dataEntities = TableDataFilters.getDataEntities(filter, tableDataRef.get());
@@ -211,14 +207,13 @@ public class FiltersTab extends ButtonList {
 
   private void editFilter(Owl<TableDataFilter> tableDataFilter) {
     try {
-      OwlReference<TableData> tableDataRef =
-          getTableViewerTab().getTableViewer().entity().getTableDataRef();
+      OwlReference<TableData> tableDataRef = getTableViewerTab().getTableViewer().entity().getTableDataRef();
       if (tableDataRef.isPresent()) {
         tableDataFilter.entity().getController(tableDataRef.get()).show();
       } else {
         tableDataFilter.entity().getController().show();
       }
-    } catch (IOException e) {
+    } catch (ControllerException e) {
       Owlook.registerException(e);
     }
   }

@@ -1,7 +1,7 @@
 package space.sadfox.tableviewer.ui.view;
 
-import java.io.IOException;
 import java.util.Arrays;
+
 import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
@@ -17,6 +17,7 @@ import space.sadfox.owlook.owlery.OwlLoader;
 import space.sadfox.owlook.owlery.OwlLoader.DeleteFlag;
 import space.sadfox.owlook.owlery.OwlReference;
 import space.sadfox.owlook.owlery.OwleryOpenDialog;
+import space.sadfox.owlook.ui.base.ControllerException;
 import space.sadfox.owlook.utils.Owlook;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 import space.sadfox.tableviewer.ui.base.ButtonList;
@@ -37,8 +38,7 @@ public class ViewsTab extends ButtonList {
           while (change.next()) {
             if (change.wasAdded()) {
               change.getAddedSubList().forEach(view -> {
-                int ind =
-                    getTableViewerTab().getTableViewer().entity().getTableDataViews().indexOf(view);
+                int ind = getTableViewerTab().getTableViewer().entity().getTableDataViews().indexOf(view);
                 addView(ind, view);
 
               });
@@ -162,14 +162,13 @@ public class ViewsTab extends ButtonList {
 
   private void editView(Owl<TableDataView> view) {
     try {
-      OwlReference<TableData> tableDataRef =
-          getTableViewerTab().getTableViewer().entity().getTableDataRef();
+      OwlReference<TableData> tableDataRef = getTableViewerTab().getTableViewer().entity().getTableDataRef();
       if (tableDataRef.isPresent()) {
         view.entity().getController(tableDataRef.get());
       } else {
         view.entity().getController().show();
       }
-    } catch (IOException e) {
+    } catch (ControllerException e) {
       Owlook.registerException(e);
     }
   }

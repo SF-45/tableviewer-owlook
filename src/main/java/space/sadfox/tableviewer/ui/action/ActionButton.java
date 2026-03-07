@@ -1,8 +1,8 @@
 package space.sadfox.tableviewer.ui.action;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
+
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
@@ -19,6 +19,7 @@ import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.owlery.OwlLoader;
 import space.sadfox.owlook.owlery.OwlLoader.DeleteFlag;
 import space.sadfox.owlook.owlery.OwlReference;
+import space.sadfox.owlook.ui.base.ControllerException;
 import space.sadfox.owlook.ui.tools.MessageBox;
 import space.sadfox.owlook.utils.Owlook;
 import space.sadfox.tableviewer.ActionDecorator;
@@ -40,8 +41,7 @@ public class ActionButton extends Button {
     tooltip.textProperty().bind(getActionOwl().entity().descriptionProperty());
     this.setTooltip(tooltip);
 
-    TableViewSelectionModel<DataEntity> selection =
-        parent.getTableDataViewTable().getSelectionModel();
+    TableViewSelectionModel<DataEntity> selection = parent.getTableDataViewTable().getSelectionModel();
     this.setOnAction(event -> {
       if (selection.isEmpty())
         return;
@@ -63,7 +63,7 @@ public class ActionButton extends Button {
     edit.setOnAction(event -> {
       try {
         new EditActionController(actionDecorator, parent).show();
-      } catch (IOException e) {
+      } catch (ControllerException e) {
         Owlook.registerException(e);
       }
     });
@@ -73,8 +73,7 @@ public class ActionButton extends Button {
     duplicate.setOnAction(event -> {
       try {
         Owl<ActionEntity> newActionOwl = OwlLoader.INSTANCE.duplicateOwl(getActionOwl());
-        ActionDecorator newActionDecorator =
-            new ActionDecorator(newActionOwl, getActionDecorator().getTags());
+        ActionDecorator newActionDecorator = new ActionDecorator(newActionOwl, getActionDecorator().getTags());
         parent.getTableViewer().entity().getActionDecorators().add(newActionDecorator);
         new EditActionController(newActionDecorator, parent).show();
       } catch (Exception e) {

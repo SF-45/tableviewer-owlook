@@ -1,6 +1,5 @@
 package space.sadfox.tableviewer;
 
-import java.io.IOException;
 import javafx.beans.binding.Bindings;
 import javafx.scene.control.SelectionMode;
 import javafx.stage.Modality;
@@ -10,6 +9,7 @@ import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.owlery.OwlLoader;
 import space.sadfox.owlook.owlery.OwlReference;
 import space.sadfox.owlook.owlery.OwleryOpenDialog;
+import space.sadfox.owlook.ui.base.ControllerException;
 import space.sadfox.owlook.ui.base.DesignController;
 import space.sadfox.owlook.utils.Owlook;
 
@@ -52,7 +52,7 @@ public class TableViewerEditController extends DesignController<TableViewerEditD
       if (tableDataRef.isPresent()) {
         try {
           tableDataRef.get().entity().getController().show();
-        } catch (IOException e) {
+        } catch (ControllerException e) {
           Owlook.registerException(e);
         }
       }

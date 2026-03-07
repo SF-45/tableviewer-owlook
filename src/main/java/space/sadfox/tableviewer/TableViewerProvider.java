@@ -1,11 +1,11 @@
 package space.sadfox.tableviewer;
 
-import java.io.IOException;
 import space.sadfox.owlook.api.Workspace;
 import space.sadfox.owlook.base.jaxb.ObservedJAXBEntity;
 import space.sadfox.owlook.base.moduleapi.ModuleHasNoConfiguration;
 import space.sadfox.owlook.base.moduleapi.OwlookModule;
 import space.sadfox.owlook.ui.base.Controller;
+import space.sadfox.owlook.ui.base.ControllerException;
 import space.sadfox.owlook.utils.Owlook;
 
 public class TableViewerProvider implements OwlookModule, Workspace {
@@ -28,7 +28,7 @@ public class TableViewerProvider implements OwlookModule, Workspace {
     if (ui == null) {
       try {
         ui = new TableViewerController();
-      } catch (IOException e) {
+      } catch (ControllerException e) {
         Owlook.registerException(e);
       }
     }
@@ -47,7 +47,8 @@ public class TableViewerProvider implements OwlookModule, Workspace {
   }
 
   // @Override
-  // public Class<? extends JAXBEntity> getConfigTarget() throws ModuleHasNoConfiguration {
+  // public Class<? extends JAXBEntity> getConfigTarget() throws
+  // ModuleHasNoConfiguration {
   // throw new ModuleHasNoConfiguration();
   // }
 
@@ -65,7 +66,5 @@ public class TableViewerProvider implements OwlookModule, Workspace {
   public Class<? extends ObservedJAXBEntity> getConfigTarget() throws ModuleHasNoConfiguration {
     throw new ModuleHasNoConfiguration();
   }
-
-
 
 }

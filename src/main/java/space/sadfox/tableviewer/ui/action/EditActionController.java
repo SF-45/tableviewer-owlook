@@ -1,6 +1,5 @@
 package space.sadfox.tableviewer.ui.action;
 
-import java.io.IOException;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -18,6 +17,7 @@ import space.sadfox.dataccess.dataccess.TableData;
 import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.owlery.OwlReference;
 import space.sadfox.owlook.ui.base.Controller;
+import space.sadfox.owlook.ui.base.ControllerException;
 import space.sadfox.owlook.ui.base.FXMLController;
 import space.sadfox.tableviewer.ActionDecorator;
 import space.sadfox.tableviewer.ActionDecoratorsCollector;
@@ -39,7 +39,7 @@ public class EditActionController extends FXMLController {
   private ActionDecoratorsCollector collector;
 
   public EditActionController(ActionDecorator actionDecorator, TableViewerTab parent)
-      throws IOException {
+      throws ControllerException {
     super(ResourceTarget.class.getResource("fxml/edit-action.fxml"));
 
     this.actionDecorator = actionDecorator;
@@ -51,7 +51,7 @@ public class EditActionController extends FXMLController {
 
   }
 
-  private void init() throws IOException {
+  private void init() throws ControllerException {
     Controller actionEntityController;
     if (getParentTableData().isPresent()) {
       actionEntityController = getActionOwl().entity().getController(getParentTableData().get());
@@ -66,14 +66,12 @@ public class EditActionController extends FXMLController {
   private void initTagsListView() {
     tags.setEditable(true);
 
-
-
     TableColumn<String, Boolean> selectedTagsColumn = new TableColumn<>();
     selectedTagsColumn.setEditable(true);
     tags.getColumns().add(selectedTagsColumn);
     selectedTagsColumn.setCellValueFactory(callback -> {
-      BooleanProperty boolProperty =
-          new SimpleBooleanProperty(getActionDecorator().getTags().contains(callback.getValue()));
+      BooleanProperty boolProperty = new SimpleBooleanProperty(
+          getActionDecorator().getTags().contains(callback.getValue()));
       ChangeListener<Boolean> changeListener = (property, oldValue, newValue) -> {
         if (newValue) {
           getActionDecorator().getTags().add(callback.getValue());
@@ -87,7 +85,6 @@ public class EditActionController extends FXMLController {
       //
     });
     selectedTagsColumn.setCellFactory(callback -> new CheckBoxTableCell<>());
-
 
     TableColumn<String, String> nameTagsColumn = new TableColumn<>();
     nameTagsColumn.setEditable(true);

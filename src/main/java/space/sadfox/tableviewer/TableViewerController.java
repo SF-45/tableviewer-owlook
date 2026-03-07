@@ -1,6 +1,5 @@
 package space.sadfox.tableviewer;
 
-import java.io.IOException;
 import javafx.beans.InvalidationListener;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
@@ -20,13 +19,12 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.owlery.OwlLoader;
+import space.sadfox.owlook.ui.base.ControllerException;
 import space.sadfox.owlook.ui.base.FXMLController;
 import space.sadfox.owlook.utils.Nullable;
 import space.sadfox.tableviewer.ui.TableViewerTab;
 
 public class TableViewerController extends FXMLController {
-
-
 
   @FXML
   private BorderPane actionsRoot;
@@ -64,7 +62,7 @@ public class TableViewerController extends FXMLController {
   @FXML
   private ScrollPane viewsRoot;
 
-  public TableViewerController() throws IOException {
+  public TableViewerController() throws ControllerException {
     super(TableViewer.class.getResource("fxml/main-scene.fxml"));
 
     stageTitle.set("OwlookTV");
@@ -89,7 +87,6 @@ public class TableViewerController extends FXMLController {
     });
 
     TableViewers.getTableViewers().forEach(this::createTableViewerMenuItem);
-
 
     // searchField.textProperty().addListener((property, oldValue, newValue) -> {
     // try {
@@ -140,8 +137,6 @@ public class TableViewerController extends FXMLController {
         ((Region) newValue).prefHeightProperty().bind(filtersRoot.heightProperty().subtract(5));
       }
     });
-
-
 
   }
 

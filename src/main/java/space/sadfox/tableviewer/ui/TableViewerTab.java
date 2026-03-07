@@ -1,6 +1,5 @@
 package space.sadfox.tableviewer.ui;
 
-import java.io.IOException;
 import javafx.beans.binding.Bindings;
 import javafx.scene.Node;
 import javafx.scene.control.Alert.AlertType;
@@ -15,6 +14,7 @@ import space.sadfox.dataccess.filter.TableDataFilter;
 import space.sadfox.dataccess.view.TableViewForTableData;
 import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.owlery.OwlReference;
+import space.sadfox.owlook.ui.base.ControllerException;
 import space.sadfox.owlook.ui.tools.MessageBox;
 import space.sadfox.owlook.utils.Owlook;
 import space.sadfox.tableviewer.TableViewer;
@@ -42,7 +42,7 @@ public class TableViewerTab extends Tab {
 
     try {
       actionsNode = new ActionController(this);
-    } catch (IOException e) {
+    } catch (ControllerException e) {
       Owlook.registerException(e);
     }
     this.setContent(getTableDataViewTable());
@@ -70,8 +70,6 @@ public class TableViewerTab extends Tab {
       }
       reloadCurrentData();
     });
-
-
 
     if (filtersNode.getSelectedTableDataFilter() != null) {
       Owl<TableDataFilter> selectFilter = filtersNode.getSelectedTableDataFilter();
@@ -131,7 +129,7 @@ public class TableViewerTab extends Tab {
         if (tableDataRef.isPresent()) {
           try {
             new TableDataController(tableDataRef.get()).show();
-          } catch (IOException e) {
+          } catch (ControllerException e) {
             Owlook.registerException(e);
           }
         } else {

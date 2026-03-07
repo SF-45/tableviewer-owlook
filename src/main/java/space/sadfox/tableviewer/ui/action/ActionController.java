@@ -1,9 +1,9 @@
 package space.sadfox.tableviewer.ui.action;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -23,6 +23,7 @@ import space.sadfox.dataccess.action.ActionProvider;
 import space.sadfox.dataccess.action.Actions;
 import space.sadfox.owlook.base.owl.Owl;
 import space.sadfox.owlook.owlery.OwleryOpenDialog;
+import space.sadfox.owlook.ui.base.ControllerException;
 import space.sadfox.owlook.ui.base.FXMLController;
 import space.sadfox.owlook.utils.Owlook;
 import space.sadfox.tableviewer.ActionDecorator;
@@ -94,9 +95,8 @@ public class ActionController extends FXMLController {
       if (currentFilter.equals("")) {
         addAllAndSort(buttons);
       } else {
-        var filtredButtons =
-            buttons.stream().filter(but -> but.getActionOwl().head().getTitle().toLowerCase()
-                .contains(serachTextBox.getText().toLowerCase())).collect(Collectors.toList());
+        var filtredButtons = buttons.stream().filter(but -> but.getActionOwl().head().getTitle().toLowerCase()
+            .contains(serachTextBox.getText().toLowerCase())).collect(Collectors.toList());
         addAllAndSort(filtredButtons);
       }
     }
@@ -135,7 +135,7 @@ public class ActionController extends FXMLController {
 
   private final ActionDecoratorsCollector actionDecoratorsCollector;
 
-  public ActionController(TableViewerTab tableViewerTab) throws IOException {
+  public ActionController(TableViewerTab tableViewerTab) throws ControllerException {
     super(TableViewerProvider.class.getResource("fxml/acion-pane.fxml"));
     this.tableViewerTab = tableViewerTab;
     actionDecoratorsCollector = new ActionDecoratorsCollector(tableViewerTab.getTableViewer());
@@ -193,8 +193,8 @@ public class ActionController extends FXMLController {
       try {
         OwleryOpenDialog<ActionEntity> openDialog = new OwleryOpenDialog<>(ActionEntity.class);
         openDialog.setSelectionModel(SelectionMode.MULTIPLE);
-        List<Owl<ActionEntity>> alredyOpenedActions =
-            TableViewers.getActionEntities(getTableViewerTab().getTableViewer());
+        List<Owl<ActionEntity>> alredyOpenedActions = TableViewers
+            .getActionEntities(getTableViewerTab().getTableViewer());
         openDialog.setAlredyOpenedOwls(FXCollections.observableList(alredyOpenedActions));
         openDialog.showAndWait(Modality.APPLICATION_MODAL);
         if (openDialog.isOpened()) {
@@ -249,8 +249,7 @@ public class ActionController extends FXMLController {
       providerAccordion = new GroupAccordion<>();
       providerAccordion.setItems(getActionDecorators());
       providerAccordion.setMatcher((item, crit) -> {
-        Optional<ActionProvider> oProvider =
-            item.getActionOwlRef().get().entity().getActionProviderSafe();
+        Optional<ActionProvider> oProvider = item.getActionOwlRef().get().entity().getActionProviderSafe();
         if (oProvider.isPresent()) {
           return oProvider.get().getIdentifier().equals(crit);
         } else {
