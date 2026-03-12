@@ -164,7 +164,7 @@ public class ViewsTab extends ButtonList {
     try {
       OwlReference<TableData> tableDataRef = getTableViewerTab().getTableViewer().entity().getTableDataRef();
       if (tableDataRef.isPresent()) {
-        view.entity().getController(tableDataRef.get());
+        view.entity().getController(tableDataRef.get()).show();
       } else {
         view.entity().getController().show();
       }
